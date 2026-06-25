@@ -1,39 +1,42 @@
 import random
 from database_manager import fetch_oils_data
+from linebot.models import FlexSendMessage, TextSendMessage
 
-# 簡易記憶體：紀錄每個用戶最近一次抽到的牌
 user_memory = {}
 
-def get_drawing_response(user_id):
+def get_menu_message():
+    """回傳包含小語、引導、療育三個選項的選單訊息"""
+    return FlexSendMessage(
+        alt_text="返魂堂服務選單",
+        contents={
+            "type": "bubble",
+            "body": {
+                "type": "box",
+                "layout": "vertical",
+                "contents": [
+                    {"type": "text", "text": "🌿 返魂堂精油系統", "weight": "bold", "size": "xl"},
+                    {"type": "button", "action": {"type": "message", "label": "1. 療育小語 (1張)", "text": "抽牌"}},
+                    {"type": "button", "action": {"type": "message", "label": "2. 心靈引導 (2張)", "text": "抽牌引導"}},
+                    {"type": "button", "action": {"type": "message", "label": "3. 深度療育 (3張)", "text": "抽牌療育"}}
+                ]
+            }
+        }
+    )
+
+def get_drawing_response(user_id, count=1):
     oils_db = fetch_oils_data()
     if not oils_db:
-        return "🔮 系統維護中... (資料庫讀取失敗)", None
+        return "🔮 系統維護中...", None
     
-    drawn_oil = random.choice(oils_db)
+    # 根據選單選擇的數量抽牌
+    drawn_oils = random.sample(oils_db, min(count, len(oils_db)))
+    user_memory[user_id] = drawn_oils
     
-    # 將結果存入記憶體
-    user_memory[user_id] = drawn_oil
+    reply_texts = []
+    for oil in drawn_oils:
+        reply_texts.append(
+            f"🌿 {oil.get('產品名稱', '未知')}\n"
+            f"🧘‍♂️ {oil.get('名醫建議 (專家理論基礎 + 核心效益組合)', '無建議')}"
+        )
     
-    reply = (
-        f"🔮【返魂堂·精油洞悉卡今日指引】🔮\n\n"
-        f"🌿 今日有緣精油：{drawn_oil.get('產品名稱', '未知')}\n"
-        f"📐 能量位格歸屬：{drawn_oil.get('位格歸屬', '未知')}\n\n"
-        f"🧘‍♂️ 心靈指引：\n{drawn_oil.get('名醫建議 (專家理論基礎 + 核心效益組合)', '無建議')}\n\n"
-        f"====================\n"
-        f"🛠️【日常使用與防護指南】\n"
-        f"• 使用方式：{drawn_oil.get('用法標籤', '無')}\n"
-        f"• 塗抹建議：{drawn_oil.get('塗抹建議', '無')}"
-    )
-    return reply, drawn_oil
-
-def get_followup_response(user_id):
-    """處理用戶的追問"""
-    oil = user_memory.get(user_id)
-    if not oil:
-        return "您還沒有抽過牌喔，請輸入「抽牌」開始。"
-    
-    # 擴充：利用 get() 方法確保即使欄位為空也不會崩潰
-    name = oil.get('產品名稱', '該精油')
-    pillar = oil.get('位格歸屬', '能量位格')
-    
-    return f"關於「{name}」，它歸屬於「{pillar}」。在更深層的訊息中，它能協助您平衡當下的能量狀態，請多加善用它的氣味來淨化思緒。"
+    return "🔮【今日指引】🔮\n\n" + "\n\n---\n\n".join(reply_texts), drawn_oils
