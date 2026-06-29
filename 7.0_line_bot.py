@@ -5,8 +5,8 @@ from handlers import get_drawing_response
 import os
 
 app = Flask(__name__)
-line_bot_api = LineBotApi(os.environ.get('CHANNEL_ACCESS_TOKEN'))
-handler = WebhookHandler(os.environ.get('CHANNEL_SECRET'))
+line_bot_api = LineBotApi(os.environ.get('4mTLI9JKpQXu/0Kb2qeqiOHQfjv7WFhnYpu21FG0Y8E8ob1q0YjUEc+GrtqfBZxqJQ8DoSBh+fLKPtx1zNoUHaem8j+ATxGJ9E1gpZF7UidCgSn4fAJ2WcimDRs7dZepx2m+fe1KTs6PIDZyGEtZ7AdB04t89/1O/w1cDnyilFU='))
+handler = WebhookHandler(os.environ.get('eea492cdcc8c24ddc585e72367ec86fd'))
 
 @app.route("/callback", methods=['POST'])
 def callback():
