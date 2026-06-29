@@ -1,24 +1,23 @@
 from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
-from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
 from handlers import get_drawing_response
+import os
 
 app = Flask(__name__)
+line_bot_api = LineBotApi(os.environ.get('CHANNEL_ACCESS_TOKEN'))
+handler = WebhookHandler(os.environ.get('CHANNEL_SECRET'))
 
-line_bot_api = LineBotApi('你的_CHANNEL_ACCESS_TOKEN')
-handler = WebhookHandler('你的_CHANNEL_SECRET')
+@app.route("/callback", methods=['POST'])
+def callback():
+    handler.handle(request.get_data(as_text=True), request.headers.get('X-Line-Signature'))
+    return 'OK'
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    user_text = event.message.text
-    
-    if user_text == "抽牌":
-        response_text = get_drawing_response(event.source.user_id)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=response_text)
-        )
+    if any(k in event.message.text for k in ["抽牌", "抽卡", "draw"]):
+        reply = get_drawing_response()
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=reply))
 
 if __name__ == "__main__":
-    app.run()
+    app.run(port=int(os.environ.get('PORT', 5000)))
