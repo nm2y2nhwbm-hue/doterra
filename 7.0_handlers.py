@@ -1,16 +1,31 @@
-from linebot import LineBotApi, WebhookHandler
-from linebot.models import TextSendMessage
-from handlers import get_drawing_response
+import random
+from database_manager import fetch_oils_data
 
-# 初始化
-line_bot_api = LineBotApi('你的_CHANNEL_ACCESS_TOKEN')
-handler = WebhookHandler('你的_CHANNEL_SECRET')
+# 簡易記憶體，用於暫存該用戶抽到的牌
+user_memory = {}
 
-def handle_message(event):
-    if event.message.text == "抽牌":
-        # 取得文字回覆
-        response_text, oil_data = get_drawing_response(event.source.user_id)
-        
-        # 發送純文字訊息
-        message = TextSendMessage(text=response_text)
-        line_bot_api.reply_message(event.reply_token, message)
+def get_drawing_response(user_id):
+    oils_db = fetch_oils_data()
+    if not oils_db:
+        return "🔮 系統維護中... (資料庫讀取失敗)"
+    
+    drawn_oil = random.choice(oils_db)
+    user_memory[user_id] = drawn_oil
+    
+    # 返回純文字格式
+    name = drawn_oil.get('產品名稱', '未知')
+    keywords = drawn_oil.get('關鍵詞', '無')
+    insight = drawn_oil.get('心靈指引', '無')
+    
+    response = f"✨ 恭喜你抽到了：{name}\n\n【關鍵詞】：{keywords}\n\n【心靈指引】：{insight}"
+    return response
+
+def get_followup_response(user_id):
+    oil = user_memory.get(user_id)
+    if not oil:
+        return "您還沒有抽過牌喔，請輸入「抽牌」開始。"
+    
+    name = oil.get('產品名稱', '該精油')
+    pillar = oil.get('位格歸屬', '能量位格')
+    
+    return f"關於「{name}」，它歸屬於「{pillar}」。在更深層的訊息中，它能協助您平衡當下的能量狀態。"
