@@ -1,18 +1,12 @@
-import random
-from database_manager import fetch_oils_data
-
-# 用戶記憶暫存
-user_memory = {}
-
 def get_drawing_response(user_id):
     oils_db = fetch_oils_data()
     if not oils_db:
-        return None, "🔮 系統維護中... (資料庫讀取失敗)"
+        return "🔮 系統維護中... (資料庫讀取失敗)", None
     
     drawn_oil = random.choice(oils_db)
     user_memory[user_id] = drawn_oil
     
-    # Flex Message 結構定義
+    # 確保這裡的 Key 名稱與你的 CSV 標頭一致
     flex_content = {
         "type": "bubble",
         "header": {
@@ -35,9 +29,3 @@ def get_drawing_response(user_id):
         }
     }
     return flex_content, drawn_oil
-
-def get_followup_response(user_id):
-    oil = user_memory.get(user_id)
-    if not oil:
-        return "您還沒有抽過牌喔，請輸入「抽牌」開始。"
-    return f"關於「{oil.get('產品名稱')}」，建議您在日常中使用它來協助平衡當下的能量狀態。"
