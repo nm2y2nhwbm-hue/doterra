@@ -5,16 +5,16 @@ from database_manager import fetch_oils_data
 user_memory = {}
 
 def get_drawing_response(user_id):
-    oils_db = fetch_oils_data()
-    if not oils_db:
-        return "🔮 系統維護中... (資料庫讀取失敗)", None
-    
-    drawn_oil = random.choice(oils_db)
-    
-    # 將結果存入記憶體
-    user_memory[user_id] = drawn_oil
-    
-    reply = (
+    try:
+        oils_db = fetch_oils_data()
+        if not oils_db:
+            return "❌ 資料庫回傳為空，請檢查資料夾路徑與 CSV 格式。", None
+        
+        drawn_oil = random.choice(oils_db)
+        # ... 後續程式碼 ...
+        
+    except Exception as e:
+        return f"🚨 系統發生錯誤：{str(e)}", None
         f"🔮【返魂堂·精油洞悉卡今日指引】🔮\n\n"
         f"🌿 今日有緣精油：{drawn_oil.get('產品名稱', '未知')}\n"
         f"📐 能量位格歸屬：{drawn_oil.get('位格歸屬', '未知')}\n\n"
