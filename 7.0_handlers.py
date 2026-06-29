@@ -1,8 +1,7 @@
 import random
-import json
 from database_manager import fetch_oils_data
 
-# 簡易記憶體
+# 簡易記憶體：紀錄每個用戶最近一次抽到的牌
 user_memory = {}
 
 def get_drawing_response(user_id):
@@ -11,41 +10,30 @@ def get_drawing_response(user_id):
         return "🔮 系統維護中... (資料庫讀取失敗)", None
     
     drawn_oil = random.choice(oils_db)
+    
+    # 將結果存入記憶體
     user_memory[user_id] = drawn_oil
     
-    # 建構 Flex Message 格式
-    flex_content = {
-        "type": "bubble",
-        "header": {
-            "type": "box",
-            "layout": "vertical",
-            "contents": [
-                {"type": "text", "text": drawn_oil.get('產品名稱', '未知'), "weight": "bold", "size": "xl", "align": "center"},
-                {"type": "text", "text": drawn_oil.get('英文名稱', 'Essential Oil'), "size": "sm", "align": "center", "color": "#888888"}
-            ]
-        },
-        "body": {
-            "type": "box",
-            "layout": "vertical",
-            "contents": [
-                {"type": "image", "url": drawn_oil.get('圖片網址', 'https://via.placeholder.com/300'), "size": "full", "aspectMode": "cover"},
-                {"type": "text", "text": f"關鍵詞：{drawn_oil.get('關鍵詞', '無')}", "margin": "md", "weight": "regular", "wrap": True},
-                {"type": "separator", "margin": "md"},
-                {"type": "text", "text": drawn_oil.get('心靈指引', '無'), "wrap": True, "margin": "md", "size": "sm"}
-            ]
-        }
-    }
-    
-    # 回傳 JSON 結構，LINE SDK 接收後需以 FlexSendMessage 格式發送
-    return flex_content, drawn_oil
+    reply = (
+        f"🔮【返魂堂·精油洞悉卡今日指引】🔮\n\n"
+        f"🌿 今日有緣精油：{drawn_oil.get('產品名稱', '未知')}\n"
+        f"📐 能量位格歸屬：{drawn_oil.get('位格歸屬', '未知')}\n\n"
+        f"🧘‍♂️ 心靈指引：\n{drawn_oil.get('名醫建議 (專家理論基礎 + 核心效益組合)', '無建議')}\n\n"
+        f"====================\n"
+        f"🛠️【日常使用與防護指南】\n"
+        f"• 使用方式：{drawn_oil.get('用法標籤', '無')}\n"
+        f"• 塗抹建議：{drawn_oil.get('塗抹建議', '無')}"
+    )
+    return reply, drawn_oil
 
 def get_followup_response(user_id):
+    """處理用戶的追問"""
     oil = user_memory.get(user_id)
     if not oil:
         return "您還沒有抽過牌喔，請輸入「抽牌」開始。"
     
+    # 擴充：利用 get() 方法確保即使欄位為空也不會崩潰
     name = oil.get('產品名稱', '該精油')
     pillar = oil.get('位格歸屬', '能量位格')
     
-    # 這裡可以保留文字，或同樣設計一個 Flex Message
     return f"關於「{name}」，它歸屬於「{pillar}」。在更深層的訊息中，它能協助您平衡當下的能量狀態，請多加善用它的氣味來淨化思緒。"
