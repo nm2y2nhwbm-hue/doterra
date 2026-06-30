@@ -12,7 +12,7 @@ def fetch_oils_data():
         return []
 
     try:
-        with open(csv_file, mode='r', encoding='utf-8-sig', errors='ignore') as f:
+        with open(csv_file, mode='r', encoding='utf-8', errors='ignore') as f:
             content = f.read()
             if not content:
                 print("檔案是空的！")
