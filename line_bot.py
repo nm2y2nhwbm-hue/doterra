@@ -35,16 +35,20 @@ def callback():
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    if event.message.text == "抽牌":
-        # 取得 flex_json 與資料
+    msg = event.message.text
+    print(f"收到訊息: {msg}")  # 這行會把收到的內容印在 Logs 裡
+    
+    if "抽牌" in msg:
         flex_json, oil_data = get_drawing_response(event.source.user_id)
-        
-        # 增加防呆：確保有資料才發送
-        if flex_json and oil_data:
+        if flex_json:
             line_bot_api.reply_message(
                 event.reply_token,
                 FlexSendMessage(alt_text=f"你抽到了 {oil_data['名稱']}", contents=flex_json)
             )
+        else:
+            print("取得資料失敗或無資料")
+    else:
+        print(f"訊息不符合觸發條件: {msg}")
 
 if __name__ == "__main__":
     app.run()
