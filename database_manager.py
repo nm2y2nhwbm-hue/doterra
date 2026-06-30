@@ -1,30 +1,26 @@
 import csv
-
-CSV_FILE_PATH = 'doterra.csv'
+import os
 
 def fetch_oils_data():
-    oils_list = []
+    # 偵測當前目錄下的檔案
+    files = os.listdir('.')
+    print(f"目前目錄下的檔案清單: {files}")
+    
+    csv_file = 'doterra.csv'
+    if csv_file not in files:
+        print(f"致命錯誤：找不到 {csv_file}！它不在程式目錄下。")
+        return []
+
     try:
-        with open(CSV_FILE_PATH, mode='r', encoding='utf-8-sig', errors='ignore') as f:
-            lines = f.readlines()
-            print(f"總共讀取到 {len(lines)} 行原始資料")
+        with open(csv_file, mode='r', encoding='utf-8-sig', errors='ignore') as f:
+            content = f.read()
+            if not content:
+                print("檔案是空的！")
+                return []
             
-            # 從第二行開始讀取 (跳過標題)
-            for i, line in enumerate(lines[1:]):
-                # 用 Tab 或 逗號來拆解
-                row = line.strip().replace('\t', ',').split(',')
-                # 如果這行有資料，就加入
-                if len(row) >= 1 and row[0].strip():
-                    oils_list.append({
-                        "名稱": row[0].strip(),
-                        "英文名稱": row[1].strip() if len(row) > 1 else "",
-                        "關鍵詞": row[2].strip() if len(row) > 2 else "",
-                        "心靈指引 (建議)": row[3].strip() if len(row) > 3 else "",
-                        "image_url": row[4].strip() if len(row) > 4 else ""
-                    })
-            
-            print(f"成功處理後得到 {len(oils_list)} 筆資料")
-            return oils_list
+            lines = content.splitlines()
+            print(f"檔案內容長度: {len(content)} 字元，共 {len(lines)} 行")
+            return [] # 這裡先回傳空，讓我們看 Log 的輸出
     except Exception as e:
-        print(f"讀取 CSV 時發生錯誤: {e}")
+        print(f"讀取時發生錯誤: {e}")
         return []
