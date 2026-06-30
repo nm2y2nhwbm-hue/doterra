@@ -29,3 +29,5 @@ def fetch_oils_data():
         return []
         
     return oils_list
+# 將編碼改成 'utf-8'，並加入 errors='ignore' 忽略非法字元
+        with open(CSV_FILE_PATH, mode='r', encoding='utf-8', errors='ignore') as f:
