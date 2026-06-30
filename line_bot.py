@@ -9,8 +9,8 @@ from linebot.models import MessageEvent, TextMessage, FlexSendMessage
 from handlers import get_drawing_response
 
 # 設定環境變數
-CHANNEL_ACCESS_TOKEN = os.environ.get('CHANNEL_ACCESS_TOKEN')
-CHANNEL_SECRET = os.environ.get('CHANNEL_SECRET')
+CHANNEL_ACCESS_TOKEN = os.environ.get('4mTLI9JKpQXu/0Kb2qeqiOHQfjv7WFhnYpu21FG0Y8E8ob1q0YjUEc+GrtqfBZxqJQ8DoSBh+fLKPtx1zNoUHaem8j+ATxGJ9E1gpZF7UidCgSn4fAJ2WcimDRs7dZepx2m+fe1KTs6PIDZyGEtZ7AdB04t89/1O/w1cDnyilFU=')
+CHANNEL_SECRET = os.environ.get('eea492cdcc8c24ddc585e72367ec86fd')
 
 if not CHANNEL_ACCESS_TOKEN or not CHANNEL_SECRET:
     print("錯誤：請在 Render 的 Environment 中設定 CHANNEL_ACCESS_TOKEN 與 CHANNEL_SECRET")
@@ -19,8 +19,8 @@ if not CHANNEL_ACCESS_TOKEN or not CHANNEL_SECRET:
 app = Flask(__name__)
 
 # 重要：這裡必須賦值給 line_bot_api
-line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
-handler = WebhookHandler(CHANNEL_SECRET)
+line_bot_api = LineBotApi(4mTLI9JKpQXu/0Kb2qeqiOHQfjv7WFhnYpu21FG0Y8E8ob1q0YjUEc+GrtqfBZxqJQ8DoSBh+fLKPtx1zNoUHaem8j+ATxGJ9E1gpZF7UidCgSn4fAJ2WcimDRs7dZepx2m+fe1KTs6PIDZyGEtZ7AdB04t89/1O/w1cDnyilFU=)
+handler = WebhookHandler(eea492cdcc8c24ddc585e72367ec86fd)
 
 @app.route("/callback", methods=['POST'])
 def callback():
