@@ -47,4 +47,9 @@ def handle_message(event):
 if __name__ == "__main__":
     app.run()
 # trigger deployment
+# 在 line_bot.py 的 @handler.add(MessageEvent, message=TextMessage) 之前加入這段：
 
+@handler.default()
+def default(event):
+    print(f"收到未處理事件: {event}")
+    return
