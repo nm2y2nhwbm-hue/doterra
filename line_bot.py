@@ -23,8 +23,10 @@ handler = WebhookHandler('eea492cdcc8c24ddc585e72367ec86fd')
 
 @app.route("/callback", methods=['POST'])
 def callback():
-    signature = request.headers.get('X-Line-Signature')
     body = request.get_data(as_text=True)
+    print(f"收到來自 LINE 的原始資料: {body}") # 這行會強制在 Logs 顯示收到的內容
+    
+    signature = request.headers.get('X-Line-Signature', '')
     try:
         handler.handle(body, signature)
     except InvalidSignatureError:
