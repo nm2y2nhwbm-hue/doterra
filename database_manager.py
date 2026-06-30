@@ -18,7 +18,7 @@ def fetch_oils_data():
     
     try:
         # 使用 Big5 編碼讀取 (你的 CSV 目前是這個編碼)
-        with open(CSV_FILE_PATH, mode='r', encoding='Big5') as f:
+        with open(CSV_FILE_PATH, mode='r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f)
             for row in reader:
                 # 確保名稱欄位有資料才加入
