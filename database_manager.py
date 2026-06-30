@@ -6,19 +6,24 @@ def fetch_oils_data():
     oils_list = []
     try:
         with open(CSV_FILE_PATH, mode='r', encoding='utf-8-sig', errors='ignore') as f:
-            # 讀取 CSV，並確保處理 Tab 分隔符或逗號
-            reader = csv.DictReader(f, delimiter='\t') # 如果你的檔案是用 Tab 分隔
-            # 如果讀不到資料，嘗試用逗號分隔再讀一次
-            if not reader.fieldnames or "名稱" not in reader.fieldnames:
-                f.seek(0)
-                reader = csv.DictReader(f, delimiter=',') 
+            lines = f.readlines()
+            print(f"總共讀取到 {len(lines)} 行原始資料")
             
-            for row in reader:
-                # 只要名稱有資料，就加入清單
-                if row.get("名稱"):
-                    oils_list.append(row)
+            # 從第二行開始讀取 (跳過標題)
+            for i, line in enumerate(lines[1:]):
+                # 用 Tab 或 逗號來拆解
+                row = line.strip().replace('\t', ',').split(',')
+                # 如果這行有資料，就加入
+                if len(row) >= 1 and row[0].strip():
+                    oils_list.append({
+                        "名稱": row[0].strip(),
+                        "英文名稱": row[1].strip() if len(row) > 1 else "",
+                        "關鍵詞": row[2].strip() if len(row) > 2 else "",
+                        "心靈指引 (建議)": row[3].strip() if len(row) > 3 else "",
+                        "image_url": row[4].strip() if len(row) > 4 else ""
+                    })
             
-            print(f"成功讀取到 {len(oils_list)} 筆資料")
+            print(f"成功處理後得到 {len(oils_list)} 筆資料")
             return oils_list
     except Exception as e:
         print(f"讀取 CSV 時發生錯誤: {e}")
