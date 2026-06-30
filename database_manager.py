@@ -2,25 +2,33 @@ import csv
 import os
 
 def fetch_oils_data():
-    # 偵測當前目錄下的檔案
-    files = os.listdir('.')
-    print(f"目前目錄下的檔案清單: {files}")
-    
     csv_file = 'doterra.csv'
-    if csv_file not in files:
-        print(f"致命錯誤：找不到 {csv_file}！它不在程式目錄下。")
-        return []
+    
+    # 嘗試幾種常見編碼
+    encodings = ['utf-8-sig', 'utf-8', 'big5', 'cp950']
+    
+    for enc in encodings:
+        try:
+            with open(csv_file, mode='r', encoding=enc) as f:
+                reader = csv.reader(f)
+                header = next(reader) # 讀取標題
+                
+                oils_list = []
+                for row in reader:
+                    if row and row[0].strip():
+                        oils_list.append({
+                            "名稱": row[0].strip(),
+                            "英文名稱": row[1].strip() if len(row) > 1 else "",
+                            "關鍵詞": row[2].strip() if len(row) > 2 else "",
+                            "心靈指引 (建議)": row[3].strip() if len(row) > 3 else "",
+                            "image_url": row[4].strip() if len(row) > 4 else ""
+                        })
+                
+                if oils_list:
+                    print(f"使用編碼 {enc} 成功讀取到 {len(oils_list)} 筆資料")
+                    return oils_list
+        except Exception:
+            continue # 如果這個編碼失敗，就試下一個
 
-    try:
-        with open(csv_file, mode='r', encoding='utf-8', errors='ignore') as f:
-            content = f.read()
-            if not content:
-                print("檔案是空的！")
-                return []
-            
-            lines = content.splitlines()
-            print(f"檔案內容長度: {len(content)} 字元，共 {len(lines)} 行")
-            return [] # 這裡先回傳空，讓我們看 Log 的輸出
-    except Exception as e:
-        print(f"讀取時發生錯誤: {e}")
-        return []
+    print("錯誤：無法以任何編碼讀取 CSV")
+    return []
