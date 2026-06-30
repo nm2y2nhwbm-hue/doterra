@@ -21,16 +21,18 @@ LineBotApi('4mTLI9JKpQXu/0Kb2qeqiOHQfjv7WFhnYpu21FG0Y8E8ob1q0YjUEc+GrtqfBZxqJQ8D
 handler = WebhookHandler('eea492cdcc8c24ddc585e72367ec86fd')
 
 
+import traceback # 在檔案最上方加入這行
+
 @app.route("/callback", methods=['POST'])
 def callback():
     body = request.get_data(as_text=True)
-    print(f"收到來自 LINE 的原始資料: {body}") # 這行會強制在 Logs 顯示收到的內容
-    
     signature = request.headers.get('X-Line-Signature', '')
     try:
         handler.handle(body, signature)
-    except InvalidSignatureError:
-        abort(400)
+    except Exception as e:
+        print("--- 發生錯誤啦！ ---")
+        traceback.print_exc() # 這行會印出完整的錯誤堆疊，包含哪一行出錯
+        abort(500)
     return 'OK'
 
 @handler.add(MessageEvent, message=TextMessage)
