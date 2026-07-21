@@ -1,1 +1,1 @@
-
+# 讓 adapters 成為可 import 的 package
