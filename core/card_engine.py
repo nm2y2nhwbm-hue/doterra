@@ -1,88 +1,93 @@
 """
-商業抽卡演算法核心。
-刻意設計成「輸入純資料、輸出純資料（ActionResult dict）」，
-完全不 import linebot、不認識 Flex Message —— 這樣未來加 Discord Bot
-或一頁式網頁時，這個檔案可以一行都不用改。
+商業抽卡演算法核心（現代精油心靈指引卡 5 大牌陣版）。
+與通訊外殼完全解耦：只吃 user_id / 文字參數，只吐 ActionResult dict。
 """
 import random
 
 from core import database_manager as db
 from core import memory_manager as mem
 
+INDICATOR_SYMBOLS = [
+    "魚", "愛心", "戒指", "孩童", "狗", "月亮",
+    "樹", "十字路口", "船", "鸛鳥", "房屋", "熊",
+]
 
-def _draw_random(pool=None):
-    oils = pool if pool is not None else db.fetch_oils_data()
-    if not oils:
+
+def _draw_unique(n: int):
+    pool = db.fetch_oils_data()
+    if len(pool) < n:
         return None
-    return random.choice(oils)
+    return random.sample(pool, n)
 
 
 def mode_1_today_energy(user_id: str) -> dict:
-    """mode_1：今日能量，24 小時內鎖定同一張卡。"""
+    """模式1：今日能量指引（單牌），24 小時內鎖定同一張卡。"""
     if mem.is_locked_today(user_id):
-        card = mem.get_locked_card(user_id)
-        return {"type": "flex_card", "mode": "mode_1", "card": card, "locked": True}
+        return {"type": "flex_single", "mode": "mode_1",
+                "card": mem.get_locked_card(user_id), "locked": True}
 
-    card = _draw_random()
-    if not card:
+    cards = _draw_unique(1)
+    if not cards:
         return {"type": "text", "text": "目前卡牌資料庫為空，請聯絡管理員。"}
 
+    card = cards[0]
     mem.lock_today_card(user_id, card)
-    return {"type": "flex_card", "mode": "mode_1", "card": card, "locked": False}
+    return {"type": "flex_single", "mode": "mode_1", "card": card, "locked": False}
 
 
-def mode_2_three_card_spread(user_id: str) -> dict:
-    """mode_2：三牌陣，不重複抽取 3 張卡。"""
-    pool = db.fetch_oils_data()
-    if len(pool) < 3:
-        return {"type": "text", "text": "卡牌數量不足，無法進行三牌陣抽選。"}
+def mode_2_life_guidance(user_id: str) -> dict:
+    """模式2：生活導引牌陣（兩張不重複）。"""
+    cards = _draw_unique(2)
+    if not cards:
+        return {"type": "text", "text": "卡牌數量不足，無法進行生活導引牌陣。"}
 
-    cards = random.sample(pool, 3)
-    return {"type": "flex_carousel", "mode": "mode_2", "cards": cards}
-
-
-def mode_3_breakthrough(user_id: str, user_question: str = "") -> dict:
-    """
-    mode_3：困擾破局。
-    TODO：串接 OpenAI gpt-4o-mini，依 user_question 語意分析後挑選對應精油卡牌。
-    """
-    # TODO(OpenAI gpt-4o-mini 整合):
-    # from openai import OpenAI
-    # client = OpenAI()
-    # resp = client.chat.completions.create(
-    #     model="gpt-4o-mini",
-    #     messages=[
-    #         {"role": "system", "content": "你是一位精油心靈指引師，"
-    #                                        "請根據使用者的困擾，從候選精油關鍵詞中挑出最貼切的一張。"},
-    #         {"role": "user", "content": user_question},
-    #     ],
-    # )
-    # 依 resp 內容比對 db.fetch_oils_data() 選出對應卡牌...
-
-    # 目前先以隨機抽卡作為 fallback，待 AI 邏輯完成後取代
-    card = _draw_random()
-    if not card:
-        return {"type": "text", "text": "目前卡牌資料庫為空，請聯絡管理員。"}
-    return {"type": "flex_card", "mode": "mode_3", "card": card, "ai_powered": False}
-
-
-def mode_4_chakra_pick(user_id: str, chakra: str) -> dict:
-    """mode_4：脈輪分類抽選。"""
-    pool = db.get_oils_by_chakra(chakra)
-    if not pool:
-        return {"type": "text", "text": f"目前找不到「{chakra}」對應的精油卡牌。"}
-
-    card = _draw_random(pool)
-    return {"type": "flex_card", "mode": "mode_4", "card": card, "chakra": chakra}
-
-
-def mode_5_debug_report(user_id: str) -> dict:
-    """mode_5：系統 debug 報告。"""
-    oils = db.fetch_oils_data()
-    lines = [
-        "【系統 Debug 報告】",
-        f"卡牌總數：{len(oils)}",
-        f"目前鎖定中的使用者數：{len(mem.USER_ENERGY_MEMORY)}",
-        f"可用脈輪分類：{', '.join(db.get_all_chakras()) or '無'}",
+    positions = [
+        {"label": "目前整體狀況", "card": cards[0]},
+        {"label": "生活中所需的建議及方向", "card": cards[1]},
     ]
-    return {"type": "text", "text": "\n".join(lines)}
+    return {"type": "flex_positions", "mode": "mode_2", "positions": positions}
+
+
+def mode_3_body_mind_spirit(user_id: str) -> dict:
+    """模式3：療癒身心靈牌陣（三張不重複，嚴格排序）。"""
+    cards = _draw_unique(3)
+    if not cards:
+        return {"type": "text", "text": "卡牌數量不足，無法進行療癒身心靈牌陣。"}
+
+    positions = [
+        {"label": "身體狀況及提升精油", "card": cards[0]},
+        {"label": "心理狀況及提升精油", "card": cards[1]},
+        {"label": "精神狀況及提升精油", "card": cards[2]},
+    ]
+    return {"type": "flex_positions", "mode": "mode_3", "positions": positions}
+
+
+def mode_4_self_awareness(user_id: str) -> dict:
+    """模式4：暸解自我牌陣（三張不重複，嚴格排序）。"""
+    cards = _draw_unique(3)
+    if not cards:
+        return {"type": "text", "text": "卡牌數量不足，無法進行暸解自我牌陣。"}
+
+    positions = [
+        {"label": "別人眼中的你", "card": cards[0]},
+        {"label": "私底下獨處時的你", "card": cards[1]},
+        {"label": "真正的你", "card": cards[2]},
+    ]
+    return {"type": "flex_positions", "mode": "mode_4", "positions": positions}
+
+
+def mode_5_indicator_spread(user_id: str, indicator_symbol: str) -> dict:
+    """模式5：單一指示牌陣。指示牌決定主題，左右各抽 1 張不重複精油卡。"""
+    if indicator_symbol not in INDICATOR_SYMBOLS:
+        return {"type": "text", "text": "請指定有效的指示象徵：魚、愛心、戒指、孩童、狗、月亮、樹、十字路口、船、鸛鳥、房屋、熊。"}
+
+    cards = _draw_unique(2)
+    if not cards:
+        return {"type": "text", "text": "卡牌數量不足，無法進行單一指示牌陣。"}
+
+    positions = [
+        {"label": f"「{indicator_symbol}」左側提升精油", "card": cards[0]},
+        {"label": f"「{indicator_symbol}」右側提升精油", "card": cards[1]},
+    ]
+    return {"type": "flex_positions", "mode": "mode_5",
+            "indicator": indicator_symbol, "positions": positions}
