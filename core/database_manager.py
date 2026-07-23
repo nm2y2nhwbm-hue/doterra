@@ -159,3 +159,50 @@ def get_oils_by_chakra(chakra: str):
 def get_all_chakras():
     """回傳目前資料庫中所有出現過的脈輪分類（去重、排序）。"""
     return sorted({o.get('chakra') for o in fetch_oils_data() if o.get('chakra')})
+_INDICATOR_CSV = _PROJECT_ROOT / 'indicator_cards.csv'
+_INDICATOR_CACHE = None
+
+
+def fetch_indicator_cards(force_reload: bool = False):
+    """
+    讀取 indicator_cards.csv（雷諾曼指示象徵卡，12 張，獨立於精油卡資料庫）。
+    回傳 List[dict]，每筆包含 id/name/name_en/image_url。
+    """
+    global _INDICATOR_CACHE
+    if _INDICATOR_CACHE is not None and not force_reload:
+        return _INDICATOR_CACHE
+
+    if not _INDICATOR_CSV.is_file():
+        print(f"[database_manager] 錯誤：找不到指示卡 CSV {_INDICATOR_CSV}")
+        return []
+
+    cards = []
+    for enc in _ENCODING_CANDIDATES:
+        try:
+            cards = []
+            with open(_INDICATOR_CSV, mode='r', encoding=enc, newline='') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    name = (row.get('name') or '').strip()
+                    if not name:
+                        continue
+                    name_en = (row.get('name_en') or '').strip()
+                    cards.append({
+                        "id": (row.get('id') or '').strip(),
+                        "name": name,
+                        "name_en": name_en,
+                        "image_url": _build_image_url(name, name_en),
+                    })
+            if cards:
+                break
+        except Exception:
+            continue
+
+    _INDICATOR_CACHE = cards
+    print(f"[database_manager] 成功讀取 {len(cards)} 張指示象徵卡")
+    return cards
+
+
+def get_indicator_names():
+    """回傳所有指示卡的中文名稱清單，供 router.py 比對觸發字使用。"""
+    return [c['name'] for c in fetch_indicator_cards()]
