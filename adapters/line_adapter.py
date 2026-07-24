@@ -1,10 +1,3 @@
-"""
-Adapter 層：把 router / card_engine 產出的通用 ActionResult
-轉譯成 LINE 專屬的 SendMessage 物件。
-"""
-from linebot.models import TextSendMessage, FlexSendMessage
-
-
 def _build_bubble(card: dict, label: str = None) -> dict:
     header_contents = []
     if label:
@@ -16,48 +9,95 @@ def _build_bubble(card: dict, label: str = None) -> dict:
         {"type": "text", "text": card.get("name_en", ""),
          "size": "sm", "align": "center", "color": "#888888"},
     ]
+
+    body_contents = [
+        {
+            "type": "box",
+            "layout": "baseline",
+            "contents": [
+                {"type": "text", "text": "關鍵詞", "size": "xs", "color": "#B08968", "flex": 1},
+                {"type": "text", "text": card.get("keywords", "無"), "size": "sm",
+                 "color": "#555555", "flex": 4, "wrap": True},
+            ],
+        },
+    ]
+
+    # 脈輪欄位只有在實際有內容時才顯示，複方精油卡本身無此欄位，不強行塞入空白列
+    chakra = (card.get("chakra") or "").strip()
+    if chakra:
+        body_contents.insert(0, {
+            "type": "box",
+            "layout": "baseline",
+            "contents": [
+                {"type": "text", "text": "脈輪", "size": "xs", "color": "#B08968", "flex": 1},
+                {"type": "text", "text": chakra, "size": "sm",
+                 "color": "#555555", "flex": 4, "wrap": True},
+            ],
+        })
+
+    body_contents.append({"type": "separator", "margin": "md"})
+
+    # 描述欄位同樣只有內容存在時才顯示；guidance 心靈小語每張卡都一定有，維持必顯示
+    description = (card.get("description") or "").strip()
+    guidance_text = card.get("guidance", "無")
+    if description:
+        body_contents.append({
+            "type": "text", "text": guidance_text,
+            "wrap": True, "margin": "md", "size": "sm", "color": "#333333",
+        })
+        body_contents.append({"type": "separator", "margin": "md"})
+        body_contents.append({
+            "type": "text", "text": description,
+            "wrap": True, "margin": "md", "size": "xs", "color": "#777777",
+        })
+    else:
+        body_contents.append({
+            "type": "text", "text": guidance_text,
+            "wrap": True, "margin": "md", "size": "sm", "color": "#333333",
+        })
+
     return {
         "type": "bubble",
         "header": {"type": "box", "layout": "vertical", "contents": header_contents},
+        "hero": {
+            "type": "image",
+            "url": card.get("image_url"),
+            "size": "full",
+            "aspectRatio": "4:3",
+            "aspectMode": "cover",
+        },
         "body": {
             "type": "box",
             "layout": "vertical",
+            "spacing": "sm",
+            "contents": body_contents,
+        },
+        "footer": {
+            "type": "box",
+            "layout": "vertical",
+            "spacing": "sm",
             "contents": [
-                {"type": "image", "url": card.get("image_url"),
-                 "size": "full", "aspectMode": "cover"},
-                {"type": "text", "text": f"關鍵詞：{card.get('keywords', '無')}",
-                 "margin": "md", "wrap": True},
-                {"type": "separator", "margin": "md"},
-                {"type": "text", "text": card.get("guidance", "無"),
-                 "wrap": True, "margin": "md", "size": "sm"},
+                {
+                    "type": "button",
+                    "style": "secondary",
+                    "height": "sm",
+                    "action": {
+                        "type": "uri",
+                        "label": "看完整解析",
+                        "uri": f"{BASE_URL}/oil/{card.get('id', '')}",
+                    },
+                },
+                {
+                    "type": "button",
+                    "style": "primary",
+                    "height": "sm",
+                    "color": "#B08968",
+                    "action": {
+                        "type": "uri",
+                        "label": "前往專屬商城",
+                        "uri": SHOP_URL,
+                    },
+                },
             ],
         },
     }
-
-
-def to_line_message(action_result: dict):
-    if not action_result:
-        return None
-
-    kind = action_result.get("type")
-
-    if kind == "text":
-        return TextSendMessage(text=action_result.get("text", ""))
-
-    if kind == "flex_single":
-        card = action_result.get("card")
-        if not card:
-            return TextSendMessage(text="目前查無卡牌資料。")
-        return FlexSendMessage(alt_text=f"你抽到了 {card.get('name')}",
-                                contents=_build_bubble(card))
-
-    if kind == "flex_positions":
-        positions = action_result.get("positions", [])
-        if not positions:
-            return TextSendMessage(text="目前查無卡牌資料。")
-        bubbles = [_build_bubble(p["card"], label=p["label"]) for p in positions]
-        carousel = {"type": "carousel", "contents": bubbles}
-        alt = "、".join(p["card"].get("name", "") for p in positions)
-        return FlexSendMessage(alt_text=f"牌陣結果：{alt}", contents=carousel)
-
-    return TextSendMessage(text="系統發生未知錯誤，請聯絡管理員。")
