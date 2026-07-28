@@ -1,3 +1,14 @@
+"""
+Adapter 層：把 router / card_engine 產出的通用 ActionResult
+轉譯成 LINE 專屬的 Flex Message JSON 結構。
+"""
+import os
+from linebot.models import TextSendMessage, FlexSendMessage
+
+BASE_URL = os.environ.get('BASE_URL', 'https://example.com')
+SHOP_URL = os.environ.get('SHOP_URL', 'https://example.com/shop')
+
+
 def _build_bubble(card: dict, label: str = None) -> dict:
     header_contents = []
     if label:
@@ -22,7 +33,6 @@ def _build_bubble(card: dict, label: str = None) -> dict:
         },
     ]
 
-    # 脈輪欄位只有在實際有內容時才顯示，複方精油卡本身無此欄位，不強行塞入空白列
     chakra = (card.get("chakra") or "").strip()
     if chakra:
         body_contents.insert(0, {
@@ -37,23 +47,19 @@ def _build_bubble(card: dict, label: str = None) -> dict:
 
     body_contents.append({"type": "separator", "margin": "md"})
 
-    # 描述欄位同樣只有內容存在時才顯示；guidance 心靈小語每張卡都一定有，維持必顯示
     description = (card.get("description") or "").strip()
     guidance_text = card.get("guidance", "無")
+
+    body_contents.append({
+        "type": "text", "text": guidance_text,
+        "wrap": True, "margin": "md", "size": "sm", "color": "#333333",
+    })
+
     if description:
-        body_contents.append({
-            "type": "text", "text": guidance_text,
-            "wrap": True, "margin": "md", "size": "sm", "color": "#333333",
-        })
         body_contents.append({"type": "separator", "margin": "md"})
         body_contents.append({
             "type": "text", "text": description,
             "wrap": True, "margin": "md", "size": "xs", "color": "#777777",
-        })
-    else:
-        body_contents.append({
-            "type": "text", "text": guidance_text,
-            "wrap": True, "margin": "md", "size": "sm", "color": "#333333",
         })
 
     return {
@@ -101,3 +107,31 @@ def _build_bubble(card: dict, label: str = None) -> dict:
             ],
         },
     }
+
+
+def to_line_message(action_result: dict):
+    if not action_result:
+        return None
+
+    kind = action_result.get("type")
+
+    if kind == "text":
+        return TextSendMessage(text=action_result.get("text", ""))
+
+    if kind == "flex_single":
+        card = action_result.get("card")
+        if not card:
+            return TextSendMessage(text="目前查無卡牌資料。")
+        return FlexSendMessage(alt_text=f"你抽到了 {card.get('name')}",
+                                contents=_build_bubble(card))
+
+    if kind == "flex_positions":
+        positions = action_result.get("positions", [])
+        if not positions:
+            return TextSendMessage(text="目前查無卡牌資料。")
+        bubbles = [_build_bubble(p["card"], label=p["label"]) for p in positions]
+        carousel = {"type": "carousel", "contents": bubbles}
+        alt = "、".join(p["card"].get("name", "") for p in positions)
+        return FlexSendMessage(alt_text=f"牌陣結果：{alt}", contents=carousel)
+
+    return TextSendMessage(text="系統發生未知錯誤，請聯絡管理員。")
