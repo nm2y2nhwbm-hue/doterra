@@ -4,13 +4,13 @@
 
 本版重點：
 1. 路徑解析強化，確保 Render 雲端環境下能穩定找到 doterra.csv。
-2. 編碼自我修復：GitHub 網頁後台編輯無法保證存檔編碼一致
-   （可能是 utf-8-sig，也可能因編輯器行為變回 Big5/CP950），
-   因此依序嘗試多種編碼，直到成功解析出有效資料為止。
+2. 編碼自我修復：依序嘗試多種編碼，直到成功解析出有效資料為止。
 3. 欄位完整映射：id/name/name_en/keywords/image_filename/guidance/
-   chakra/description 全數讀入，複方精油卡的 chakra/description
-   欄位若為空字串，維持空字串（由 adapter 層決定是否顯示），
-   不做任何預設值替換。
+   chakra/description 全數讀入。
+4. 圖片網址直接採用 CSV 裡的 image_filename 欄位（含副檔名，
+   例如 .jpg / .png 皆可），不再由程式端自行猜測副檔名；
+   只有當 CSV 該欄位為空時，才保底用 slugify_name_en() + .png
+   組出檔名，避免資料缺漏時整支程式掛掉。
 """
 import csv
 import os
@@ -30,16 +30,14 @@ _CANDIDATE_PATHS = [
     Path.cwd() / 'doterra.csv',
 ]
 
-# 依序嘗試的編碼清單。utf-8-sig 放最前面（正確目標格式），
-# 後面幾個是 GitHub 網頁後台編輯常見的「意外編碼」保底容錯。
 _ENCODING_CANDIDATES = ['utf-8-sig', 'utf-8', 'big5', 'cp950', 'gb18030']
 
 BASE_URL = os.environ.get('BASE_URL', 'https://example.com')
 
 # --------------------------------------------------------------------------
 # 【一鍵切換開關】
-# True  = 目前尚無實體圖檔，先用 placehold.co 動態生成測試字卡，確保 Flex Message 不破圖
-# False = 42 張去背實體圖已上傳到 static/images/ 之後，改為 False 切回真實圖片路徑
+# True  = 尚無實體圖檔，用 placehold.co 動態生成測試字卡
+# False = 實體圖檔已上傳到 static/images/，改用真實圖片路徑
 # --------------------------------------------------------------------------
 USE_PLACEHOLDER_IMAGE = False
 
@@ -64,11 +62,39 @@ def _print_debug_directory_listing():
         print(f"[database_manager] 診斷：無法列出 {_PROJECT_ROOT} 內容 -> {e}")
 
 
+def _build_placeholder_image_url(name: str, name_en: str) -> str:
+    """動態字卡生圖公式（暫時方案，不需任何實體圖檔）。"""
+    label = f"{name} | {name_en}" if name_en else name
+    encoded_label = urllib.parse.quote(label)
+    return f"https://placehold.co/600x400/EFE9E1/8A6D5C/png?text={encoded_label}"
+
+
+def _build_real_image_url(image_filename: str, name_en: str) -> str:
+    """
+    優先直接使用 CSV 裡的 image_filename 欄位（含實際副檔名，
+    例如 lemon.jpg、sandalwood-hawaiian.jpg），確保程式端不會
+    自行猜測／覆寫副檔名而與實際上傳的檔案格式不符。
+
+    只有當 image_filename 欄位為空時，才保底用 slugify_name_en()
+    產生檔名並預設補上 .png，避免單筆資料缺漏就讓整個抽卡失敗。
+    """
+    image_filename = (image_filename or "").strip()
+    if image_filename:
+        return f"{BASE_URL}/static/images/{image_filename}"
+
+    clean_slug = slugify_name_en(name_en)
+    return f"{BASE_URL}/static/images/{clean_slug}.png"
+
+
+def _build_image_url(name: str, name_en: str, image_filename: str = "") -> str:
+    """統一入口：依 USE_PLACEHOLDER_IMAGE 開關決定要用哪一種圖片網址。"""
+    if USE_PLACEHOLDER_IMAGE:
+        return _build_placeholder_image_url(name, name_en)
+    return _build_real_image_url(image_filename, name_en)
+
+
 def _parse_csv_with_encoding(csv_path: Path, encoding: str):
-    """
-    嘗試以指定編碼解析整個 CSV。
-    只要任何一列解碼失敗就會拋出例外，代表這個編碼不對，交給上層換下一個試。
-    """
+    """嘗試以指定編碼解析整個 CSV。失敗就交給上層換下一個編碼試。"""
     oils = []
     with open(csv_path, mode='r', encoding=encoding, newline='') as f:
         reader = csv.DictReader(f)
@@ -77,6 +103,7 @@ def _parse_csv_with_encoding(csv_path: Path, encoding: str):
             if not name:
                 continue
             name_en = (row.get('name_en') or '').strip()
+            image_filename = (row.get('image_filename') or '').strip()
             oils.append({
                 "id": (row.get('id') or '').strip(),
                 "name": name,
@@ -85,39 +112,9 @@ def _parse_csv_with_encoding(csv_path: Path, encoding: str):
                 "guidance": (row.get('guidance') or '').strip(),
                 "chakra": (row.get('chakra') or '').strip(),
                 "description": (row.get('description') or '').strip(),
-                "image_url": _build_image_url(name, name_en),
+                "image_url": _build_image_url(name, name_en, image_filename),
             })
     return oils
-
-
-def _build_placeholder_image_url(name: str, name_en: str) -> str:
-    """
-    動態字卡生圖公式（暫時方案，不需任何實體圖檔）：
-    讀取 card['name'] 與 card['name_en']，組成 "中文名 | 英文名" 字樣，
-    經 URL 編碼後帶入 placehold.co 正式生圖 API。
-    """
-    label = f"{name} | {name_en}" if name_en else name
-    encoded_label = urllib.parse.quote(label)
-    return f"https://placehold.co/600x400/EFE9E1/8A6D5C/png?text={encoded_label}"
-
-
-def _build_real_image_url(name_en: str) -> str:
-    """
-    【未來正式圖檔開關】
-    待 42 張去背精油圖上傳至 static/images/ 後，
-    將 USE_PLACEHOLDER_IMAGE 改為 False，即會改用此函式產生的絕對路徑：
-
-        f"{BASE_URL}/static/images/{clean_slug}.png"
-    """
-    clean_slug = slugify_name_en(name_en)
-    return f"{BASE_URL}/static/images/{clean_slug}.png"
-
-
-def _build_image_url(name: str, name_en: str) -> str:
-    """統一入口：依 USE_PLACEHOLDER_IMAGE 開關決定要用哪一種圖片網址。"""
-    if USE_PLACEHOLDER_IMAGE:
-        return _build_placeholder_image_url(name, name_en)
-    return _build_real_image_url(name_en)
 
 
 def fetch_oils_data(force_reload: bool = False):
@@ -156,13 +153,10 @@ def fetch_oils_data(force_reload: bool = False):
         print(f"[database_manager] 錯誤：{csv_path} 嘗試了所有編碼 {_ENCODING_CANDIDATES} 仍無法解析出有效資料")
         for err in errors:
             print(f"[database_manager] 錯誤明細 -> {err}")
-        print(f"[database_manager] 請確認 CSV 標題列是否為 id,name,name_en,keywords,image_filename,guidance,chakra,description")
         return []
 
     if used_encoding != 'utf-8-sig':
-        print(f"[database_manager] 警告：doterra.csv 實際編碼偵測為「{used_encoding}」而非預期的 utf-8-sig。"
-              f" 建議之後重新用純文字編輯器（非 GitHub 網頁編輯器）另存為 UTF-8 with BOM 再覆蓋 commit，"
-              f" 目前先以容錯模式正常運作，不影響功能。")
+        print(f"[database_manager] 警告：doterra.csv 實際編碼偵測為「{used_encoding}」而非預期的 utf-8-sig。")
 
     _CACHE = oils
     mode_desc = "placehold.co 動態測試字卡" if USE_PLACEHOLDER_IMAGE else "static/images/ 實體圖檔"
@@ -182,17 +176,14 @@ def get_all_chakras():
 
 
 # --------------------------------------------------------------------------
-# 指示象徵卡（雷諾曼式主題指示卡，獨立於精油卡資料庫）
+# 指示象徵卡（獨立於精油卡資料庫）
 # --------------------------------------------------------------------------
 _INDICATOR_CSV = _PROJECT_ROOT / 'indicator_cards.csv'
 _INDICATOR_CACHE = None
 
 
 def fetch_indicator_cards(force_reload: bool = False):
-    """
-    讀取 indicator_cards.csv（12 張指示象徵卡，獨立於精油卡資料庫）。
-    回傳 List[dict]，每筆包含 id/name/name_en/image_url。
-    """
+    """讀取 indicator_cards.csv（12 張指示象徵卡）。"""
     global _INDICATOR_CACHE
     if _INDICATOR_CACHE is not None and not force_reload:
         return _INDICATOR_CACHE
@@ -212,11 +203,12 @@ def fetch_indicator_cards(force_reload: bool = False):
                     if not name:
                         continue
                     name_en = (row.get('name_en') or '').strip()
+                    image_filename = (row.get('image_filename') or '').strip()
                     cards.append({
                         "id": (row.get('id') or '').strip(),
                         "name": name,
                         "name_en": name_en,
-                        "image_url": _build_image_url(name, name_en),
+                        "image_url": _build_image_url(name, name_en, image_filename),
                     })
             if cards:
                 break
@@ -230,4 +222,4 @@ def fetch_indicator_cards(force_reload: bool = False):
 
 def get_indicator_names():
     """回傳所有指示卡的中文名稱清單，供 router.py 比對觸發字使用。"""
-    return [c['name'] for c in fetch_indicator_cards()]
+    return [c['name'] for c in
