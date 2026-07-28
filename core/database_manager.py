@@ -98,4 +98,97 @@ def _parse_csv_with_encoding(csv_path: Path, encoding: str):
     return oils
 
 
-def fetch_oils_data(force_reload:
+def fetch_oils_data(force_reload: bool = False):
+    global _CACHE
+    if _CACHE is not None and not force_reload:
+        return _CACHE
+
+    csv_path = _resolve_csv_path()
+
+    if not csv_path.is_file():
+        print(f"[database_manager] 錯誤：在所有候選路徑都找不到 doterra.csv")
+        print(f"[database_manager] 錯誤：已嘗試路徑 = {[str(p) for p in _CANDIDATE_PATHS]}")
+        _print_debug_directory_listing()
+        return []
+
+    oils = []
+    used_encoding = None
+    errors = []
+
+    for enc in _ENCODING_CANDIDATES:
+        try:
+            oils = _parse_csv_with_encoding(csv_path, enc)
+            if oils:
+                used_encoding = enc
+                break
+        except Exception as e:
+            errors.append(f"{enc}: {e}")
+            continue
+
+    if not oils:
+        print(f"[database_manager] 錯誤：{csv_path} 嘗試了所有編碼 {_ENCODING_CANDIDATES} 仍無法解析出有效資料")
+        for err in errors:
+            print(f"[database_manager] 錯誤明細 -> {err}")
+        return []
+
+    if used_encoding != 'utf-8-sig':
+        print(f"[database_manager] 警告：doterra.csv 實際編碼偵測為「{used_encoding}」而非預期的 utf-8-sig。")
+
+    _CACHE = oils
+    mode_desc = "placehold.co 動態測試字卡" if USE_PLACEHOLDER_IMAGE else "static/images/ 實體圖檔"
+    print(f"[database_manager] 成功讀取 {len(oils)} 筆精油資料，來源 = {csv_path}，"
+          f"編碼 = {used_encoding}，圖片模式 = {mode_desc}")
+    return oils
+
+
+def get_oils_by_chakra(chakra: str):
+    return [o for o in fetch_oils_data() if o.get('chakra') == chakra]
+
+
+def get_all_chakras():
+    return sorted({o.get('chakra') for o in fetch_oils_data() if o.get('chakra')})
+
+
+_INDICATOR_CSV = _PROJECT_ROOT / 'indicator_cards.csv'
+_INDICATOR_CACHE = None
+
+
+def fetch_indicator_cards(force_reload: bool = False):
+    global _INDICATOR_CACHE
+    if _INDICATOR_CACHE is not None and not force_reload:
+        return _INDICATOR_CACHE
+
+    if not _INDICATOR_CSV.is_file():
+        print(f"[database_manager] 錯誤：找不到指示卡 CSV {_INDICATOR_CSV}")
+        return []
+
+    cards = []
+    for enc in _ENCODING_CANDIDATES:
+        try:
+            cards = []
+            with open(_INDICATOR_CSV, mode='r', encoding=enc, newline='') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    name = (row.get('name') or '').strip()
+                    if not name:
+                        continue
+                    name_en = (row.get('name_en') or '').strip()
+                    image_filename = (row.get('image_filename') or '').strip()
+                    cards.append({
+                        "id": (row.get('id') or '').strip(),
+                        "name": name,
+                        "name_en": name_en,
+                        "image_url": _build_image_url(name, name_en, image_filename),
+                    })
+            if cards:
+                break
+        except Exception:
+            continue
+
+    _INDICATOR_CACHE = cards
+    print(f"[database_manager] 成功讀取 {len(cards)} 張指示象徵卡")
+    return cards
+
+
+def get_indicator_names():
+    return [c['name'] for c in fetch_indicator_cards()]
