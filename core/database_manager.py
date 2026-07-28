@@ -41,7 +41,7 @@ BASE_URL = os.environ.get('BASE_URL', 'https://example.com')
 # True  = 目前尚無實體圖檔，先用 placehold.co 動態生成測試字卡，確保 Flex Message 不破圖
 # False = 42 張去背實體圖已上傳到 static/images/ 之後，改為 False 切回真實圖片路徑
 # --------------------------------------------------------------------------
-USE_PLACEHOLDER_IMAGE = True
+USE_PLACEHOLDER_IMAGE = False
 
 _CACHE = None
 
