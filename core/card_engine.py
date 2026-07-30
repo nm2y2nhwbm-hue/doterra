@@ -7,10 +7,10 @@ import random
 from core import database_manager as db
 from core import memory_manager as mem
 
-INDICATOR_SYMBOLS = [
-    "魚", "愛心", "戒指", "孩童", "狗", "月亮",
-    "樹", "十字路口", "船", "鸛鳥", "房屋", "熊",
-]
+
+def _get_indicator_symbols():
+    """從 indicator_cards.csv 動態讀取指示象徵清單，不寫死於程式碼中。"""
+    return db.get_indicator_names()
 
 
 def _draw_unique(n: int):
@@ -76,10 +76,22 @@ def mode_4_self_awareness(user_id: str) -> dict:
     return {"type": "flex_positions", "mode": "mode_4", "positions": positions}
 
 
+def mode_5_prompt_for_indicator() -> dict:
+    """
+    使用者點擊選單「單一指示牌與精油對應占卜」但尚未指定象徵符號時的提示。
+    """
+    symbols = "、".join(_get_indicator_symbols())
+    return {
+        "type": "text",
+        "text": f"請指定指示象徵，例如：{symbols}",
+        "mode": "mode_5_prompt",
+    }
+
+
 def mode_5_indicator_spread(user_id: str, indicator_symbol: str) -> dict:
     """模式5：單一指示牌陣。指示牌決定主題，左右各抽 1 張不重複精油卡。"""
-    if indicator_symbol not in INDICATOR_SYMBOLS:
-        return {"type": "text", "text": "請指定有效的指示象徵：魚、愛心、戒指、孩童、狗、月亮、樹、十字路口、船、鸛鳥、房屋、熊。"}
+    if indicator_symbol not in _get_indicator_symbols():
+        return {"type": "text", "text": "請指定有效的指示象徵，請參考選單提示。"}
 
     cards = _draw_unique(2)
     if not cards:
