@@ -1,15 +1,15 @@
 import os
 import sys
 import traceback
-from flask import Flask, request, abort
+from flask import Flask, request, abort, jsonify
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage
 
 from router import route_message
 from adapters.line_adapter import to_line_message
+from core import database_manager as db
 
-# --- 環境設定區 (二合一處理) ---
 if os.path.exists(".env"):
     try:
         from dotenv import load_dotenv
@@ -26,7 +26,6 @@ if not CHANNEL_ACCESS_TOKEN or not CHANNEL_SECRET:
     print("請確認線上平台設定或本地 .env 檔案內容。")
     sys.exit(1)
 
-# 靜態圖片掛載：static/images/<slug>.png 會對應到 /static/images/<slug>.png
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 
 line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
@@ -52,7 +51,6 @@ def handle_message(event):
     user_id = event.source.user_id
     text = event.message.text
 
-    # 無狀態路由：這一句話獨立判定，不管上一句使用者說了什麼
     action_result = route_message(user_id, text)
 
     if action_result is None:
@@ -71,7 +69,18 @@ def health():
     return {"status": "ok"}
 
 
-# --- 啟動區 ---
+@app.route("/api/oils", methods=['GET'])
+def api_oils():
+    """回傳 69 張精油卡的完整 JSON，供一頁式前端 static/cards.html 讀取。"""
+    return jsonify(db.fetch_oils_data())
+
+
+@app.route("/api/indicators", methods=['GET'])
+def api_indicators():
+    """回傳 12 張指示卡的完整 JSON，供模式 5 前端讀取。"""
+    return jsonify(db.fetch_indicator_cards())
+
+
 if __name__ == "__main__":
     is_debug = os.environ.get('FLASK_DEBUG', 'True') == 'True'
     port = int(os.environ.get('PORT', 5000))
