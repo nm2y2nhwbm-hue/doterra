@@ -9,7 +9,7 @@ BASE_URL = os.environ.get('BASE_URL', 'https://example.com')
 SHOP_URL = os.environ.get('SHOP_URL', 'https://example.com/shop')
 
 
-def _build_bubble(card: dict, label: str = None) -> dict:
+def _build_bubble(card: dict, label: str = None, mode: str = None) -> dict:
     header_contents = []
     if label:
         header_contents.append({"type": "text", "text": label,
@@ -62,6 +62,45 @@ def _build_bubble(card: dict, label: str = None) -> dict:
             "wrap": True, "margin": "md", "size": "xs", "color": "#777777",
         })
 
+    footer_buttons = []
+    if mode:
+        mode_num = mode.replace('mode_', '')
+        footer_buttons.append({
+            "type": "button",
+            "style": "primary",
+            "height": "sm",
+            "color": "#8C3B46",
+            "action": {
+                "type": "uri",
+                "label": "開啟沉浸式牌陣體驗",
+                "uri": f"{BASE_URL}/static/cards.html?mode={mode_num}",
+            },
+        })
+
+    footer_buttons += [
+        {
+            "type": "button",
+            "style": "secondary",
+            "height": "sm",
+            "action": {
+                "type": "uri",
+                "label": "看完整解析",
+                "uri": f"{BASE_URL}/oil/{card.get('id', '')}",
+            },
+        },
+        {
+            "type": "button",
+            "style": "primary",
+            "height": "sm",
+            "color": "#B08968",
+            "action": {
+                "type": "uri",
+                "label": "前往專屬商城",
+                "uri": SHOP_URL,
+            },
+        },
+    ]
+
     return {
         "type": "bubble",
         "header": {"type": "box", "layout": "vertical", "contents": header_contents},
@@ -82,29 +121,7 @@ def _build_bubble(card: dict, label: str = None) -> dict:
             "type": "box",
             "layout": "vertical",
             "spacing": "sm",
-            "contents": [
-                {
-                    "type": "button",
-                    "style": "secondary",
-                    "height": "sm",
-                    "action": {
-                        "type": "uri",
-                        "label": "看完整解析",
-                        "uri": f"{BASE_URL}/oil/{card.get('id', '')}",
-                    },
-                },
-                {
-                    "type": "button",
-                    "style": "primary",
-                    "height": "sm",
-                    "color": "#B08968",
-                    "action": {
-                        "type": "uri",
-                        "label": "前往專屬商城",
-                        "uri": SHOP_URL,
-                    },
-                },
-            ],
+            "contents": footer_buttons,
         },
     }
 
@@ -114,6 +131,7 @@ def to_line_message(action_result: dict):
         return None
 
     kind = action_result.get("type")
+    mode = action_result.get("mode")
 
     if kind == "text":
         return TextSendMessage(text=action_result.get("text", ""))
@@ -123,13 +141,13 @@ def to_line_message(action_result: dict):
         if not card:
             return TextSendMessage(text="目前查無卡牌資料。")
         return FlexSendMessage(alt_text=f"你抽到了 {card.get('name')}",
-                                contents=_build_bubble(card))
+                                contents=_build_bubble(card, mode=mode))
 
     if kind == "flex_positions":
         positions = action_result.get("positions", [])
         if not positions:
             return TextSendMessage(text="目前查無卡牌資料。")
-        bubbles = [_build_bubble(p["card"], label=p["label"]) for p in positions]
+        bubbles = [_build_bubble(p["card"], label=p["label"], mode=mode) for p in positions]
         carousel = {"type": "carousel", "contents": bubbles}
         alt = "、".join(p["card"].get("name", "") for p in positions)
         return FlexSendMessage(alt_text=f"牌陣結果：{alt}", contents=carousel)
