@@ -1,6 +1,7 @@
 """
 無狀態路由模組。每一句訊息獨立判定，不參考任何上一句對話狀態。
 順位：1 黑名單攔截 → 2 白名單解鎖 → 3 五大牌陣模式分流。
+觸發字同時保留「Rich Menu 實際送出文字」與舊版口語關鍵字，兩者並存。
 """
 from core import memory_manager as mem
 from core import card_engine as engine
@@ -11,16 +12,16 @@ BLACKLIST_REPLY = (
     "【快捷轉移區】\n如需轉檔工具，建議改用專門的線上轉檔服務。"
 )
 
-UNLOCK_KEYWORDS = ["解鎖密碼", "多特瑞精油卡牌抽卡程式"]
+UNLOCK_KEYWORDS = ["🔑 6. 系統狀態與開發者指令", "解鎖密碼", "多特瑞精油卡牌抽卡程式"]
 UNLOCK_REPLY = "🔓 今日能量鎖定已解除，你可以重新抽取今日能量卡牌。"
 
-MODE_1_KEYWORDS = ["抽卡", "今日能量", "單牌"]
-MODE_2_KEYWORDS = ["生活導引", "兩張牌", "導引牌陣"]
-MODE_3_KEYWORDS = ["三牌陣", "身心靈", "三牌"]
-MODE_4_KEYWORDS = ["了解自我", "自我牌陣", "別人眼中的自己"]
-MODE_5_KEYWORDS = ["指示牌", "單一指示", "指定主題"]
+MODE_1_KEYWORDS = ["🔮 1. 單張心靈肯定小語", "今日能量", "抽卡", "單牌"]
+MODE_2_KEYWORDS = ["💫 2. 現階段狀態與方向指引", "生活導引", "兩張牌", "導引牌陣"]
+MODE_3_KEYWORDS = ["🌿 3. 身·心·靈全方位深度解析", "三牌陣", "身心靈", "三牌"]
+MODE_4_KEYWORDS = ["🧘 4. 別人眼中的你與真正的你", "了解自我", "自我牌陣"]
+MODE_5_KEYWORDS = ["🎯 5. 單一指示牌與精油對應占卜", "指示牌", "單一指示", "指定主題"]
 
-INDICATOR_SYMBOLS = engine.INDICATOR_SYMBOLS
+INDICATOR_SYMBOLS = engine._get_indicator_symbols()
 
 
 def _contains_any(text: str, keywords) -> bool:
@@ -46,7 +47,7 @@ def route_message(user_id: str, text: str):
     indicator = _extract_indicator(text)
     if indicator or _contains_any(text, MODE_5_KEYWORDS):
         if not indicator:
-            return {"type": "text", "text": "請指定指示象徵：魚、愛心、戒指、孩童、狗、月亮、樹、十字路口、船、鸛鳥、房屋、熊。"}
+            return engine.mode_5_prompt_for_indicator()
         return engine.mode_5_indicator_spread(user_id, indicator)
 
     if _contains_any(text, MODE_4_KEYWORDS):
