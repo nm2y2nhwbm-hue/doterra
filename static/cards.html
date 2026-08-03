@@ -241,16 +241,36 @@
     startShuffleThenFan(pool);
   }
 
+  const INDICATOR_THEMES = {
+    "魚": "若你的問題與金錢有關，使內在與外在能夠處於平衡狀態",
+    "愛心": "若你的問題與愛情有關",
+    "戒指": "若你的問題與婚姻有關",
+    "孩童": "若你的問題與孩子有關",
+    "狗": "若你的問題與朋友有關",
+    "月亮": "若你的問題與名聲或成就有關",
+    "樹": "若你的問題與健康有關",
+    "十字路口": "若你的問題與下決定有關",
+    "船": "若你的問題與旅行有關",
+    "鸛鳥": "若你的問題與改變或升遷有關",
+    "房屋": "若你的問題與家有關",
+    "熊": "若你的問題與老闆有關",
+  };
+
   function renderIndicatorList(){
     indicatorSelect.style.display = 'flex';
     INDICATORS.forEach(ind => {
       const item = document.createElement('div');
       item.className = 'indicator-item';
-      item.innerHTML = `<span>${ind.name}</span><span class="en">${ind.name_en || ''}</span>`;
+      const theme = INDICATOR_THEMES[ind.name] || '';
+      item.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:2px;">
+          <span><b>${ind.name}</b> <span class="en">${ind.name_en || ''}</span></span>
+          <span style="font-size:11.5px;color:#8a7c6c;">${theme}</span>
+        </div>`;
       item.addEventListener('click', () => {
         selectedIndicatorName = ind.name;
         indicatorSelect.style.display = 'none';
-        instruction.textContent = `「${ind.name}」已插入牌組，正在洗牌……`;
+        instruction.textContent = `「${ind.name}」已插入牌組，正在洗牌……洗牌之後，抽三張牌～`;
 
         const oilsSubset = shuffle(OILS).slice(0, FAN_POOL_SIZE - 1).map(c => ({card:c, isIndicator:false}));
         const insertPos = Math.floor(Math.random() * (oilsSubset.length + 1));
@@ -340,7 +360,8 @@
     }
   }
 
-  // 模式5：扇形排開後，找出指示牌實際落位，取指示牌與左右各一
+  // 模式5：扇形排開後，找出指示牌實際落位，指示牌優先翻開（主導角色），
+  // 稍作停頓後才依序翻開左右兩張精油牌回應主題。
   function revealMode5(){
     if (drawnCount > 0) return; // 只能觸發一次
     drawnCount = 1;
@@ -357,27 +378,35 @@
       }
     });
 
-    deckHint.textContent = '指示牌現身，正在揭示左右兩側的精油指引……';
+    deckHint.textContent = `「${selectedIndicatorName}」指示牌現身，為你點出主題……`;
 
+    // 第一步：指示牌率先翻開，作為整個牌陣的主導
+    const indicatorItem = fanItems[idx];
+    flipCardInPlace(indicatorItem, '指示牌');
+    renderDrawnCard('指示牌', indicatorItem.card);
+    appendDetail('指示牌', indicatorItem.card);
+
+    // 第二步：停頓後，才依序翻開左右兩張精油牌回應這個主題
     setTimeout(() => {
-      const indicatorItem = fanItems[idx];
-      flipCardInPlace(indicatorItem, '指示牌');
-      renderDrawnCard('指示牌', indicatorItem.card);
-      appendDetail('指示牌', indicatorItem.card);
+      deckHint.textContent = '正在揭示左右兩側的精油指引……';
 
-      const revealSide = (sideIdx, label) => {
-        if (sideIdx < 0 || sideIdx >= fanItems.length) return;
-        const sideItem = fanItems[sideIdx];
-        flipCardInPlace(sideItem, label);
-        renderDrawnCard(label, sideItem.card);
-        appendDetail(label, sideItem.card);
+      const revealSide = (sideIdx, label, delay) => {
+        setTimeout(() => {
+          if (sideIdx < 0 || sideIdx >= fanItems.length) return;
+          const sideItem = fanItems[sideIdx];
+          flipCardInPlace(sideItem, label);
+          renderDrawnCard(label, sideItem.card);
+          appendDetail(label, sideItem.card);
+        }, delay);
       };
-      revealSide(leftIdx, `「${selectedIndicatorName}」左側提升精油`);
-      revealSide(rightIdx, `「${selectedIndicatorName}」右側提升精油`);
+      revealSide(leftIdx, `「${selectedIndicatorName}」左側提升精油`, 0);
+      revealSide(rightIdx, `「${selectedIndicatorName}」右側提升精油`, 500);
 
-      deckHint.textContent = '解讀完成 ✦ 願這份訊息與你同在';
-      againBtn.style.display = 'inline-block';
-    }, 700);
+      setTimeout(() => {
+        deckHint.textContent = '解讀完成 ✦ 願這份訊息與你同在';
+        againBtn.style.display = 'inline-block';
+      }, 1100);
+    }, 900);
   }
 
   function renderDrawnCard(label, card){
