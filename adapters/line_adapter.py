@@ -7,6 +7,7 @@ from linebot.models import TextSendMessage, FlexSendMessage
 
 BASE_URL = os.environ.get('BASE_URL', 'https://example.com')
 SHOP_URL = os.environ.get('SHOP_URL', 'https://example.com/shop')
+LIFF_ID = os.environ.get('LIFF_ID', '2010916161-HrIOEAda')  # 雫之洞悉・返魂堂（開發環境）
 
 
 def _build_bubble(card: dict, label: str = None, mode: str = None) -> dict:
@@ -73,7 +74,7 @@ def _build_bubble(card: dict, label: str = None, mode: str = None) -> dict:
             "action": {
                 "type": "uri",
                 "label": "開啟沉浸式牌陣體驗",
-                "uri": f"{BASE_URL}/static/cards.html?mode={mode_num}",
+                "uri": f"https://miniapp.line.me/{LIFF_ID}?mode={mode_num}",
             },
         })
 
