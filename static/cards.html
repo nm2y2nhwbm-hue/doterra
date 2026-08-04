@@ -451,10 +451,10 @@
     if (m >= 1 && m <= 5) enterStage(m);
   }
 
-  // 若透過 LIFF 開啟，初始化 LIFF SDK（LIFF_ID 需替換成你自己的）
+  // 若透過 LINE MINI App / LIFF 開啟，初始化 LIFF SDK
   function initLiffIfPresent(){
-    const LIFF_ID = "YOUR_LIFF_ID"; // 到 LINE Developers 建立 LIFF 後填入
-    if (window.liff && LIFF_ID !== "YOUR_LIFF_ID") {
+    const LIFF_ID = "2010916161-HrIOEAda"; // 雫之洞悉・返魂堂（開發環境）
+    if (window.liff) {
       liff.init({ liffId: LIFF_ID }).catch(() => {});
     }
   }
