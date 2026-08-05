@@ -25,7 +25,7 @@
   .rose-divider{display:flex;align-items:center;justify-content:center;gap:10px;color:var(--gold);opacity:.7;margin:6px auto 14px;}
   .rose-divider::before,.rose-divider::after{content:"";flex:1;max-width:60px;height:1px;background:var(--gold);opacity:.5;}
 
-  main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 12px 100px;width:100%;}
+  main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 12px 40px;width:100%;}
 
   #mode-select{width:100%;max-width:520px;display:flex;flex-direction:column;gap:12px;margin-top:4px;}
   .mode-btn{background:linear-gradient(135deg,#fff8ef,var(--parchment));border:1px solid rgba(184,145,46,.4);border-radius:14px;padding:14px 18px;text-align:left;cursor:pointer;box-shadow:0 2px 6px rgba(63,51,43,.08);display:flex;align-items:center;gap:12px;}
@@ -41,23 +41,15 @@
   .stage-title{font-size:14px;color:var(--rose-deep);letter-spacing:.05em;}
   .instruction{font-size:13px;color:#6b5d4f;text-align:center;margin:4px 0 6px;min-height:18px;}
 
-  /* --- 模式5：指示標題選單 --- */
   #indicator-select{display:none;flex-direction:column;gap:8px;width:100%;max-width:420px;margin:8px 0 16px;}
   .indicator-item{background:#fffaf3;border:1px solid rgba(184,145,46,.35);border-radius:10px;padding:11px 16px;font-size:14px;color:var(--ink);cursor:pointer;display:flex;justify-content:space-between;align-items:center;}
   .indicator-item:active{background:var(--parchment-deep);}
   .indicator-item .en{font-size:10.5px;color:#9a8c7b;}
 
-  /* --- 扇形排開牌組 --- */
   #fan-wrap{width:100%;display:none;flex-direction:column;align-items:center;}
-  #fan-stage{
-    position:relative; width:100%; max-width:560px; height:190px;
-    margin:8px auto 4px; display:flex; align-items:flex-end; justify-content:center;
-  }
+  #fan-stage{position:relative; width:100%; max-width:560px; height:190px; margin:8px auto 4px; display:flex; align-items:flex-end; justify-content:center;}
   #fan-stage.shuffling .fan-card{ animation:fanShuffle .9s ease-in-out infinite; }
-  @keyframes fanShuffle{
-    0%,100%{ filter:brightness(1); }
-    50%{ filter:brightness(1.06); }
-  }
+  @keyframes fanShuffle{ 0%,100%{filter:brightness(1);} 50%{filter:brightness(1.06);} }
   .fan-card{
     position:absolute; bottom:0; width:92px; height:130px; border-radius:10px;
     background:
@@ -66,14 +58,12 @@
     border:1.6px solid var(--gold);
     box-shadow:0 3px 8px rgba(63,51,43,.18);
     transform-origin:bottom center;
-    transition:transform .25s ease, box-shadow .25s ease, top .3s ease;
+    transition:transform .25s ease, box-shadow .25s ease;
     cursor:pointer;
   }
   .fan-card::after{content:"❀";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--rose);opacity:.5;}
   .fan-card:active{ box-shadow:0 6px 16px rgba(140,59,70,.3); }
-  .fan-card.revealed{
-    background:#fff; pointer-events:none;
-  }
+  .fan-card.revealed{ background:#fff; pointer-events:none; }
   .fan-card.revealed::after{display:none;}
   .fan-card.revealed img{width:100%;height:70%;object-fit:cover;border-radius:10px 10px 0 0;}
   .fan-card.revealed .mini-cap{font-size:8.5px;text-align:center;color:var(--rose-deep);padding:2px 2px;line-height:1.2;}
@@ -82,7 +72,6 @@
 
   .deck-hint{font-size:12px;color:var(--sage);margin-top:6px;}
 
-  /* 已抽出的卡（詳解排列） */
   #drawn-row{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:14px;}
   .drawn-slot{display:flex;flex-direction:column;align-items:center;gap:6px;}
   .drawn-slot .slot-label{font-size:11px;color:var(--sage);letter-spacing:.05em;}
@@ -103,11 +92,9 @@
   .detail-card .dc-guidance{font-size:13px;line-height:1.7;color:#4a3f35;}
   .detail-card .dc-chakra{font-size:11px;color:var(--sage);margin-top:8px;}
 
-  .again-btn{margin:16px auto 0;background:var(--rose);color:#fff;border:none;border-radius:24px;padding:10px 28px;font-size:13.5px;cursor:pointer;box-shadow:0 4px 12px rgba(140,59,70,.3);}
+  .send-status{font-size:12.5px;color:var(--sage);text-align:center;margin-top:14px;min-height:16px;}
+  .again-btn{margin:10px auto 0;background:var(--rose);color:#fff;border:none;border-radius:24px;padding:10px 28px;font-size:13.5px;cursor:pointer;box-shadow:0 4px 12px rgba(140,59,70,.3);}
   .again-btn:active{transform:scale(.97);}
-
-  #line-cta{position:fixed;bottom:0;left:0;right:0;background:linear-gradient(180deg,rgba(243,234,224,0) 0%,var(--parchment) 30%);padding:12px 16px 16px;display:flex;justify-content:center;}
-  #line-cta a{display:inline-flex;align-items:center;gap:8px;background:#06C755;color:#fff;text-decoration:none;padding:10px 24px;border-radius:24px;font-size:13.5px;font-weight:600;box-shadow:0 4px 14px rgba(6,199,85,.35);}
 </style>
 </head>
 <body>
@@ -141,14 +128,11 @@
     </div>
 
     <div id="reveal-detail"></div>
+    <div class="send-status" id="send-status"></div>
     <button class="again-btn" id="again-btn" style="display:none;">再抽一次 / 選擇其他牌陣</button>
   </div>
 
 </main>
-
-<div id="line-cta">
-  <a href="https://line.me/R/ti/p/@your-line-id" target="_blank" rel="noopener">加入 LINE 官方帳號 →</a>
-</div>
 
 <script>
 (function(){
@@ -164,11 +148,15 @@
   const deckHint = document.getElementById('deck-hint');
   const drawnRow = document.getElementById('drawn-row');
   const revealDetail = document.getElementById('reveal-detail');
+  const sendStatus = document.getElementById('send-status');
   const againBtn = document.getElementById('again-btn');
   const backBtn = document.getElementById('back-btn');
 
+  const LIFF_ID = "2010916161-HrIOEAda"; // 雫之洞悉・返魂堂（開發環境）
+
   let OILS = [];
   let INDICATORS = [];
+  let liffReady = false;
 
   const MODE_CONFIG = {
     1: { title: "今日能量", count: 1, labels: ["今日心靈小語"] },
@@ -177,12 +165,29 @@
     4: { title: "了解自我", count: 3, labels: ["別人眼中的你", "私底下獨處時的你", "真正自我的你"] },
   };
 
-  const FAN_POOL_SIZE = 12;   // 扇形展示的張數（含指示卡時為 12 張混合）
-  let fanItems = [];          // { card, isIndicator, el }
+  const INDICATOR_THEMES = {
+    "魚": "若你的問題與金錢有關，使內在與外在能夠處於平衡狀態",
+    "愛心": "若你的問題與愛情有關",
+    "戒指": "若你的問題與婚姻有關",
+    "孩童": "若你的問題與孩子有關",
+    "狗": "若你的問題與朋友有關",
+    "月亮": "若你的問題與名聲或成就有關",
+    "樹": "若你的問題與健康有關",
+    "十字路口": "若你的問題與下決定有關",
+    "船": "若你的問題與旅行有關",
+    "鸛鳥": "若你的問題與改變或升遷有關",
+    "房屋": "若你的問題與家有關",
+    "熊": "若你的問題與老闆有關",
+  };
+
+  const FAN_POOL_SIZE = 12;
+  let fanItems = [];
   let drawPlan = [];
   let drawnCount = 0;
   let selectedIndicatorName = null;
   let isMode5 = false;
+  let currentMode = null;
+  let collectedResults = []; // { label, card }，供最終送回 LINE 使用
 
   async function loadData(){
     const [oilsRes, indRes] = await Promise.all([fetch('/api/oils'), fetch('/api/indicators')]);
@@ -208,12 +213,14 @@
     drawnRow.innerHTML = '';
     revealDetail.innerHTML = '';
     revealDetail.classList.remove('active');
+    sendStatus.textContent = '';
     againBtn.style.display = 'none';
     fanItems = [];
     drawPlan = [];
     drawnCount = 0;
     selectedIndicatorName = null;
     isMode5 = false;
+    collectedResults = [];
   }
 
   function showModeSelect(){
@@ -225,6 +232,7 @@
     modeSelect.style.display = 'none';
     stage.classList.add('active');
     resetStageDom();
+    currentMode = modeId;
 
     if (modeId === 5) {
       isMode5 = true;
@@ -240,21 +248,6 @@
     const pool = shuffle(OILS).slice(0, FAN_POOL_SIZE).map(c => ({card:c, isIndicator:false}));
     startShuffleThenFan(pool);
   }
-
-  const INDICATOR_THEMES = {
-    "魚": "若你的問題與金錢有關，使內在與外在能夠處於平衡狀態",
-    "愛心": "若你的問題與愛情有關",
-    "戒指": "若你的問題與婚姻有關",
-    "孩童": "若你的問題與孩子有關",
-    "狗": "若你的問題與朋友有關",
-    "月亮": "若你的問題與名聲或成就有關",
-    "樹": "若你的問題與健康有關",
-    "十字路口": "若你的問題與下決定有關",
-    "船": "若你的問題與旅行有關",
-    "鸛鳥": "若你的問題與改變或升遷有關",
-    "房屋": "若你的問題與家有關",
-    "熊": "若你的問題與老闆有關",
-  };
 
   function renderIndicatorList(){
     indicatorSelect.style.display = 'flex';
@@ -283,10 +276,9 @@
     });
   }
 
-  // ---------- 扇形排開渲染 ----------
   function layoutFan(){
     const n = fanItems.length;
-    const spreadAngle = Math.min(56, n * 5); // 總扇開角度
+    const spreadAngle = Math.min(56, n * 5);
     const startAngle = -spreadAngle / 2;
     const radius = 210;
     fanItems.forEach((item, i) => {
@@ -309,6 +301,7 @@
     revealDetail.innerHTML = '';
     revealDetail.classList.remove('active');
     drawnCount = 0;
+    collectedResults = [];
 
     fanItems = deckItems.map(d => ({ ...d, el: null }));
 
@@ -325,12 +318,12 @@
       if (mode5) {
         deckHint.textContent = '點擊扇形中任一張牌，感應你的指示牌位置';
         fanItems.forEach(item => {
-          item.el.addEventListener('click', () => revealMode5(), { once:false });
+          item.el.addEventListener('click', () => revealMode5());
         });
       } else {
         deckHint.textContent = `依序點擊卡牌，抽出第 1 張（共需 ${drawPlan.length} 張）`;
         fanItems.forEach(item => {
-          item.el.addEventListener('click', () => drawStandardCard(item), { once:false });
+          item.el.addEventListener('click', () => drawStandardCard(item));
         });
       }
     }, 900);
@@ -349,21 +342,20 @@
     flipCardInPlace(item, label);
     renderDrawnCard(label, item.card);
     appendDetail(label, item.card);
+    collectedResults.push({ label, card: item.card });
     drawnCount++;
 
     if (drawnCount >= drawPlan.length) {
       deckHint.textContent = '解讀完成 ✦ 願這份訊息與你同在';
       fanItems.forEach(i => { if(!i.el.classList.contains('revealed')) i.el.classList.add('dimmed'); });
-      againBtn.style.display = 'inline-block';
+      finishAndSend();
     } else {
       deckHint.textContent = `依序點擊卡牌，抽出第 ${drawnCount + 1} 張（共需 ${drawPlan.length} 張）`;
     }
   }
 
-  // 模式5：扇形排開後，找出指示牌實際落位，指示牌優先翻開（主導角色），
-  // 稍作停頓後才依序翻開左右兩張精油牌回應主題。
   function revealMode5(){
-    if (drawnCount > 0) return; // 只能觸發一次
+    if (drawnCount > 0) return;
     drawnCount = 1;
 
     const idx = fanItems.findIndex(i => i.isIndicator);
@@ -380,13 +372,12 @@
 
     deckHint.textContent = `「${selectedIndicatorName}」指示牌現身，為你點出主題……`;
 
-    // 第一步：指示牌率先翻開，作為整個牌陣的主導
     const indicatorItem = fanItems[idx];
     flipCardInPlace(indicatorItem, '指示牌');
     renderDrawnCard('指示牌', indicatorItem.card);
     appendDetail('指示牌', indicatorItem.card);
+    collectedResults.push({ label: '指示牌', card: indicatorItem.card });
 
-    // 第二步：停頓後，才依序翻開左右兩張精油牌回應這個主題
     setTimeout(() => {
       deckHint.textContent = '正在揭示左右兩側的精油指引……';
 
@@ -397,6 +388,7 @@
           flipCardInPlace(sideItem, label);
           renderDrawnCard(label, sideItem.card);
           appendDetail(label, sideItem.card);
+          collectedResults.push({ label, card: sideItem.card });
         }, delay);
       };
       revealSide(leftIdx, `「${selectedIndicatorName}」左側提升精油`, 0);
@@ -404,7 +396,7 @@
 
       setTimeout(() => {
         deckHint.textContent = '解讀完成 ✦ 願這份訊息與你同在';
-        againBtn.style.display = 'inline-block';
+        finishAndSend();
       }, 1100);
     }, 900);
   }
@@ -436,14 +428,86 @@
     revealDetail.classList.add('active');
   }
 
-  modeSelect.addEventListener('click', (e) => {
+  // ---------- 組 Flex carousel JSON，透過 liff.sendMessages() 送回 LINE 聊天室 ----------
+  function buildBubble(label, card){
+    const bodyContents = [
+      {
+        type: "box", layout: "baseline",
+        contents: [
+          { type: "text", text: "關鍵詞", size: "xs", color: "#B08968", flex: 1 },
+          { type: "text", text: card.keywords || "無", size: "sm", color: "#555555", flex: 4, wrap: true },
+        ],
+      },
+    ];
+    if (card.chakra) {
+      bodyContents.unshift({
+        type: "box", layout: "baseline",
+        contents: [
+          { type: "text", text: "脈輪", size: "xs", color: "#B08968", flex: 1 },
+          { type: "text", text: card.chakra, size: "sm", color: "#555555", flex: 4, wrap: true },
+        ],
+      });
+    }
+    bodyContents.push({ type: "separator", margin: "md" });
+    bodyContents.push({ type: "text", text: card.guidance || "無", wrap: true, margin: "md", size: "sm", color: "#333333" });
+    if (card.description) {
+      bodyContents.push({ type: "separator", margin: "md" });
+      bodyContents.push({ type: "text", text: card.description, wrap: true, margin: "md", size: "xs", color: "#777777" });
+    }
+
+    return {
+      type: "bubble",
+      header: {
+        type: "box", layout: "vertical",
+        contents: [
+          { type: "text", text: label, size: "xs", color: "#B08968", align: "center" },
+          { type: "text", text: card.name, weight: "bold", size: "xl", align: "center" },
+          { type: "text", text: card.name_en || "", size: "sm", align: "center", color: "#888888" },
+        ],
+      },
+      hero: { type: "image", url: card.image_url, size: "full", aspectRatio: "4:3", aspectMode: "cover" },
+      body: { type: "box", layout: "vertical", spacing: "sm", contents: bodyContents },
+    };
+  }
+
+  function finishAndSend(){
+    again极Btn_show();
+    if (!liffReady || !window.liff || !liff.isInClient()) {
+      sendStatus.textContent = '（非 LINE 內開啟，結果僅顯示於本頁面）';
+      return;
+    }
+
+    const bubbles = collectedResults.map(r => buildBubble(r.label, r.card));
+    const modeTitle = MODE_CONFIG[currentMode] ? MODE_CONFIG[currentMode].title : '指示牌';
+    const altText = `${modeTitle}牌陣結果：` + collectedResults.map(r => r.card.name).join('、');
+
+    const flexMessage = {
+      type: "flex",
+      altText: altText,
+      contents: bubbles.length > 1 ? { type: "carousel", contents: bubbles } : bubbles[0],
+    };
+
+    sendStatus.textContent = '正在將結果送回聊天室……';
+    liff.sendMessages([flexMessage]).then(() => {
+      sendStatus.textContent = '已送回 LINE 聊天室 ✓ 即將自動關閉';
+      setTimeout(() => { try { liff.closeWindow(); } catch(e){} }, 1200);
+    }).catch(() => {
+      sendStatus.textContent = '送回聊天室失敗，請截圖保存本頁結果。';
+    });
+  }
+
+  function again极Btn_show(){
+    document.getElementById('again-btn').style.display = 'inline-block';
+  }
+
+  document.getElementById('mode-select').addEventListener('click', (e) => {
     const btn = e.target.closest('.mode-btn');
     if (!btn) return;
     enterStage(Number(btn.dataset.mode));
   });
 
   backBtn.addEventListener('click', showModeSelect);
-  againBtn.addEventListener('click', showModeSelect);
+  document.getElementById('again-btn').addEventListener('click', showModeSelect);
 
   function initFromQuery(){
     const params = new URLSearchParams(window.location.search);
@@ -451,17 +515,13 @@
     if (m >= 1 && m <= 5) enterStage(m);
   }
 
-  // 若透過 LINE MINI App / LIFF 開啟，初始化 LIFF SDK
-  function initLiffIfPresent(){
-    const LIFF_ID = "2010916161-HrIOEAda"; // 雫之洞悉・返魂堂（開發環境）
-    if (window.liff) {
-      liff.init({ liffId: LIFF_ID }).catch(() => {});
-    }
+  function initLiff(){
+    if (!window.liff) return Promise.resolve();
+    return liff.init({ liffId: LIFF_ID }).then(() => { liffReady = true; }).catch(() => {});
   }
 
-  loadData().then(() => {
+  Promise.all([loadData(), initLiff()]).then(() => {
     instruction.textContent = '';
-    initLiffIfPresent();
     initFromQuery();
   }).catch(() => {
     instruction.textContent = '資料讀取失敗，請重新整理頁面再試一次。';
