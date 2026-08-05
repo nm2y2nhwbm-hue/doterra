@@ -471,7 +471,7 @@
   }
 
   function finishAndSend(){
-    again极Btn_show();
+    showAgainButton();
     if (!liffReady || !window.liff || !liff.isInClient()) {
       sendStatus.textContent = '（非 LINE 內開啟，結果僅顯示於本頁面）';
       return;
@@ -491,12 +491,14 @@
     liff.sendMessages([flexMessage]).then(() => {
       sendStatus.textContent = '已送回 LINE 聊天室 ✓ 即將自動關閉';
       setTimeout(() => { try { liff.closeWindow(); } catch(e){} }, 1200);
-    }).catch(() => {
-      sendStatus.textContent = '送回聊天室失敗，請截圖保存本頁結果。';
+    }).catch((err) => {
+      const reason = (err && err.message) ? err.message : String(err);
+      sendStatus.textContent = `送回聊天室失敗：${reason}`;
+      console.error('[liff.sendMessages error]', err);
     });
   }
 
-  function again极Btn_show(){
+  function showAgainButton(){
     document.getElementById('again-btn').style.display = 'inline-block';
   }
 
