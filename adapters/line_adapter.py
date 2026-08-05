@@ -1,128 +1,53 @@
 """
-Adapter 層：把 router / card_engine 產出的通用 ActionResult
-轉譯成 LINE 專屬的 Flex Message JSON 結構。
+Adapter 層（V2：純導流版）。
+LINE 端不再組裝完整卡片結果，只負責把 router.py 的 mode_redirect
+轉譯成一句導流文字 + 一顆 LIFF 按鈕。真正的抽卡結果卡片，
+由前端 static/cards.html 抽完後透過 liff.sendMessages() 自己送回聊天室。
 """
 import os
 from linebot.models import TextSendMessage, FlexSendMessage
 
 BASE_URL = os.environ.get('BASE_URL', 'https://example.com')
-SHOP_URL = os.environ.get('SHOP_URL', 'https://example.com/shop')
 LIFF_ID = os.environ.get('LIFF_ID', '2010916161-HrIOEAda')  # 雫之洞悉・返魂堂（開發環境）
 
 
-def _build_bubble(card: dict, label: str = None, mode: str = None) -> dict:
-    header_contents = []
-    if label:
-        header_contents.append({"type": "text", "text": label,
-                                 "size": "xs", "color": "#B08968", "align": "center"})
-    header_contents += [
-        {"type": "text", "text": card.get("name", "未知"),
-         "weight": "bold", "size": "xl", "align": "center"},
-        {"type": "text", "text": card.get("name_en", ""),
-         "size": "sm", "align": "center", "color": "#888888"},
-    ]
-
-    body_contents = [
-        {
-            "type": "box",
-            "layout": "baseline",
-            "contents": [
-                {"type": "text", "text": "關鍵詞", "size": "xs", "color": "#B08968", "flex": 1},
-                {"type": "text", "text": card.get("keywords", "無"), "size": "sm",
-                 "color": "#555555", "flex": 4, "wrap": True},
-            ],
-        },
-    ]
-
-    chakra = (card.get("chakra") or "").strip()
-    if chakra:
-        body_contents.insert(0, {
-            "type": "box",
-            "layout": "baseline",
-            "contents": [
-                {"type": "text", "text": "脈輪", "size": "xs", "color": "#B08968", "flex": 1},
-                {"type": "text", "text": chakra, "size": "sm",
-                 "color": "#555555", "flex": 4, "wrap": True},
-            ],
-        })
-
-    body_contents.append({"type": "separator", "margin": "md"})
-
-    description = (card.get("description") or "").strip()
-    guidance_text = card.get("guidance", "無")
-
-    body_contents.append({
-        "type": "text", "text": guidance_text,
-        "wrap": True, "margin": "md", "size": "sm", "color": "#333333",
-    })
-
-    if description:
-        body_contents.append({"type": "separator", "margin": "md"})
-        body_contents.append({
-            "type": "text", "text": description,
-            "wrap": True, "margin": "md", "size": "xs", "color": "#777777",
-        })
-
-    footer_buttons = []
-    if mode:
-        mode_num = mode.replace('mode_', '')
-        footer_buttons.append({
-            "type": "button",
-            "style": "primary",
-            "height": "sm",
-            "color": "#8C3B46",
-            "action": {
-                "type": "uri",
-                "label": "開啟沉浸式牌陣體驗",
-                "uri": f"https://miniapp.line.me/{LIFF_ID}?mode={mode_num}",
-            },
-        })
-
-    footer_buttons += [
-        {
-            "type": "button",
-            "style": "secondary",
-            "height": "sm",
-            "action": {
-                "type": "uri",
-                "label": "看完整解析",
-                "uri": f"{BASE_URL}/oil/{card.get('id', '')}",
-            },
-        },
-        {
-            "type": "button",
-            "style": "primary",
-            "height": "sm",
-            "color": "#B08968",
-            "action": {
-                "type": "uri",
-                "label": "前往專屬商城",
-                "uri": SHOP_URL,
-            },
-        },
-    ]
+def _build_redirect_bubble(action_result: dict) -> dict:
+    mode = action_result.get("mode", "")
+    mode_num = mode.replace('mode_', '')
+    title = action_result.get("title", "")
+    text = action_result.get("text", "")
 
     return {
         "type": "bubble",
-        "header": {"type": "box", "layout": "vertical", "contents": header_contents},
-        "hero": {
-            "type": "image",
-            "url": card.get("image_url"),
-            "size": "full",
-            "aspectRatio": "4:3",
-            "aspectMode": "cover",
-        },
         "body": {
             "type": "box",
             "layout": "vertical",
-            "spacing": "sm",
-            "contents": body_contents,
+            "spacing": "md",
+            "contents": [
+                {"type": "text", "text": f"✦ {title} ✦", "weight": "bold",
+                 "size": "lg", "align": "center", "color": "#6E2B34"},
+                {"type": "separator", "margin": "md"},
+                {"type": "text", "text": text, "wrap": True, "margin": "md",
+                 "size": "sm", "color": "#4A3F35"},
+            ],
         },
         "footer": {
             "type": "box",
             "layout": "vertical",
             "spacing": "sm",
-            "contents": footer_buttons,
+            "contents": [
+                {
+                    "type": "button",
+                    "style": "primary",
+                    "height": "sm",
+                    "color": "#8C3B46",
+                    "action": {
+                        "type": "uri",
+                        "label": f"進入「{title}」牌陣",
+                        "uri": f"https://miniapp.line.me/{LIFF_ID}?mode={mode_num}",
+                    },
+                },
+            ],
         },
     }
 
@@ -132,25 +57,13 @@ def to_line_message(action_result: dict):
         return None
 
     kind = action_result.get("type")
-    mode = action_result.get("mode")
 
     if kind == "text":
         return TextSendMessage(text=action_result.get("text", ""))
 
-    if kind == "flex_single":
-        card = action_result.get("card")
-        if not card:
-            return TextSendMessage(text="目前查無卡牌資料。")
-        return FlexSendMessage(alt_text=f"你抽到了 {card.get('name')}",
-                                contents=_build_bubble(card, mode=mode))
-
-    if kind == "flex_positions":
-        positions = action_result.get("positions", [])
-        if not positions:
-            return TextSendMessage(text="目前查無卡牌資料。")
-        bubbles = [_build_bubble(p["card"], label=p["label"], mode=mode) for p in positions]
-        carousel = {"type": "carousel", "contents": bubbles}
-        alt = "、".join(p["card"].get("name", "") for p in positions)
-        return FlexSendMessage(alt_text=f"牌陣結果：{alt}", contents=carousel)
+    if kind == "mode_redirect":
+        title = action_result.get("title", "")
+        bubble = _build_redirect_bubble(action_result)
+        return FlexSendMessage(alt_text=f"點擊進入「{title}」牌陣", contents=bubble)
 
     return TextSendMessage(text="系統發生未知錯誤，請聯絡管理員。")
