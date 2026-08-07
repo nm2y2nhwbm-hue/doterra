@@ -1,0 +1,101 @@
+:root{
+  --parchment:#F3EAE0; --parchment-deep:#E8DCCC;
+  --ink:#3F332B; --rose:#8C3B46; --rose-deep:#6E2B34;
+  --sage:#78876B; --gold:#B8912E; --card-back:#F6EFE4;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:"Noto Serif TC","Songti TC",serif;
+  background:radial-gradient(ellipse at top,#F8F1E6 0%,var(--parchment) 55%,var(--parchment-deep) 100%);
+  color:var(--ink); min-height:100vh; display:flex; flex-direction:column;
+  -webkit-tap-highlight-color:transparent; overflow-x:hidden;
+}
+.brand-title{font-family:"Cormorant Garamond","Noto Serif TC",serif;text-align:center;padding:20px 16px 4px;letter-spacing:.12em;}
+.brand-title h1{font-size:clamp(18px,5vw,26px);margin:0 0 4px;color:var(--rose-deep);font-weight:600;}
+.brand-title p{margin:0;font-size:10.5px;color:var(--sage);letter-spacing:.3em;}
+.rose-divider{display:flex;align-items:center;justify-content:center;gap:10px;color:var(--gold);opacity:.7;margin:6px auto 14px;}
+.rose-divider::before,.rose-divider::after{content:"";flex:1;max-width:60px;height:1px;background:var(--gold);opacity:.5;}
+
+main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 12px 40px;width:100%;}
+
+#mode-select{width:100%;max-width:520px;display:flex;flex-direction:column;gap:12px;margin-top:4px;}
+.mode-btn{background:linear-gradient(135deg,#fff8ef,var(--parchment));border:1px solid rgba(184,145,46,.4);border-radius:14px;padding:14px 18px;text-align:left;cursor:pointer;box-shadow:0 2px 6px rgba(63,51,43,.08);display:flex;align-items:center;gap:12px;}
+.mode-btn:active{transform:scale(.98);}
+.mode-num{font-family:"Cormorant Garamond",serif;font-size:22px;color:var(--rose);width:30px;text-align:center;flex-shrink:0;}
+.mode-text b{display:block;font-size:15px;color:var(--ink);}
+.mode-text span{font-size:11.5px;color:#7a6d5f;}
+
+#stage{width:100%;max-width:640px;display:none;flex-direction:column;align-items:center;}
+#stage.active{display:flex;}
+.stage-header{display:flex;align-items:center;justify-content:space-between;width:100%;margin-bottom:6px;}
+.back-btn{background:none;border:1px solid var(--rose);color:var(--rose);border-radius:20px;padding:5px 12px;font-size:12.5px;cursor:pointer;}
+.stage-title{font-size:14px;color:var(--rose-deep);letter-spacing:.05em;}
+.instruction{font-size:13px;color:#6b5d4f;text-align:center;margin:4px 0 6px;min-height:18px;}
+
+/* --- 模式5：指示標題選單 --- */
+#indicator-select{display:none;flex-direction:column;gap:8px;width:100%;max-width:420px;margin:8px 0 16px;}
+.indicator-item{background:#fffaf3;border:1px solid rgba(184,145,46,.35);border-radius:10px;padding:11px 16px;font-size:14px;color:var(--ink);cursor:pointer;display:flex;justify-content:space-between;align-items:center;}
+.indicator-item:active{background:var(--parchment-deep);}
+.indicator-item .en{font-size:10.5px;color:#9a8c7b;}
+
+/* --- 扇形排開（U型）牌組 --- */
+#fan-wrap{width:100%;display:none;flex-direction:column;align-items:center;}
+#fan-stage{
+  position:relative; width:100%; max-width:600px; height:230px;
+  margin:8px auto 4px; display:flex; align-items:flex-end; justify-content:center;
+}
+#fan-stage.shuffling .fan-card{ animation:fanShuffle .9s ease-in-out infinite; }
+@keyframes fanShuffle{ 0%,100%{filter:brightness(1);} 50%{filter:brightness(1.06);} }
+.fan-card{
+  position:absolute; bottom:0;
+  width:clamp(58px, 8.5vw, 88px);
+  height:calc(clamp(58px, 8.5vw, 88px) * 1.4);
+  border-radius:9px;
+  background:
+    radial-gradient(circle at 50% 30%, #fffaf2 0, var(--card-back) 60%),
+    repeating-linear-gradient(45deg, rgba(184,145,46,.06) 0 10px, transparent 10px 20px);
+  border:1.6px solid var(--gold);
+  box-shadow:0 3px 8px rgba(63,51,43,.18);
+  transform-origin:bottom center;
+  transition:transform .25s ease, box-shadow .25s ease;
+  cursor:pointer;
+}
+.fan-card::after{content:"❀";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--rose);opacity:.5;}
+.fan-card:active{ box-shadow:0 6px 16px rgba(140,59,70,.3); }
+.fan-card.revealed{ background:#fff; pointer-events:none; }
+.fan-card.revealed::after{display:none;}
+.fan-card.revealed img{
+  width:100%; height:72%; object-fit:cover; border-radius:9px 9px 0 0;
+  transform:scale(1.35); transform-origin:center;
+}
+.fan-card.revealed .mini-cap{font-size:8px;text-align:center;color:var(--rose-deep);padding:2px 2px;line-height:1.2;overflow:hidden;}
+.fan-card.dimmed{ opacity:.28; pointer-events:none; }
+.fan-card.spotlight{ box-shadow:0 0 0 3px var(--rose), 0 6px 16px rgba(140,59,70,.35); z-index:5; }
+
+.deck-hint{font-size:12px;color:var(--sage);margin-top:6px;}
+
+/* 已抽出的卡（詳解排列） */
+#drawn-row{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:14px;}
+.drawn-slot{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.drawn-slot .slot-label{font-size:11px;color:var(--sage);letter-spacing:.05em;}
+.drawn-card{width:120px;height:168px;border-radius:12px;overflow:hidden;border:1.5px solid var(--gold);box-shadow:0 4px 12px rgba(63,51,43,.16);background:#fff;display:flex;flex-direction:column;animation:cardReveal .5s ease;}
+@keyframes cardReveal{ from{opacity:0;transform:translateY(10px) scale(.95);} to{opacity:1;transform:translateY(0) scale(1);} }
+.drawn-card img{width:100%;height:60%;object-fit:cover;transform:scale(1.3);transform-origin:center;}
+.drawn-card .cap{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:4px 6px;text-align:center;}
+.drawn-card .cap b{font-size:11.5px;color:var(--rose-deep);}
+.drawn-card .cap span{font-size:9px;color:#8a7c6c;}
+
+#reveal-detail{width:100%;max-width:520px;margin-top:18px;display:none;flex-direction:column;gap:12px;}
+#reveal-detail.active{display:flex;}
+.detail-card{background:#fffaf3;border:1px solid rgba(184,145,46,.35);border-radius:14px;padding:14px 16px;box-shadow:0 3px 10px rgba(63,51,43,.08);}
+.detail-card .dc-label{font-size:11px;color:var(--sage);letter-spacing:.1em;margin-bottom:4px;}
+.detail-card .dc-name{font-size:17px;color:var(--rose-deep);font-weight:600;}
+.detail-card .dc-name-en{font-size:11.5px;color:#9a8c7b;margin-bottom:6px;}
+.detail-card .dc-keywords{font-size:12.5px;color:var(--ink);margin-bottom:6px;}
+.detail-card .dc-guidance{font-size:13px;line-height:1.7;color:#4a3f35;}
+.detail-card .dc-chakra{font-size:11px;color:var(--sage);margin-top:8px;}
+
+.send-status{font-size:12.5px;color:var(--sage);text-align:center;margin-top:14px;min-height:16px;}
+.again-btn{margin:10px auto 0;background:var(--rose);color:#fff;border:none;border-radius:24px;padding:10px 28px;font-size:13.5px;cursor:pointer;box-shadow:0 4px 12px rgba(140,59,70,.3);}
+.again-btn:active{transform:scale(.97);}
