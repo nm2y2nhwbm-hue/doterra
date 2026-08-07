@@ -2,6 +2,7 @@ import os
 import sys
 import traceback
 from flask import Flask, request, abort, jsonify
+from flask_cors import CORS
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage
@@ -9,6 +10,7 @@ from linebot.models import MessageEvent, TextMessage
 from router import route_message
 from adapters.line_adapter import to_line_message
 from core import database_manager as db
+from core import draw_logger
 
 if os.path.exists(".env"):
     try:
@@ -27,6 +29,7 @@ if not CHANNEL_ACCESS_TOKEN or not CHANNEL_SECRET:
     sys.exit(1)
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
+CORS(app, resources={r"/api/*": {"origins": ["https://doterra-two.vercel.app"]}})
 
 line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
@@ -71,7 +74,7 @@ def health():
 
 @app.route("/api/oils", methods=['GET'])
 def api_oils():
-    """回傳 69 張精油卡的完整 JSON，供一頁式前端 static/cards.html 讀取。"""
+    """回傳 69 張精油卡的完整 JSON，供一頁式前端讀取。"""
     return jsonify(db.fetch_oils_data())
 
 
@@ -79,6 +82,22 @@ def api_oils():
 def api_indicators():
     """回傳 12 張指示卡的完整 JSON，供模式 5 前端讀取。"""
     return jsonify(db.fetch_indicator_cards())
+
+
+@app.route("/api/log-draw", methods=['POST'])
+def api_log_draw():
+    """
+    前端抽卡完成後呼叫，記錄「誰、何時、抽了哪個牌陣、抽到哪些卡」。
+    請求格式：{ "user_id": "...", "display_name": "...", "mode": "mode_1", "cards": ["檸檬", "玫瑰"] }
+    """
+    data = request.get_json(silent=True) or {}
+    ok = draw_logger.log_draw(
+        user_id=data.get('user_id', ''),
+        display_name=data.get('display_name', ''),
+        mode=data.get('mode', ''),
+        card_names=data.get('cards', []),
+    )
+    return jsonify({"success": ok})
 
 
 if __name__ == "__main__":
