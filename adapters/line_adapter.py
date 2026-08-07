@@ -7,7 +7,6 @@ LINE 端不再組裝完整卡片結果，只負責把 router.py 的 mode_redirec
 import os
 from linebot.models import TextSendMessage, FlexSendMessage
 
-BASE_URL = os.environ.get('BASE_URL', 'https://example.com')
 LIFF_ID = os.environ.get('LIFF_ID', '2010916161-HrIOEAda')  # 雫之洞悉・返魂堂（開發環境）
 
 
