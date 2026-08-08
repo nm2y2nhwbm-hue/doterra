@@ -29,7 +29,13 @@ if not CHANNEL_ACCESS_TOKEN or not CHANNEL_SECRET:
     sys.exit(1)
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
-CORS(app, resources={r"/api/*": {"origins": ["https://doterra-two.vercel.app"]}})
+
+# CORS：同時允許 Render 本身與 Vercel 網域呼叫 API，
+# 避免因為之後測試網址在兩邊之間切換而被擋。
+CORS(app, resources={r"/api/*": {"origins": [
+    "https://doterra-two.vercel.app",
+    "https://doterra-73pv.onrender.com",
+]}})
 
 line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
