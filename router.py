@@ -43,7 +43,6 @@ def _extract_indicator(text: str):
 
 
 def _build_mode_redirect(mode_id: int) -> dict:
-    """命中模式 1-5 時，統一回傳導流訊息，附上對應模式的 LIFF 按鈕。"""
     return {
         "type": "mode_redirect",
         "mode": f"mode_{mode_id}",
