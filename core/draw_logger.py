@@ -4,7 +4,6 @@
 這是輕量級紀錄，非長期資料庫，如需長期保存建議之後接外部試算表或資料庫。
 """
 import csv
-import os
 from datetime import datetime
 from pathlib import Path
 
@@ -23,10 +22,6 @@ def _ensure_header():
 
 
 def log_draw(user_id: str, display_name: str, mode: str, card_names: list):
-    """
-    記錄一次抽卡結果。
-    card_names: 字串陣列，例如 ["檸檬", "薰衣草", "玫瑰"]
-    """
     try:
         _ensure_header()
         with open(_LOG_CSV, mode='a', encoding='utf-8-sig', newline='') as f:
