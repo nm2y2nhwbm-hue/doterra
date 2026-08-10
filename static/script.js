@@ -148,13 +148,11 @@
     });
   }
 
-           // ---------- 扇形排開（倒 U 型 / 扇形）佈局計算 ----------
+             // ---------- 扇形排開（深凹 正U型）佈局計算 ----------
   function layoutFan(){
     const n = fanItems.length;
     const spreadAngle = Math.min(50, n * 5); 
     const startAngle = -spreadAngle / 2;
-    
-    // 💡 關鍵 1：大幅放大半徑，擴大左右兩側的水平間距
     const radius = 600; 
     
     fanItems.forEach((item, i) => {
@@ -162,17 +160,27 @@
       const angle = startAngle + t * spreadAngle;
       const rad = angle * Math.PI / 180;
       
-      const x = Math.sin(rad) * radius;
-      
-      // 💡 關鍵 2：獨立拉大 Y 軸的彩虹拱形落差
-      // 數值 50 讓中間往上凸起，兩側往下沉，在 50 度窄角度下依然有高低層次
+      // 1. 計算 -1 到 1 的分布軌跡 (pct)
       const pct = n === 1 ? 0 : (i / (n - 1)) * 2 - 1; 
-      const y = ((1 - Math.cos(rad)) * radius) + (pct * pct * 50); 
       
+      // 2. 水平 X 軸：基礎三角函數，並在兩側額外外推，確保左右寬度夠長、U型不縮水
+      const x = Math.sin(rad) * radius + (pct * 30);
+      
+      // 3. 垂直 Y 軸：極大化二次方曲線落差！
+      // 核心公式：這裡的 120 就是主宰「下沉深度」與「上揚高度」的關鍵。
+      // 當 pct = 0 (中間) 時，y 是 0，帶入 translateY(${-y}px) 依然保持在底部；
+      // 當 pct = ±1 (兩側) 時，y 會變成大約 -120px，帶入後會變成 +120px 強烈上揚！
+      const y = ((Math.cos(rad) - 1) * radius) - (pct * pct * 120); 
+      
+      // 4. 寫入變形矩陣
       item.el.style.transform = `translateX(${x}px) translateY(${-y}px) rotate(${angle}deg)`;
-      item.el.style.zIndex = i;
+      
+      // 5. 疊放層次：讓中間的牌疊在最前面，兩側往後蓋，深 U 視覺會更立體
+      const centerT = n === 1 ? 0 : (i - (n - 1) / 2);
+      item.el.style.zIndex = Math.round(100 - Math.abs(centerT));
     });
   }
+
 
 
 
