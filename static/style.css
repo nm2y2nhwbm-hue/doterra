@@ -52,16 +52,16 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 12px
   width:clamp(58px, 8.5vw, 88px);
   height:calc(clamp(58px, 8.5vw, 88px) * 1.4);
   border-radius:9px;
-  background:
-    radial-gradient(circle at 50% 30%, #fffaf2 0, var(--card-back) 60%),
-    repeating-linear-gradient(45deg, rgba(184,145,46,.06) 0 10px, transparent 10px 20px);
+  background-image:url("images/Gemini_Generated_Image.png");
+  background-size:cover;
+  background-position:center;
   border:1.6px solid var(--gold);
   box-shadow:0 3px 8px rgba(63,51,43,.18);
   transform-origin:bottom center;
   transition:transform .25s ease, box-shadow .25s ease;
   cursor:pointer;
 }
-.fan-card::after{content:"❀";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--rose);opacity:.5;}
+.fan-card::after{ content:none; }
 .fan-card:active{ box-shadow:0 6px 16px rgba(140,59,70,.3); }
 .fan-card.revealed{ background:#fff; pointer-events:none; }
 .fan-card.revealed::after{display:none;}
