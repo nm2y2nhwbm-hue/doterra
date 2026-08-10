@@ -148,22 +148,32 @@
     });
   }
 
-  // ---------- 扇形排開（U型）佈局計算 ----------
+    // ---------- 扇形排開（倒 U 型 / 扇形）佈局計算 ----------
   function layoutFan(){
     const n = fanItems.length;
-    const spreadAngle = Math.min(140, n * 9); // U型：張數越多角度越大，形成兩端上揚的弧
+    // 1. 角度優化
+    const spreadAngle = Math.min(120, n * 10); 
     const startAngle = -spreadAngle / 2;
-    const radius = 300;
+    
+    // 2. 放大半徑：半徑越大，扇形的弧度在網頁上看起來越自然平滑
+    const radius = 500; 
+    
     fanItems.forEach((item, i) => {
       const t = n === 1 ? 0.5 : i / (n - 1);
       const angle = startAngle + t * spreadAngle;
       const rad = angle * Math.PI / 180;
+      
       const x = Math.sin(rad) * radius;
-      const y = -Math.cos(rad) * radius + radius - 60;
+      
+      // 💡 關鍵修正：去除原本死板的減 60 偏移，讓 Y 軸完全交給三角函數去推算
+      // 中間的牌 y=0 (CSS 渲染最上方)，兩側的牌 y 變大 (CSS 渲染往下沉)，形成漂亮的彩虹倒 U
+      const y = (1 - Math.cos(rad)) * radius; 
+      
       item.el.style.transform = `translateX(${x}px) translateY(${-y}px) rotate(${angle}deg)`;
       item.el.style.zIndex = i;
     });
   }
+
 
   function startShuffleThenFan(deckItems, mode5){
     fanWrap.style.display = 'flex';
