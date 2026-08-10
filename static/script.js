@@ -151,29 +151,23 @@
                // ---------- 扇形排開（完美正 U 型）佈局計算 ----------
   function layoutFan(){
     const n = fanItems.length;
-    const spreadAngle = Math.min(50, n * 5); 
+    const spreadAngle = Math.min(150, Math.max(70, n * 10)); // 最低保底 70 度，避免卡片少時弧度太平
     const startAngle = -spreadAngle / 2;
-    const radius = 700; 
-    
+    const radius = 260;
     fanItems.forEach((item, i) => {
-      const t = n === 1 ? 0.5 : i / (n - 1);
-      const angle = startAngle + t * spreadAngle;
-      const rad = angle * Math.PI / 180;
-      const pct = n === 1 ? 0 : (i / (n - 1)) * 2 - 1; 
-      
-      const x = Math.sin(rad) * radius + (pct * 60);
+        const t = n === 1 ? 0.5 : i / (n - 1);
+        const angle = startAngle + t * spreadAngle;
+        const rad = angle * Math.PI / 180;
+        const x = Math.sin(rad) * radius;
       
       // 💡 關鍵 3：修正 Y 軸凹形。中間最低，兩側對稱抬高
-      // 透過 -80 調整下沉深度，數值越負，中間凹得越深、兩端揚得越高
-      const y = ((Math.cos(rad) - 1) * radius) - (pct * pct * 80); 
+      const y = (Math.cos(rad) - 1) * radius; // 中心點 y=0，往兩側逐漸上揚
       
       // 💡 關鍵 4：角度反轉，讓卡牌向內收束，形成碗狀邊緣
-      item.el.style.transform = `translateX(${x}px) translateY(${y}px) rotate(${-angle}deg)`;
-      
-      item.el.style.zIndex = i;
+      item.el.style.transform = `translateX(${x}px) translateY(${y}px) rotate(${angle}deg)`;
+        item.el.style.zIndex = i;
     });
-  }
-
+}
 
 
 
