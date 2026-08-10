@@ -148,13 +148,13 @@
     });
   }
 
-       // ---------- 扇形排開（正 U 型）佈局計算 ----------
+         // ---------- 扇形排開（窄角度 倒U型）佈局計算 ----------
   function layoutFan(){
     const n = fanItems.length;
-    // 1. 調整角度增長：張數少時角度小，張數多時撐得夠開
-    const spreadAngle = Math.min(140, Math.pow(n, 1.5) * 5); 
+    // 💡 角度縮小：單張遞增角度調小，且上限鎖死在 50 度
+    const spreadAngle = Math.min(50, n * 5); 
     const startAngle = -spreadAngle / 2;
-    const radius = 300;
+    const radius = 400; // 放大半徑讓平移更平滑
     
     fanItems.forEach((item, i) => {
       const t = n === 1 ? 0.5 : i / (n - 1);
@@ -163,15 +163,16 @@
       
       const x = Math.sin(rad) * radius;
       
-      // 💡 關鍵修正：反轉 Y 軸計算。
-      // 當角度為 0 (中間) 時，y 是 0；當角度變大 (兩側) 時，y 會變成負值 (例如 -50)
-      // 帶入後續的 translateY(${-y}px) 就會變成正負得正 (往上提到 -50px)，形成正 U 型
-      const y = (Math.cos(rad) - 1) * radius; 
+      // 💡 幾何修正：基礎三角函數 + 二次方曲線壓低兩側
+      // 讓中間跟兩側強行拉開約 30px 的高低差，50度時看起就會有很精緻的微開扇形感
+      const pct = n === 1 ? 0 : (i / (n - 1)) * 2 - 1; // 產生 -1 到 1 的分布
+      const y = ((1 - Math.cos(rad)) * radius) + (pct * pct * 20); 
       
       item.el.style.transform = `translateX(${x}px) translateY(${-y}px) rotate(${angle}deg)`;
       item.el.style.zIndex = i;
     });
   }
+
 
 
 
