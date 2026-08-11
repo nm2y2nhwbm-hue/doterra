@@ -1,31 +1,471 @@
-(function () {
+(function(){
   "use strict";
-  const API_BASE = "";
-  const LIFF_ID = "2010916161-HrIOEAda";
-  const $ = (id) => document.getElementById(id);
-  const els = {modeSelect:$("mode-select"),stage:$("stage"),title:$("stage-title"),instruction:$("instruction"),indicator:$("indicator-select"),orientation:$("orientation-select"),fanWrap:$("fan-wrap"),fan:$("fan-stage"),hint:$("deck-hint"),drawn:$("drawn-row"),detail:$("reveal-detail"),status:$("send-status"),again:$("again-btn"),offer:$("result-offer"),offerCode:$("offer-code")};
-  const LABELS={1:["今日心靈小語"],2:["目前整體狀況","生活所需方向"],3:["身・身體狀況","心・心理狀態","靈・精神狀況"],4:["別人眼中的你","私底下的你","真正的你"]};
-  const TITLES={1:"今日能量",2:"生活導引",3:"三牌陣",4:"了解自我",5:"指示牌"};
-  let oils=[],indicators=[],mode=0,fanItems=[],plan=[],picked=[],chosenIndicator=null,reversed=false,accessToken="",liffReady=false,liffProfile=null;
-  const shuffle=(items)=>{const a=[...items];for(let i=a.length-1;i;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
-  const escapeHtml=(value)=>String(value??"").replace(/[&<>"']/g,(c)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
-  async function loadData(){const [a,b]=await Promise.all([fetch(`${API_BASE}/api/oils`),fetch(`${API_BASE}/api/indicators`)]);if(!a.ok||!b.ok)throw Error();oils=await a.json();indicators=await b.json();}
-  function reset(){els.indicator.innerHTML="";els.orientation.innerHTML="";els.fan.innerHTML="";els.drawn.innerHTML="";els.detail.innerHTML="";els.status.textContent="";els.hint.textContent="";els.offer.hidden=true;els.again.hidden=true;els.indicator.hidden=true;els.orientation.hidden=true;els.fanWrap.hidden=true;fanItems=[];plan=[];picked=[];chosenIndicator=null;reversed=false;}
-  function enter(next){reset();mode=next;els.modeSelect.hidden=true;els.stage.classList.add("active");els.title.textContent=TITLES[next];if(next===5){els.instruction.textContent="第一步：選擇你想探索的主題指示牌";renderIndicators();}else{plan=LABELS[next];els.instruction.textContent=`準備 ${plan.length} 張牌的牌陣`;renderDeckStart();}}
-  function renderDeckStart(){els.fanWrap.hidden=false;els.fan.innerHTML='<button class="deck-start" type="button">洗牌並展開完整牌組</button>';els.fan.querySelector("button").onclick=()=>startFan(shuffle(oils).map(card=>({card,isIndicator:false})));}
-  function renderIndicators(){els.indicator.hidden=false;indicators.forEach(card=>{const button=document.createElement("button");button.innerHTML=`<img src="${escapeHtml(card.image_url)}" alt=""><b>${escapeHtml(card.name)}</b><span>${escapeHtml(card.name_en)}</span>`;button.onclick=()=>{chosenIndicator=card;els.indicator.hidden=true;els.instruction.textContent="第二步：選擇指示牌放入牌組的方向";renderOrientation();};els.indicator.append(button);});}
-  function renderOrientation(){els.orientation.hidden=false;[false,true].forEach(isReversed=>{const button=document.createElement("button");button.innerHTML=`<img class="${isReversed?'reversed':''}" src="${escapeHtml(chosenIndicator.image_url)}" alt=""><b>${isReversed?'反位':'正位'}</b><span>${isReversed?'換個角度看見阻礙':'依循此刻浮現的訊息'}</span>`;button.onclick=()=>{reversed=isReversed;els.orientation.hidden=true;els.instruction.textContent="第三步：指示牌已放入完整牌組，正在洗牌";const deck=shuffle(oils).map(card=>({card,isIndicator:false}));const slot=1+Math.floor(Math.random()*(deck.length-1));deck.splice(slot,0,{card:chosenIndicator,isIndicator:true});startFan(deck,true);};els.orientation.append(button);});}
-  function layoutFan(){const n=fanItems.length,side=.43,rx=.29,ry=.31,arc=Math.PI*Math.sqrt((rx*rx+ry*ry)/2),full=side*2+arc;fanItems.forEach((item,index)=>{const d=n<=1?full/2:index/(n-1)*full;let x,y,r;if(d<side){const p=d/side;x=-rx;y=.035+p*side;r=90;}else if(d<=side+arc){const p=(d-side)/arc,theta=Math.PI-p*Math.PI;x=Math.cos(theta)*rx;y=.035+side+Math.sin(theta)*ry;r=90-p*180;}else{const p=(d-side-arc)/side;x=rx;y=.035+side*(1-p);r=-90;}Object.assign(item.el.style,{left:`${50+x*100}%`,top:`${y*100}%`,transform:`translate(-50%,0) rotate(${r}deg)`,zIndex:index});});}
-  function startFan(deck,isMode5=false){els.fanWrap.hidden=false;els.fan.innerHTML="";els.fan.classList.add("shuffling");els.hint.textContent="正在洗牌……";setTimeout(()=>{els.fan.classList.remove("shuffling");fanItems=deck.map(item=>({...item,el:null}));fanItems.forEach((item,index)=>{const b=document.createElement("button");b.className="fan-card";b.type="button";b.setAttribute("aria-label",`第 ${index+1} 張牌`);b.innerHTML=`<span>${index+1}</span>`;b.onclick=()=>isMode5?revealMode5():pickStandard(index);item.el=b;els.fan.append(b);});layoutFan();els.hint.textContent=isMode5?"點任一張牌，讓指示牌與左右精油一同現身":"依序點選牌卡";},850);}
-  function reveal(item,label){item.el.classList.add("revealed");item.el.innerHTML=`<img class="${item.isIndicator&&reversed?'reversed':''}" src="${escapeHtml(item.card.image_url)}" alt="${escapeHtml(item.card.name)}">`;const box=document.createElement("article");box.innerHTML=`<span>${escapeHtml(label)}</span><img class="${item.isIndicator&&reversed?'reversed':''}" src="${escapeHtml(item.card.image_url)}" alt=""><h4>${escapeHtml(item.card.name)}</h4><small>${escapeHtml(item.card.name_en)}</small><p>${escapeHtml(item.card.guidance||item.card.keywords||"")}</p>`;els.drawn.append(box);}
-  function pickStandard(index){if(picked.includes(index)||picked.length>=plan.length)return;picked.push(index);reveal(fanItems[index],plan[picked.length-1]);if(picked.length===plan.length)finish(picked.map(i=>({label:plan[picked.indexOf(i)],card:fanItems[i].card})));}
-  function revealMode5(){if(picked.length)return;const i=fanItems.findIndex(x=>x.isIndicator),indexes=[i-1,i,i+1],labels=["左側・提升用油",`指示牌・${reversed?'反位':'正位'}`,"右側・心靈小語"];picked=indexes;fanItems.forEach((x,k)=>!indexes.includes(k)&&x.el.classList.add("dimmed"));indexes.forEach((idx,k)=>setTimeout(()=>reveal(fanItems[idx],labels[k]),k*420));setTimeout(()=>finish(indexes.map((idx,k)=>({label:labels[k],card:fanItems[idx].card}))),1450);}
-  async function finish(results){els.hint.textContent="解讀完成 ✦ 願這份訊息與你同在";els.again.hidden=false;els.offerCode.textContent=`INSIGHT-${Math.random().toString(36).slice(2,7).toUpperCase()}`;els.offer.hidden=false;const payload={accessToken,mode,indicatorName:chosenIndicator?.name||"",indicatorOrientation:mode===5?(reversed?"反位":"正位"):"",cards:results.map(r=>({name:r.card.name,position:r.label}))};if(accessToken)fetch("/api/receptions",{method:"PATCH",headers:{"content-type":"application/json"},body:JSON.stringify(payload)}).catch(()=>{els.status.textContent="同步失敗，結果仍保留在畫面中。";});if(liffReady&&window.liff&&liff.isInClient()){try{await liff.sendMessages([{type:"text",text:`${TITLES[mode]}：${results.map(r=>`${r.label}－${r.card.name}`).join("；")}`}]);els.status.textContent="結果已送回 LINE 聊天室";}catch(e){els.status.textContent="LINE 傳送失敗，結果仍保留在本頁。";}}}
-  els.modeSelect.onclick=(e)=>{const button=e.target.closest("button[data-mode]");if(button)enter(Number(button.dataset.mode));};
-  $("back-btn").onclick=()=>{reset();els.stage.classList.remove("active");els.modeSelect.hidden=false;};els.again.onclick=$("back-btn").onclick;
-  $("intake-form").onsubmit=async(e)=>{e.preventDefault();const form=e.currentTarget,status=$("form-status"),button=form.querySelector("button[type=submit]"),fd=new FormData(form),payload=Object.fromEntries(fd.entries());payload.consent=fd.get("consent")==="on";button.disabled=true;status.textContent="正在安全保存……";try{const response=await fetch("/api/receptions",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)}),data=await response.json();if(!response.ok)throw Error(data.error);accessToken=data.accessToken;status.textContent=`已完成，受付編號：${data.receptionNumber}`;$("reception-note").textContent=`已連結受付編號 ${data.receptionNumber}，抽牌結果將自動保存。`;location.hash="cards";}catch(err){status.textContent=err.message||"同步失敗，填寫內容仍保留。";}finally{button.disabled=false;}};
-  function initAdmin(){if(!new URLSearchParams(location.search).has("admin"))return;$("admin").hidden=false;$("admin").scrollIntoView();$("admin-login").onsubmit=async(e)=>{e.preventDefault();const token=$("admin-token").value,out=$("admin-summary");out.textContent="讀取中……";const response=await fetch("/api/admin/summary",{headers:{"X-Admin-Token":token}});if(!response.ok){out.textContent="權限驗證失敗。";return;}const data=await response.json(),rows=data.receptions.map(r=>`<tr><td>${escapeHtml(r.reception_number)}</td><td>${escapeHtml(r.name)}<small>${escapeHtml(r.email)}</small></td><td>${escapeHtml(r.theme)}</td><td>${escapeHtml(r.preferred_date)}</td><td>${escapeHtml(r.status)}</td></tr>`).join("");out.innerHTML=`<div class="stats"><b>受付 ${data.receptions.length}</b><b>抽牌 ${data.draws.length}</b></div><div class="table-wrap"><table><thead><tr><th>編號</th><th>姓名／Email</th><th>主題</th><th>日期</th><th>狀態</th></tr></thead><tbody>${rows||'<tr><td colspan="5">尚無資料</td></tr>'}</tbody></table></div>`;};}
-  async function init(){initAdmin();try{await loadData();}catch(e){els.instruction.textContent="牌卡資料讀取失敗，請稍後再試。";}if(window.liff)try{await liff.init({liffId:LIFF_ID});liffReady=true;if(liff.isLoggedIn())liffProfile=await liff.getProfile();}catch(e){console.warn("LIFF unavailable",e);}const q=Number(new URLSearchParams(location.search).get("mode"));if(q>=1&&q<=5)enter(q);}
-  init();
+  // ⚠️ 請依照 cards.html 實際部署位置調整這裡：
+  // 若 cards.html 跑在 Render 上（跟 API 同網域），可以把 API_BASE 改成空字串 ''，
+  // 直接用相對路徑 fetch('/api/oils') 即可，不需要跨網域。
+  // 若 cards.html 跑在 Vercel（跟 API 不同網域），才需要填完整 Render 網址。
+  const API_BASE = "https://doterra-73pv.onrender.com";
+  const LIFF_ID = "2010916161-HrIOEAda"; // 雫之洞悉・返魂堂（開發環境）
+
+  const modeSelect = document.getElementById('mode-select');
+  const stage = document.getElementById('stage');
+  const stageTitle = document.getElementById('stage-title');
+  const instruction = document.getElementById('instruction');
+  const indicatorSelect = document.getElementById('indicator-select');
+  const fanWrap = document.getElementById('fan-wrap');
+  const fanStage = document.getElementById('fan-stage');
+  const deckHint = document.getElementById('deck-hint');
+  const drawnRow = document.getElementById('drawn-row');
+  const revealDetail = document.getElementById('reveal-detail');
+  const sendStatus = document.getElementById('send-status');
+  const againBtn = document.getElementById('again-btn');
+  const backBtn = document.getElementById('back-btn');
+
+  let OILS = [];
+  let INDICATORS = [];
+  let liffReady = false;
+  let liffProfile = null;
+
+  const MODE_CONFIG = {
+    1: { title: "今日能量", count: 1, labels: ["今日心靈小語"] },
+    2: { title: "生活導引", count: 2, labels: ["目前整體狀況", "生活中所需的建議及方向"] },
+    3: { title: "三牌陣",   count: 3, labels: ["身・目前身體狀況", "心・目前心理狀態", "靈・目前精神狀況"] },
+    4: { title: "了解自我", count: 3, labels: ["別人眼中的你", "私底下獨處時的你", "真正自我的你"] },
+  };
+
+  const INDICATOR_THEMES = {
+    "魚": "若你的問題與金錢有關，使內在與外在能夠處於平衡狀態",
+    "愛心": "若你的問題與愛情有關",
+    "戒指": "若你的問題與婚姻有關",
+    "孩童": "若你的問題與孩子有關",
+    "狗": "若你的問題與朋友有關",
+    "月亮": "若你的問題與名聲或成就有關",
+    "樹": "若你的問題與健康有關",
+    "十字路口": "若你的問題與下決定有關",
+    "船": "若你的問題與旅行有關",
+    "鸛鳥": "若你的問題與改變或升遷有關",
+    "房屋": "若你的問題與家有關",
+    "熊": "若你的問題與老闆有關",
+  };
+
+  const FAN_POOL_SIZE = 16;   // 扇形展示張數（U型可容納較多，不必犧牲卡片大小）
+  let fanItems = [];
+  let drawPlan = [];
+  let drawnCount = 0;
+  let selectedIndicatorName = null;
+  let isMode5 = false;
+  let currentMode = null;
+  let collectedResults = [];
+
+  async function loadData(){
+    const [oilsRes, indRes] = await Promise.all([
+      fetch(`${API_BASE}/api/oils`),
+      fetch(`${API_BASE}/api/indicators`)
+    ]);
+    OILS = await oilsRes.json();
+    INDICATORS = await indRes.json();
+  }
+
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]]=[a[j],a[i]];
+    }
+    return a;
+  }
+
+  function resetStageDom(){
+    indicatorSelect.style.display = 'none';
+    indicatorSelect.innerHTML = '';
+    fanWrap.style.display = 'none';
+    fanStage.innerHTML = '';
+    fanStage.classList.remove('shuffling');
+    drawnRow.innerHTML = '';
+    revealDetail.innerHTML = '';
+    revealDetail.classList.remove('active');
+    sendStatus.textContent = '';
+    againBtn.style.display = 'none';
+    fanItems = [];
+    drawPlan = [];
+    drawnCount = 0;
+    selectedIndicatorName = null;
+    isMode5 = false;
+    collectedResults = [];
+  }
+
+  function showModeSelect(){
+    stage.classList.remove('active');
+    modeSelect.style.display = 'flex';
+  }
+
+  function enterStage(modeId){
+    modeSelect.style.display = 'none';
+    stage.classList.add('active');
+    resetStageDom();
+    currentMode = modeId;
+
+    if (modeId === 5) {
+      isMode5 = true;
+      stageTitle.textContent = '指示牌';
+      instruction.textContent = '請先從下方選擇一個你想探索的主題';
+      renderIndicatorList();
+      return;
+    }
+
+    const cfg = MODE_CONFIG[modeId];
+    stageTitle.textContent = cfg.title;
+    drawPlan = cfg.labels;
+    const pool = shuffle(OILS).slice(0, FAN_POOL_SIZE).map(c => ({card:c, isIndicator:false}));
+    startShuffleThenFan(pool);
+  }
+
+  function renderIndicatorList(){
+    indicatorSelect.style.display = 'flex';
+    INDICATORS.forEach(ind => {
+      const item = document.createElement('div');
+      item.className = 'indicator-item';
+      const theme = INDICATOR_THEMES[ind.name] || '';
+      item.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:2px;">
+          <span><b>${ind.name}</b> <span class="en">${ind.name_en || ''}</span></span>
+          <span style="font-size:11.5px;color:#8a7c6c;">${theme}</span>
+        </div>`;
+      item.addEventListener('click', () => {
+        selectedIndicatorName = ind.name;
+        indicatorSelect.style.display = 'none';
+        instruction.textContent = `「${ind.name}」已插入牌組，正在洗牌……洗牌之後，抽三張牌～`;
+
+        const oilsSubset = shuffle(OILS).slice(0, FAN_POOL_SIZE - 1).map(c => ({card:c, isIndicator:false}));
+        const insertPos = Math.floor(Math.random() * (oilsSubset.length + 1));
+        oilsSubset.splice(insertPos, 0, {card: ind, isIndicator:true});
+        const finalDeck = shuffle(oilsSubset);
+
+        startShuffleThenFan(finalDeck, true);
+      });
+      indicatorSelect.appendChild(item);
+    });
+  }
+
+               function layoutFan(){
+    const n = fanItems.length;
+    const arcRatio = 0.5;                // 中段圓弧佔比，其餘平均分配到左右兩側直線
+    const arcCount = Math.max(2, Math.round(n * arcRatio));
+    const straightCount = Math.floor((n - arcCount) / 2);
+
+    const arcAngleTotal = 90;            // 底部弧形的總展開角度
+    const radius = 190;
+    const straightGap = 24;              // 兩側直線段，每張卡片的垂直間距
+
+    // 中段：底部圓弧
+    const arcPositions = [];
+    for (let i = 0; i < arcCount; i++) {
+        const t = arcCount === 1 ? 0.5 : i / (arcCount - 1);
+        const angle = -arcAngleTotal / 2 + t * arcAngleTotal;
+        const rad = angle * Math.PI / 180;
+        const x = Math.sin(rad) * radius;
+        const y = (1 - Math.cos(rad)) * radius;
+        arcPositions.push({ x, y, angle });
+    }
+
+    const leftEdge = arcPositions[0];
+    const rightEdge = arcPositions[arcPositions.length - 1];
+
+    const positions = [];
+
+    // 左側：從圓弧左端固定角度，純垂直往上直線延伸
+    for (let i = straightCount; i >= 1; i--) {
+        positions.push({
+            x: leftEdge.x,
+            y: leftEdge.y - straightGap * i,
+            angle: leftEdge.angle,
+        });
+    }
+
+    positions.push(...arcPositions);
+
+    // 右側：從圓弧右端固定角度，純垂直往上直線延伸（鏡像）
+    for (let i = 1; i <= straightCount; i++) {
+        positions.push({
+            x: rightEdge.x,
+            y: rightEdge.y - straightGap * i,
+            angle: rightEdge.angle,
+        });
+    }
+
+    fanItems.forEach((item, i) => {
+        const pos = positions[i] || positions[positions.length - 1];
+        item.el.style.transform = `translateX(${pos.x}px) translateY(${pos.y}px) rotate(${pos.angle}deg)`;
+        item.el.style.zIndex = i;
+    });
+}
+
+
+
+
+
+
+
+  function startShuffleThenFan(deckItems, mode5){
+    fanWrap.style.display = 'flex';
+    fanStage.innerHTML = '';
+    fanStage.classList.add('shuffling');
+    deckHint.textContent = '正在洗牌，請稍候……';
+    drawnRow.innerHTML = '';
+    revealDetail.innerHTML = '';
+    revealDetail.classList.remove('active');
+    drawnCount = 0;
+    collectedResults = [];
+
+    fanItems = deckItems.map(d => ({ ...d, el: null }));
+
+    setTimeout(() => {
+      fanStage.classList.remove('shuffling');
+      fanItems.forEach((item) => {
+        const el = document.createElement('div');
+        el.className = 'fan-card';
+        fanStage.appendChild(el);
+        item.el = el;
+      });
+      layoutFan();
+
+      if (mode5) {
+        deckHint.textContent = '點擊扇形中任一張牌，感應你的指示牌位置';
+        fanItems.forEach(item => {
+          item.el.addEventListener('click', () => revealMode5());
+        });
+      } else {
+        deckHint.textContent = `依序點擊卡牌，抽出第 1 張（共需 ${drawPlan.length} 張）`;
+        fanItems.forEach(item => {
+          item.el.addEventListener('click', () => drawStandardCard(item));
+        });
+      }
+    }, 900);
+  }
+
+  function flipCardInPlace(item, label){
+    item.el.classList.add('revealed');
+    item.el.innerHTML = `<img src="${item.card.image_url}" alt="${item.card.name}"><div class="mini-cap">${item.card.name}</div>`;
+  }
+
+  function drawStandardCard(item){
+    if (item.el.classList.contains('revealed') || item.el.classList.contains('dimmed')) return;
+    if (drawnCount >= drawPlan.length) return;
+
+    const label = drawPlan[drawnCount];
+    flipCardInPlace(item, label);
+    renderDrawnCard(label, item.card);
+    appendDetail(label, item.card);
+    collectedResults.push({ label, card: item.card });
+    drawnCount++;
+
+    if (drawnCount >= drawPlan.length) {
+      deckHint.textContent = '解讀完成 ✦ 願這份訊息與你同在';
+      fanItems.forEach(i => { if(!i.el.classList.contains('revealed')) i.el.classList.add('dimmed'); });
+      finishAndSend();
+    } else {
+      deckHint.textContent = `依序點擊卡牌，抽出第 ${drawnCount + 1} 張（共需 ${drawPlan.length} 張）`;
+    }
+  }
+
+  function revealMode5(){
+    if (drawnCount > 0) return;
+    drawnCount = 1;
+
+    const idx = fanItems.findIndex(i => i.isIndicator);
+    const leftIdx = idx - 1;
+    const rightIdx = idx + 1;
+
+    fanItems.forEach((item, i) => {
+      if (i === idx || i === leftIdx || i === rightIdx) {
+        item.el.classList.add('spotlight');
+      } else {
+        item.el.classList.add('dimmed');
+      }
+    });
+
+    deckHint.textContent = `「${selectedIndicatorName}」指示牌現身，為你點出主題……`;
+
+    const indicatorItem = fanItems[idx];
+    flipCardInPlace(indicatorItem, '指示牌');
+    renderDrawnCard('指示牌', indicatorItem.card);
+    appendDetail('指示牌', indicatorItem.card);
+    collectedResults.push({ label: '指示牌', card: indicatorItem.card });
+
+    setTimeout(() => {
+      deckHint.textContent = '正在揭示左右兩側的精油指引……';
+
+      const revealSide = (sideIdx, label, delay) => {
+        setTimeout(() => {
+          if (sideIdx < 0 || sideIdx >= fanItems.length) return;
+          const sideItem = fanItems[sideIdx];
+          flipCardInPlace(sideItem, label);
+          renderDrawnCard(label, sideItem.card);
+          appendDetail(label, sideItem.card);
+          collectedResults.push({ label, card: sideItem.card });
+        }, delay);
+      };
+      revealSide(leftIdx, `「${selectedIndicatorName}」左側提升精油`, 0);
+      revealSide(rightIdx, `「${selectedIndicatorName}」右側提升精油`, 500);
+
+      setTimeout(() => {
+        deckHint.textContent = '解讀完成 ✦ 願這份訊息與你同在';
+        finishAndSend();
+      }, 1100);
+    }, 900);
+  }
+
+  function renderDrawnCard(label, card){
+    const slot = document.createElement('div');
+    slot.className = 'drawn-slot';
+    slot.innerHTML = `
+      <div class="slot-label">${label}</div>
+      <div class="drawn-card">
+        <img src="${card.image_url}" alt="${card.name}">
+        <div class="cap"><b>${card.name}</b><span>${card.name_en || ''}</span></div>
+      </div>`;
+    drawnRow.appendChild(slot);
+  }
+
+  function appendDetail(label, card){
+    const el = document.createElement('div');
+    el.className = 'detail-card';
+    el.innerHTML = `
+      <div class="dc-label">${label}</div>
+      <div class="dc-name">${card.name}</div>
+      <div class="dc-name-en">${card.name_en || ''}</div>
+      ${card.keywords ? `<div class="dc-keywords">${card.keywords}</div>` : ''}
+      ${card.guidance ? `<div class="dc-guidance">${card.guidance}</div>` : ''}
+      ${card.chakra ? `<div class="dc-chakra">脈輪：${card.chakra}</div>` : ''}
+    `;
+    revealDetail.appendChild(el);
+    revealDetail.classList.add('active');
+  }
+
+  // ---------- 組 Flex carousel JSON，透過 liff.sendMessages() 送回 LINE 聊天室 ----------
+  function buildBubble(label, card){
+    const bodyContents = [
+      {
+        type: "box", layout: "baseline",
+        contents: [
+          { type: "text", text: "關鍵詞", size: "xs", color: "#B08968", flex: 1 },
+          { type: "text", text: card.keywords || "無", size: "sm", color: "#555555", flex: 4, wrap: true },
+        ],
+      },
+    ];
+    if (card.chakra) {
+      bodyContents.unshift({
+        type: "box", layout: "baseline",
+        contents: [
+          { type: "text", text: "脈輪", size: "xs", color: "#B08968", flex: 1 },
+          { type: "text", text: card.chakra, size: "sm", color: "#555555", flex: 4, wrap: true },
+        ],
+      });
+    }
+    bodyContents.push({ type: "separator", margin: "md" });
+    bodyContents.push({ type: "text", text: card.guidance || "無", wrap: true, margin: "md", size: "sm", color: "#333333" });
+    if (card.description) {
+      bodyContents.push({ type: "separator", margin: "md" });
+      bodyContents.push({ type: "text", text: card.description, wrap: true, margin: "md", size: "xs", color: "#777777" });
+    }
+
+    return {
+      type: "bubble",
+      header: {
+        type: "box", layout: "vertical",
+        contents: [
+          { type: "text", text: label, size: "xs", color: "#B08968", align: "center" },
+          { type: "text", text: card.name, weight: "bold", size: "xl", align: "center" },
+          { type: "text", text: card.name_en || "", size: "sm", align: "center", color: "#888888" },
+        ],
+      },
+      hero: { type: "image", url: card.image_url, size: "full", aspectRatio: "4:3", aspectMode: "cover" },
+      body: { type: "box", layout: "vertical", spacing: "sm", contents: bodyContents },
+    };
+  }
+
+  function logDrawToBackend(){
+    if (!collectedResults.length) return;
+    const payload = {
+      user_id: liffProfile ? liffProfile.userId : '',
+      display_name: liffProfile ? liffProfile.displayName : '',
+      mode: `mode_${currentMode}`,
+      cards: collectedResults.map(r => r.card.name),
+    };
+    fetch(`${API_BASE}/api/log-draw`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }).catch((e) => console.error('[log-draw error]', e));
+  }
+
+  function finishAndSend(){
+    showAgainButton();
+    logDrawToBackend();
+
+    if (!liffReady || !window.liff || !liff.isInClient()) {
+      sendStatus.textContent = '（非 LINE 內開啟，結果僅顯示於本頁面）';
+      return;
+    }
+
+    const bubbles = collectedResults.map(r => buildBubble(r.label, r.card));
+    const modeTitle = MODE_CONFIG[currentMode] ? MODE_CONFIG[currentMode].title : '指示牌';
+    const altText = `${modeTitle}牌陣結果：` + collectedResults.map(r => r.card.name).join('、');
+
+    const flexMessage = {
+      type: "flex",
+      altText: altText,
+      contents: bubbles.length > 1 ? { type: "carousel", contents: bubbles } : bubbles[0],
+    };
+
+    sendStatus.textContent = '正在將結果送回聊天室……';
+    liff.sendMessages([flexMessage]).then(() => {
+      sendStatus.textContent = '已送回 LINE 聊天室 ✓ 即將自動關閉';
+      setTimeout(() => { try { liff.closeWindow(); } catch(e){} }, 1200);
+    }).catch((err) => {
+      const reason = (err && err.message) ? err.message : String(err);
+      sendStatus.textContent = `送回聊天室失敗：${reason}`;
+      console.error('[liff.sendMessages error]', err);
+    });
+  }
+
+  function showAgainButton(){
+    againBtn.style.display = 'inline-block';
+  }
+
+  modeSelect.addEventListener('click', (e) => {
+    const btn = e.target.closest('.mode-btn');
+    if (!btn) return;
+    enterStage(Number(btn.dataset.mode));
+  });
+
+  backBtn.addEventListener('click', showModeSelect);
+  againBtn.addEventListener('click', showModeSelect);
+
+  function initFromQuery(){
+    const params = new URLSearchParams(window.location.search);
+    const m = Number(params.get('mode'));
+    if (m >= 1 && m <= 5) enterStage(m);
+  }
+
+  function initLiff(){
+    if (!window.liff) return Promise.resolve();
+    return liff.init({ liffId: LIFF_ID })
+      .then(() => {
+        liffReady = true;
+        if (liff.isLoggedIn && liff.isLoggedIn()) {
+          return liff.getProfile().then(p => { liffProfile = p; }).catch(() => {});
+        }
+      })
+      .catch((e) => console.error('[liff.init error]', e));
+  }
+
+  Promise.all([loadData(), initLiff()]).then(() => {
+    instruction.textContent = '';
+    initFromQuery();
+  }).catch((e) => {
+    console.error('[loadData error]', e);
+    instruction.textContent = '資料讀取失敗，請重新整理頁面再試一次。';
+  });
 })();
