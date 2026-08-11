@@ -148,20 +148,107 @@
     });
   }
 
-              function layoutFan(){
-    const n = fanItems.length;
-    const spreadAngle = Math.min(150, Math.max(70, n * 10));
-    const startAngle = -spreadAngle / 2;
-    const radius = 260;
-    fanItems.forEach((item, i) => {
-        const t = n === 1 ? 0.5 : i / (n - 1);
-        const angle = startAngle + t * spreadAngle;
-        const rad = angle * Math.PI / 180;
-        const x = Math.sin(rad) * radius;
-        const y = (1 - Math.cos(rad)) * radius; // 修正方向：中心點 y=0，兩側往下沉（正值），符合真實扇形手感
-        item.el.style.transform = `translateX(${x}px) translateY(${y}px) rotate(${angle}deg)`;
-        item.el.style.zIndex = i;
-    });
+              // ---------- 69 張修長型完美正 U 牌陣 ----------
+// 路徑：左直線 → 下半橢圓 → 右直線
+// 角度：左側 90° → 底部 0° → 右側 -90°
+
+function layoutFan() {
+  const total = fanItems.length;
+
+  if (!total) return;
+
+  // 現行正式版參數
+  const sideHeight = 0.43; // 左右直邊長度
+  const radiusX = 0.29;    // 水平內縮程度
+  const radiusY = 0.31;    // 底部圓弧深度
+  const topOffset = 0.035;
+
+  // 計算整條 U 型路徑長度
+  const straightLength = sideHeight;
+
+  const arcLength =
+    Math.PI *
+    Math.sqrt(
+      (radiusX ** 2 + radiusY ** 2) / 2
+    );
+
+  const fullLength =
+    straightLength * 2 + arcLength;
+
+  fanItems.forEach((item, index) => {
+    const distance =
+      total <= 1
+        ? fullLength / 2
+        : (index / (total - 1)) * fullLength;
+
+    let x;
+    let y;
+    let rotation;
+
+    if (distance < straightLength) {
+      // 左側直線
+      const progress =
+        distance / straightLength;
+
+      x = -radiusX;
+      y = topOffset + progress * sideHeight;
+      rotation = 90;
+
+    } else if (
+      distance <= straightLength + arcLength
+    ) {
+      // 底部半橢圓
+      const progress =
+        (distance - straightLength) /
+        arcLength;
+
+      const theta =
+        Math.PI - progress * Math.PI;
+
+      x = Math.cos(theta) * radiusX;
+
+      y =
+        topOffset +
+        sideHeight +
+        Math.sin(theta) * radiusY;
+
+      // 90° → 0° → -90°
+      rotation =
+        90 - progress * 180;
+
+    } else {
+      // 右側直線
+      const progress =
+        (
+          distance -
+          straightLength -
+          arcLength
+        ) / straightLength;
+
+      x = radiusX;
+
+      y =
+        topOffset +
+        sideHeight * (1 - progress);
+
+      rotation = -90;
+    }
+
+    item.el.style.left =
+      `${50 + x * 100}%`;
+
+    item.el.style.top =
+      `${y * 100}%`;
+
+    item.el.style.transform =
+      `translate(-50%, 0) rotate(${rotation}deg)`;
+
+    item.el.style.transformOrigin =
+      "center center";
+
+    item.el.style.zIndex =
+      String(index + 1);
+  });
 }
 
 
