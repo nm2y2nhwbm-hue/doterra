@@ -49,7 +49,7 @@
     "熊": "若你的問題與老闆有關",
   };
 
-  const FAN_POOL_SIZE = 69;   // 扇形展示張數（U型可容納較多，不必犧牲卡片大小）
+  const FAN_POOL_SIZE = 30;   // 扇形展示張數（U型可容納較多，不必犧牲卡片大小）
   let fanItems = [];
   let drawPlan = [];
   let drawnCount = 0;
