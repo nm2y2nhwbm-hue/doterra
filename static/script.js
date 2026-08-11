@@ -149,83 +149,20 @@
   }
 
                // ---------- 扇形排開（完美正 U 型）佈局計算 ----------
-  // ---------- 完美正 U 型牌陣 ----------
-// 路徑：左直線 → 下半圓 → 右直線
-// 左右位置及角度皆為鏡射對稱
-
-function layoutPerfectU(index, total) {
-  const sideHeight = 0.34;
-  const radiusX = 0.39;
-  const radiusY = 0.31;
-
-  const straightLength = sideHeight;
-  const arcLength =
-    Math.PI * Math.sqrt((radiusX ** 2 + radiusY ** 2) / 2);
-
-  const fullLength = straightLength * 2 + arcLength;
-
-  const distance =
-    total <= 1
-      ? fullLength / 2
-      : (index / (total - 1)) * fullLength;
-
-  let x;
-  let y;
-  let rotation;
-
-  if (distance < straightLength) {
-    // 左側垂直線
-    const progress = distance / straightLength;
-
-    x = -radiusX;
-    y = 0.035 + progress * sideHeight;
-    rotation = 0;
-  } else if (distance <= straightLength + arcLength) {
-    // 底部半圓
-    const progress =
-      (distance - straightLength) / arcLength;
-
-    const theta = Math.PI - progress * Math.PI;
-
-    x = Math.cos(theta) * radiusX;
-    y =
-      0.035 +
-      sideHeight +
-      Math.sin(theta) * radiusY;
-
-    rotation = (progress - 0.5) * 180;
-  } else {
-    // 右側垂直線
-    const progress =
-      (distance - straightLength - arcLength) /
-      straightLength;
-
-    x = radiusX;
-    y = 0.035 + sideHeight * (1 - progress);
-    rotation = 0;
-  }
-
-  return {
-    left: `${50 + x * 100}%`,
-    top: `${y * 100}%`,
-    rotation: `${rotation}deg`,
-    zIndex: index
-  };
-}
-
-function layoutFan() {
-  const total = fanItems.length;
-
-  fanItems.forEach((item, index) => {
-    const position = layoutPerfectU(index, total);
-
-    item.el.style.left = position.left;
-    item.el.style.top = position.top;
-    item.el.style.zIndex = position.zIndex;
-
-    item.el.style.transform =
-      `translate(-50%, 0) rotate(${position.rotation})`;
-  });
+  function layoutFan(){
+    const n = fanItems.length;
+    const spreadAngle = Math.min(150, Math.max(70, n * 10));
+    const startAngle = -spreadAngle / 2;
+    const radius = 260;
+    fanItems.forEach((item, i) => {
+        const t = n === 1 ? 0.5 : i / (n - 1);
+        const angle = startAngle + t * spreadAngle;
+        const rad = angle * Math.PI / 180;
+        const x = Math.sin(rad) * radius;
+        const y = (1 - Math.cos(rad)) * radius; // 修正方向：中心點 y=0，兩側往下沉（正值），符合真實扇形手感
+        item.el.style.transform = `translateX(${x}px) translateY(${y}px) rotate(${angle}deg)`;
+        item.el.style.zIndex = i;
+    });
 }
 
 
