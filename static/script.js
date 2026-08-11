@@ -148,42 +148,36 @@
     });
   }
 
-             // ----------【V1 卡牌扇形 UI 修正】淺正 U 型 ----------
+            // ---------- 30 張卡牌正 U 型排列 ----------
 function layoutFan() {
   const n = fanItems.length;
   if (!n) return;
 
-  // 30 張卡不要再使用 n * 10，否則會直接撞上 150°
-  const spreadAngle = Math.min(100, Math.max(60, n * 3));
-  const startAngle = -spreadAngle / 2;
-
-  const radiusX = 520; // 左右展開寬度
-  const uDepth = 80;   // 中央下沉深度
+  const fanWidth = 680;  // 整體寬度
+  const uDepth = 110;    // 中央下沉深度
+  const maxRotate = 32;  // 左右最大傾斜角度
 
   fanItems.forEach((item, i) => {
     const t = n === 1 ? 0.5 : i / (n - 1);
-    const angle = startAngle + t * spreadAngle;
-    const rad = angle * Math.PI / 180;
+    const normalized = t * 2 - 1; // 左側 -1、中央 0、右側 1
 
-    // 左右位置
-    const x = Math.sin(rad) * radiusX;
+    // 左右平均展開
+    const x = normalized * (fanWidth / 2);
 
-    // 中央最低、兩側最高，形成正 U 型
-    const normalized = Math.abs(2 * t - 1);
+    // 正 U 型：兩側 y=0，中央 y=uDepth（向下）
     const y = uDepth * (1 - normalized * normalized);
 
-    // 減少兩側旋轉，避免卡牌橫躺
-    const rotation = angle * 0.42;
+    // 左右對稱旋轉
+    const rotation = normalized * maxRotate;
 
     item.el.style.transform =
       `translateX(${x}px) translateY(${y}px) rotate(${rotation}deg)`;
 
-    // 中央卡牌顯示在較上層
+    // 中央卡牌位於最上層
     item.el.style.zIndex =
-      String(Math.round(100 - Math.abs(i - (n - 1) / 2)));
+      String(Math.round(100 - Math.abs(normalized) * 50));
   });
 }
-
 
   function startShuffleThenFan(deckItems, mode5){
     fanWrap.style.display = 'flex';
