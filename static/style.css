@@ -42,13 +42,13 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 12px
 /* --- 扇形排開（U型）牌組 --- */
 #fan-wrap{width:100%;display:none;flex-direction:column;align-items:center;}
 #fan-stage{
-  position:relative; width:100%; max-width:600px; height:520px;
-  margin:8px auto 4px; display:block; overflow:visible;
+  position:relative; width:100%; max-width:600px; height:230px;
+  margin:8px auto 4px; display:flex; align-items:flex-end; justify-content:center;
 }
 #fan-stage.shuffling .fan-card{ animation:fanShuffle .9s ease-in-out infinite; }
 @keyframes fanShuffle{ 0%,100%{filter:brightness(1);} 50%{filter:brightness(1.06);} }
 .fan-card{
-  position:absolute; left:50%; top:56px;
+  position:absolute; bottom:0;
   width:clamp(58px, 8.5vw, 88px);
   height:calc(clamp(58px, 8.5vw, 88px) * 1.4);
   border-radius:9px;
@@ -57,7 +57,7 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 12px
   background-position:center;
   border:1.6px solid var(--gold);
   box-shadow:0 3px 8px rgba(63,51,43,.18);
-  transform-origin:center center;
+  transform-origin:bottom center;
   transition:transform .25s ease, box-shadow .25s ease;
   cursor:pointer;
 }
