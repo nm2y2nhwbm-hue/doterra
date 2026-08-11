@@ -1,7 +1,8 @@
 import os
 import sys
 import traceback
-from flask import Flask, request, abort, jsonify
+import secrets
+from flask import Flask, request, abort, jsonify, send_from_directory
 from flask_cors import CORS
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
@@ -29,6 +30,7 @@ if not CHANNEL_ACCESS_TOKEN or not CHANNEL_SECRET:
     sys.exit(1)
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
+db.init_app_database()
 
 # CORS：同時允許 Render 本身與 Vercel 網域呼叫 API，
 # 避免因為之後測試網址在兩邊之間切換而被擋。
@@ -78,6 +80,11 @@ def health():
     return {"status": "ok"}
 
 
+@app.route("/", methods=['GET'])
+def landing_page():
+    return send_from_directory('static', 'cards.html')
+
+
 @app.route("/api/oils", methods=['GET'])
 def api_oils():
     """回傳 69 張精油卡的完整 JSON，供一頁式前端讀取。"""
@@ -104,6 +111,33 @@ def api_log_draw():
         card_names=data.get('cards', []),
     )
     return jsonify({"success": ok})
+
+
+def _valid_intake(data):
+    required = ('name', 'email', 'date', 'theme', 'mood', 'question')
+    return all(str(data.get(key, '')).strip() for key in required) and data.get('consent') is True
+
+
+@app.route('/api/receptions', methods=['POST', 'PATCH'])
+def api_receptions():
+    data = request.get_json(silent=True) or {}
+    if request.method == 'POST':
+        if not _valid_intake(data):
+            return jsonify({'error': '請完成必填欄位與資料使用同意。'}), 400
+        return jsonify(db.create_reception(data)), 201
+    if not data.get('accessToken') or not data.get('mode') or not data.get('cards'):
+        return jsonify({'error': '缺少抽牌紀錄資料。'}), 400
+    db.save_draw(data)
+    return jsonify({'success': True})
+
+
+@app.route('/api/admin/summary', methods=['GET'])
+def api_admin_summary():
+    expected = os.environ.get('ADMIN_TOKEN', '')
+    supplied = request.headers.get('X-Admin-Token', '')
+    if not expected or not secrets.compare_digest(expected, supplied):
+        abort(403)
+    return jsonify(db.admin_summary())
 
 
 if __name__ == "__main__":
