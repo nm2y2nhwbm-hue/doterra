@@ -73,7 +73,7 @@
     "熊": "若你的問題與老闆有關",
   };
 
-  const FAN_POOL_SIZE = 16;
+  const FAN_POOL_SIZE = 70;
 
   let fanItems = [];
   let drawPlan = [];
