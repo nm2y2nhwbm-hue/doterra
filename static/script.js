@@ -151,7 +151,7 @@
                // ---------- 扇形排開（完美正 U 型）佈局計算 ----------
   function layoutFan(){
     const n = fanItems.length;
-    const spreadAngle = Math.min(150, Math.max(70, n * 10)); // 最低保底 70 度，避免卡片少時弧度太平
+    const spreadAngle = Math.min(150, Math.max(70, n * 10));
     const startAngle = -spreadAngle / 2;
     const radius = 260;
     fanItems.forEach((item, i) => {
@@ -159,12 +159,8 @@
         const angle = startAngle + t * spreadAngle;
         const rad = angle * Math.PI / 180;
         const x = Math.sin(rad) * radius;
-      
-      // 💡 關鍵 3：修正 Y 軸凹形。中間最低，兩側對稱抬高
-      const y = (Math.cos(rad) - 1) * radius; // 中心點 y=0，往兩側逐漸上揚
-      
-      // 💡 關鍵 4：角度反轉，讓卡牌向內收束，形成碗狀邊緣
-      item.el.style.transform = `translateX(${x}px) translateY(${y}px) rotate(${angle}deg)`;
+        const y = (1 - Math.cos(rad)) * radius; // 修正方向：中心點 y=0，兩側往下沉（正值），符合真實扇形手感
+        item.el.style.transform = `translateX(${x}px) translateY(${y}px) rotate(${angle}deg)`;
         item.el.style.zIndex = i;
     });
 }
