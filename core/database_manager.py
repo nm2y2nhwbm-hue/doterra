@@ -15,9 +15,6 @@
 import csv
 import os
 import urllib.parse
-import sqlite3
-import secrets
-from datetime import datetime, timezone
 from pathlib import Path
 
 from core.text_utils import slugify_name_en
@@ -37,90 +34,6 @@ BASE_URL = os.environ.get('BASE_URL', 'https://example.com')
 USE_PLACEHOLDER_IMAGE = False
 
 _CACHE = None
-_DB_PATH = Path(os.environ.get('DATABASE_PATH', str(_PROJECT_ROOT / 'doterra.sqlite3')))
-
-
-def _connect():
-    connection = sqlite3.connect(_DB_PATH)
-    connection.row_factory = sqlite3.Row
-    return connection
-
-
-def init_app_database():
-    with _connect() as connection:
-        connection.executescript("""
-        CREATE TABLE IF NOT EXISTS receptions (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          reception_number TEXT UNIQUE NOT NULL,
-          access_token TEXT UNIQUE NOT NULL,
-          name TEXT NOT NULL,
-          email TEXT NOT NULL,
-          line_id TEXT DEFAULT '',
-          preferred_date TEXT NOT NULL,
-          theme TEXT NOT NULL,
-          mood TEXT NOT NULL,
-          question TEXT NOT NULL,
-          note TEXT DEFAULT '',
-          status TEXT NOT NULL DEFAULT 'waiting',
-          created_at TEXT NOT NULL
-        );
-        CREATE TABLE IF NOT EXISTS draws (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          access_token TEXT DEFAULT '',
-          user_id TEXT DEFAULT '',
-          display_name TEXT DEFAULT '',
-          mode TEXT NOT NULL,
-          indicator_name TEXT DEFAULT '',
-          indicator_orientation TEXT DEFAULT '',
-          cards TEXT NOT NULL,
-          created_at TEXT NOT NULL
-        );
-        """)
-
-
-def create_reception(payload: dict):
-    init_app_database()
-    now = datetime.now(timezone.utc)
-    reception_number = f"VIP-{now:%Y%m%d}-{secrets.token_hex(2).upper()}"
-    access_token = secrets.token_urlsafe(24)
-    with _connect() as connection:
-        connection.execute("""
-          INSERT INTO receptions
-          (reception_number, access_token, name, email, line_id, preferred_date,
-           theme, mood, question, note, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (reception_number, access_token, payload['name'], payload['email'],
-              payload.get('lineId', ''), payload['date'], payload['theme'],
-              payload['mood'], payload['question'], payload.get('note', ''),
-              now.isoformat()))
-    return {'receptionNumber': reception_number, 'accessToken': access_token}
-
-
-def save_draw(payload: dict):
-    init_app_database()
-    cards = payload.get('cards') or []
-    card_text = '、'.join(c.get('name', '') if isinstance(c, dict) else str(c) for c in cards)
-    with _connect() as connection:
-        connection.execute("""
-          INSERT INTO draws
-          (access_token, user_id, display_name, mode, indicator_name,
-           indicator_orientation, cards, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (payload.get('accessToken', ''), payload.get('user_id', ''),
-              payload.get('display_name', ''), str(payload.get('mode', '')),
-              payload.get('indicatorName', ''), payload.get('indicatorOrientation', ''),
-              card_text, datetime.now(timezone.utc).isoformat()))
-    return True
-
-
-def admin_summary():
-    init_app_database()
-    with _connect() as connection:
-        receptions = [dict(row) for row in connection.execute(
-            "SELECT * FROM receptions ORDER BY created_at DESC LIMIT 300")]
-        draws = [dict(row) for row in connection.execute(
-            "SELECT * FROM draws ORDER BY created_at DESC LIMIT 300")]
-    return {'receptions': receptions, 'draws': draws}
 
 
 def _resolve_csv_path() -> Path:
