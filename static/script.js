@@ -148,20 +148,58 @@
     });
   }
 
-           function layoutFan(){
-    const n = fanItems.length;
-    const spreadAngle = Math.min(150, Math.max(70, n * 10));
-    const startAngle = -spreadAngle / 2;
-    const radius = 260;
-    fanItems.forEach((item, i) => {
-        const t = n === 1 ? 0.5 : i / (n - 1);
-        const angle = startAngle + t * spreadAngle;
-        const rad = angle * Math.PI / 180;
-        const x = Math.sin(rad) * radius;
-        const y = (1 - Math.cos(rad)) * radius; // 修正方向：中心點 y=0，兩側往下沉（正值），符合真實扇形手感
-        item.el.style.transform = `translateX(${x}px) translateY(${y}px) rotate(${angle}deg)`;
-        item.el.style.zIndex = i;
-    });
+           // ---------- 馬蹄形正 U 型排列 ----------
+function layoutFan() {
+  const n = fanItems.length;
+  if (!n) return;
+
+  const radius = 280;       // U 型半圓寬度的一半
+  const armHeight = 320;    // 左右直立段高度
+
+  // 半圓與兩側直線的總路徑長度
+  const arcLength = Math.PI * radius;
+  const totalLength = armHeight * 2 + arcLength;
+
+  fanItems.forEach((item, i) => {
+    const t = n === 1 ? 0.5 : i / (n - 1);
+    const distance = t * totalLength;
+
+    let x;
+    let y;
+    let rotation;
+
+    if (distance < armHeight) {
+      // 左側直立段：由上往下
+      x = -radius;
+      y = -armHeight + distance;
+      rotation = 0;
+
+    } else if (distance < armHeight + arcLength) {
+      // 底部半圓：由左側繞過底部到右側
+      const arcDistance = distance - armHeight;
+      const angle = Math.PI + arcDistance / radius;
+
+      x = Math.cos(angle) * radius;
+      y = -Math.sin(angle) * radius;
+
+      // 左端 0°、底部 90°、右端 180°
+      rotation = (angle - Math.PI) * 180 / Math.PI;
+
+    } else {
+      // 右側直立段：由下往上
+      const rightDistance =
+        distance - armHeight - arcLength;
+
+      x = radius;
+      y = -rightDistance;
+      rotation = 180;
+    }
+
+    item.el.style.transform =
+      `translate(-50%, -50%) translate(${x}px, ${y}px) rotate(${rotation}deg)`;
+
+    item.el.style.zIndex = String(i + 1);
+  });
 }
 
   function startShuffleThenFan(deckItems, mode5){
