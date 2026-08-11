@@ -49,7 +49,7 @@
     "熊": "若你的問題與老闆有關",
   };
 
-  const FAN_POOL_SIZE = 30;   // 扇形展示張數（U型可容納較多，不必犧牲卡片大小）
+  const FAN_POOL_SIZE = 15;   // 扇形展示張數（U型可容納較多，不必犧牲卡片大小）
   let fanItems = [];
   let drawPlan = [];
   let drawnCount = 0;
@@ -148,21 +148,41 @@
     });
   }
 
-              // ---------- 69 張修長型完美正 U 牌陣 ----------
-function layoutFan(){
-    const n = fanItems.length;
-    const spreadAngle = Math.min(150, Math.max(70, n * 10));
-    const startAngle = -spreadAngle / 2;
-    const radius = 260;
-    fanItems.forEach((item, i) => {
-        const t = n === 1 ? 0.5 : i / (n - 1);
-        const angle = startAngle + t * spreadAngle;
-        const rad = angle * Math.PI / 180;
-        const x = Math.sin(rad) * radius;
-        const y = (1 - Math.cos(rad)) * radius; // 修正方向：中心點 y=0，兩側往下沉（正值），符合真實扇形手感
-        item.el.style.transform = `translateX(${x}px) translateY(${y}px) rotate(${angle}deg)`;
-        item.el.style.zIndex = i;
-    });
+              // ----------【V1 卡牌扇形 UI 修改】完美正 U 型排列計算 ----------
+function layoutFan() {
+  const n = fanItems.length;
+
+  // 【V1 修改】依卡牌數量自動調整展開角度
+  // 最小 70 度、最大 150 度
+  const spreadAngle = Math.min(150, Math.max(70, n * 10));
+
+  // 【V1 修改】讓整組卡牌以中央為基準左右對稱
+  const startAngle = -spreadAngle / 2;
+
+  // 【V1 修改】控制 U 型曲線深度
+  const radius = 260;
+
+  fanItems.forEach((item, i) => {
+    // 【V1 保留】計算每張卡在扇形中的相對位置
+    const t = n === 1 ? 0.5 : i / (n - 1);
+    const angle = startAngle + t * spreadAngle;
+    const rad = angle * Math.PI / 180;
+
+    // 【V1 修改】計算左右展開位置
+    const x = Math.sin(rad) * radius;
+
+    // 【V1 關鍵修改】中央卡牌 y = 0，左右兩側逐漸下沉
+    // 形成中央較高、兩側較低的正 U 型扇形
+    const y = (1 - Math.cos(rad)) * radius;
+
+    // 【V1 卡牌扇形 UI 修改】
+    // 同時套用水平位置、垂直高度與旋轉角度
+    item.el.style.transform =
+      `translateX(${x}px) translateY(${y}px) rotate(${angle}deg)`;
+
+    // 【V1 保留】維持卡牌由左至右的堆疊順序
+    item.el.style.zIndex = i;
+  });
 }
 
 
