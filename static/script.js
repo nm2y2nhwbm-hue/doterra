@@ -148,29 +148,39 @@
     });
   }
 
-             // 【V1 卡牌扇形 UI 修改】中間向下、左右逐漸升高，形成正 U 型
+             // ----------【V1 卡牌扇形 UI 修正】淺正 U 型 ----------
 function layoutFan() {
   const n = fanItems.length;
-  const spreadAngle = Math.min(150, Math.max(70, n * 10));
+  if (!n) return;
+
+  // 30 張卡不要再使用 n * 10，否則會直接撞上 150°
+  const spreadAngle = Math.min(100, Math.max(60, n * 3));
   const startAngle = -spreadAngle / 2;
-  const radius = 260;
-  const edgeRad = (spreadAngle / 2) * Math.PI / 180;
+
+  const radiusX = 520; // 左右展開寬度
+  const uDepth = 80;   // 中央下沉深度
 
   fanItems.forEach((item, i) => {
     const t = n === 1 ? 0.5 : i / (n - 1);
     const angle = startAngle + t * spreadAngle;
     const rad = angle * Math.PI / 180;
 
-    const x = Math.sin(rad) * radius;
+    // 左右位置
+    const x = Math.sin(rad) * radiusX;
 
-    // 中間最低、左右最高
-    const y =
-      (Math.cos(rad) - Math.cos(edgeRad)) * radius;
+    // 中央最低、兩側最高，形成正 U 型
+    const normalized = Math.abs(2 * t - 1);
+    const y = uDepth * (1 - normalized * normalized);
+
+    // 減少兩側旋轉，避免卡牌橫躺
+    const rotation = angle * 0.42;
 
     item.el.style.transform =
-      `translateX(${x}px) translateY(${y}px) rotate(${angle}deg)`;
+      `translateX(${x}px) translateY(${y}px) rotate(${rotation}deg)`;
 
-    item.el.style.zIndex = i;
+    // 中央卡牌顯示在較上層
+    item.el.style.zIndex =
+      String(Math.round(100 - Math.abs(i - (n - 1) / 2)));
   });
 }
 
