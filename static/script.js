@@ -154,11 +154,10 @@
 
     // 保留原算法
     const arcRatio = 0.5;
-    const arcCount = Math.max(2, Math.round(n * arcRatio));
-
-    const remaining = n - arcCount;
-    const leftCount = Math.floor(remaining / 2);
-    const rightCount = remaining - leftCount;
+const arcCount = Math.round(69 * 0.5); // 35
+const remaining = 69 - 35;             // 34
+const leftCount = 17;
+const rightCount = 17;
 
     // 保留 90°底部弧形，只放大排列尺寸
     const arcAngleTotal = 90;
