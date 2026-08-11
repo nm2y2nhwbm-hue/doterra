@@ -152,33 +152,38 @@
     const n = fanItems.length;
     if (!n) return;
 
-    // 底部半圓約占總牌數 40%
-    const arcCount = Math.max(5, Math.round(n * 0.4));
+    // 維持原算法：一半牌放底部弧形
+    const arcRatio = 0.5;
+    const arcCount = Math.max(2, Math.round(n * arcRatio));
 
-    // 左右分開計算，避免奇數時少一個座標
+    // 分別計算左右數量，確保座標總數等於牌數
     const remaining = n - arcCount;
     const leftCount = Math.floor(remaining / 2);
     const rightCount = remaining - leftCount;
 
-    const arcAngleTotal = 110;
-    const radiusX = 235;
-    const radiusY = 145;
-    const straightGap = 62;
+    // 維持原本參數
+    const arcAngleTotal = 90;
+    const radius = 190;
+    const straightGap = 24;
 
     const arcPositions = [];
 
-    // 底部橢圓半弧：中央最低，左右端逐漸升高
+    // 底部圓弧：中央最低，左右逐漸上升
     for (let i = 0; i < arcCount; i++) {
-        const t = arcCount === 1 ? 0.5 : i / (arcCount - 1);
-        const angle = -arcAngleTotal / 2 + t * arcAngleTotal;
+        const t = arcCount === 1
+            ? 0.5
+            : i / (arcCount - 1);
+
+        const angle =
+            -arcAngleTotal / 2 +
+            t * arcAngleTotal;
+
         const rad = angle * Math.PI / 180;
 
         arcPositions.push({
-            x: Math.sin(rad) * radiusX,
-            y: Math.cos(rad) * radiusY,
-
-            // 底部牌只做輕微轉向，避免變成強烈扇形
-            rotate: angle * 0.32
+            x: Math.sin(rad) * radius,
+            y: Math.cos(rad) * radius,
+            angle
         });
     }
 
@@ -186,35 +191,34 @@
     const rightEdge = arcPositions[arcPositions.length - 1];
     const positions = [];
 
-    // 左側垂直直線
+    // 左側直線：由上往下銜接底部弧線
     for (let i = leftCount; i >= 1; i--) {
         positions.push({
             x: leftEdge.x,
             y: leftEdge.y - straightGap * i,
-            rotate: 0
+            angle: 0
         });
     }
 
-    // 底部半圓
     positions.push(...arcPositions);
 
-    // 右側垂直直線
+    // 右側直線：由底部弧線往上
     for (let i = 1; i <= rightCount; i++) {
         positions.push({
             x: rightEdge.x,
             y: rightEdge.y - straightGap * i,
-            rotate: 0
+            angle: 0
         });
     }
 
     fanItems.forEach((item, i) => {
         const pos = positions[i];
 
-        item.el.style.transform = `
-            translate(-50%, -50%)
-            translate(${pos.x}px, ${pos.y}px)
-            rotate(${pos.rotate}deg)
-        `;
+        item.el.style.transform = [
+            `translateX(${pos.x}px)`,
+            `translateY(${pos.y}px)`,
+            `rotate(${pos.angle}deg)`
+        ].join(" ");
 
         item.el.style.zIndex = String(i + 1);
     });
