@@ -148,24 +148,24 @@
     });
   }
 
-               function layoutFan(){
+              function layoutFan(){
     const n = fanItems.length;
-    const arcRatio = 0.5;                // 中段圓弧佔比，其餘平均分配到左右兩側直線
+    const arcRatio = 0.5;
     const arcCount = Math.max(2, Math.round(n * arcRatio));
     const straightCount = Math.floor((n - arcCount) / 2);
 
-    const arcAngleTotal = 90;            // 底部弧形的總展開角度
+    const arcAngleTotal = 90;   // 底部弧形展開角度（左右各 45 度）
     const radius = 190;
-    const straightGap = 24;              // 兩側直線段，每張卡片的垂直間距
+    const straightGap = 24;
 
-    // 中段：底部圓弧
+    // 中段：底部圓弧。中心角度=0 時 y 最大（谷底），往兩側角度增加時 y 持續變小（持續上升，不反轉）
     const arcPositions = [];
     for (let i = 0; i < arcCount; i++) {
         const t = arcCount === 1 ? 0.5 : i / (arcCount - 1);
         const angle = -arcAngleTotal / 2 + t * arcAngleTotal;
         const rad = angle * Math.PI / 180;
         const x = Math.sin(rad) * radius;
-        const y = (1 - Math.cos(rad)) * radius;
+        const y = Math.cos(rad) * radius;   // 中心(rad=0)→y最大(谷底)；兩側角度越大→y越小(持續上升)
         arcPositions.push({ x, y, angle });
     }
 
@@ -174,18 +174,18 @@
 
     const positions = [];
 
-    // 左側：從圓弧左端固定角度，純垂直往上直線延伸
+    // 左側直線臂：延續谷底往上「持續上升」的同一個方向，x 固定、y 持續遞減（不反轉）
     for (let i = straightCount; i >= 1; i--) {
         positions.push({
             x: leftEdge.x,
-            y: leftEdge.y - straightGap * i,
+            y: leftEdge.y - straightGap * i,   // 持續減少 = 持續往上，跟弧形段方向一致
             angle: leftEdge.angle,
         });
     }
 
     positions.push(...arcPositions);
 
-    // 右側：從圓弧右端固定角度，純垂直往上直線延伸（鏡像）
+    // 右側直線臂：鏡像同理，方向一致不反轉
     for (let i = 1; i <= straightCount; i++) {
         positions.push({
             x: rightEdge.x,
