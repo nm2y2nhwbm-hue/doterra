@@ -28,10 +28,34 @@
   let liffProfile = null;
 
   const MODE_CONFIG = {
-    1: { title: "今日能量", count: 1, labels: ["今日心靈小語"] },
-    2: { title: "生活導引", count: 2, labels: ["目前整體狀況", "生活中所需的建議及方向"] },
-    3: { title: "三牌陣",   count: 3, labels: ["身・目前身體狀況", "心・目前心理狀態", "靈・目前精神狀況"] },
-    4: { title: "了解自我", count: 3, labels: ["別人眼中的你", "私底下獨處時的你", "真正自我的你"] },
+    1: {
+      title: "今日能量",
+      count: 1,
+      labels: ["今日心靈小語"]
+    },
+    2: {
+      title: "生活導引",
+      count: 2,
+      labels: ["目前整體狀況", "生活中所需的建議及方向"]
+    },
+    3: {
+      title: "三牌陣",
+      count: 3,
+      labels: [
+        "身・目前身體狀況",
+        "心・目前心理狀態",
+        "靈・目前精神狀況"
+      ]
+    },
+    4: {
+      title: "了解自我",
+      count: 3,
+      labels: [
+        "別人眼中的你",
+        "私底下獨處時的你",
+        "真正自我的你"
+      ]
+    },
   };
 
   const INDICATOR_THEMES = {
@@ -49,7 +73,8 @@
     "熊": "若你的問題與老闆有關",
   };
 
-  const FAN_POOL_SIZE = 16;   // 扇形展示張數（U型可容納較多，不必犧牲卡片大小）
+  const FAN_POOL_SIZE = 16;
+
   let fanItems = [];
   let drawPlan = [];
   let drawnCount = 0;
@@ -63,30 +88,38 @@
       fetch(`${API_BASE}/api/oils`),
       fetch(`${API_BASE}/api/indicators`)
     ]);
+
     OILS = await oilsRes.json();
     INDICATORS = await indRes.json();
   }
 
   function shuffle(arr){
     const a = arr.slice();
-    for(let i=a.length-1;i>0;i--){
-      const j = Math.floor(Math.random()*(i+1));
-      [a[i],a[j]]=[a[j],a[i]];
+
+    for(let i = a.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
     }
+
     return a;
   }
 
   function resetStageDom(){
     indicatorSelect.style.display = 'none';
     indicatorSelect.innerHTML = '';
+
     fanWrap.style.display = 'none';
     fanStage.innerHTML = '';
     fanStage.classList.remove('shuffling');
+
     drawnRow.innerHTML = '';
+
     revealDetail.innerHTML = '';
     revealDetail.classList.remove('active');
+
     sendStatus.textContent = '';
     againBtn.style.display = 'none';
+
     fanItems = [];
     drawPlan = [];
     drawnCount = 0;
@@ -103,110 +136,237 @@
   function enterStage(modeId){
     modeSelect.style.display = 'none';
     stage.classList.add('active');
+
     resetStageDom();
+
     currentMode = modeId;
 
-    if (modeId === 5) {
+    if(modeId === 5){
       isMode5 = true;
       stageTitle.textContent = '指示牌';
       instruction.textContent = '請先從下方選擇一個你想探索的主題';
+
       renderIndicatorList();
       return;
     }
 
     const cfg = MODE_CONFIG[modeId];
+
     stageTitle.textContent = cfg.title;
     drawPlan = cfg.labels;
-    const pool = shuffle(OILS).slice(0, FAN_POOL_SIZE).map(c => ({card:c, isIndicator:false}));
+
+    const pool = shuffle(OILS)
+      .slice(0, FAN_POOL_SIZE)
+      .map(c => ({
+        card: c,
+        isIndicator: false
+      }));
+
     startShuffleThenFan(pool);
   }
 
   function renderIndicatorList(){
     indicatorSelect.style.display = 'flex';
+
     INDICATORS.forEach(ind => {
       const item = document.createElement('div');
+
       item.className = 'indicator-item';
+
       const theme = INDICATOR_THEMES[ind.name] || '';
+
       item.innerHTML = `
         <div style="display:flex;flex-direction:column;gap:2px;">
-          <span><b>${ind.name}</b> <span class="en">${ind.name_en || ''}</span></span>
-          <span style="font-size:11.5px;color:#8a7c6c;">${theme}</span>
-        </div>`;
+          <span>
+            <b>${ind.name}</b>
+            <span class="en">${ind.name_en || ''}</span>
+          </span>
+          <span style="font-size:11.5px;color:#8a7c6c;">
+            ${theme}
+          </span>
+        </div>
+      `;
+
       item.addEventListener('click', () => {
         selectedIndicatorName = ind.name;
         indicatorSelect.style.display = 'none';
-        instruction.textContent = `「${ind.name}」已插入牌組，正在洗牌……洗牌之後，抽三張牌～`;
 
-        const oilsSubset = shuffle(OILS).slice(0, FAN_POOL_SIZE - 1).map(c => ({card:c, isIndicator:false}));
-        const insertPos = Math.floor(Math.random() * (oilsSubset.length + 1));
-        oilsSubset.splice(insertPos, 0, {card: ind, isIndicator:true});
+        instruction.textContent =
+          `「${ind.name}」已插入牌組，正在洗牌……洗牌之後，抽三張牌～`;
+
+        const oilsSubset = shuffle(OILS)
+          .slice(0, FAN_POOL_SIZE - 1)
+          .map(c => ({
+            card: c,
+            isIndicator: false
+          }));
+
+        const insertPos =
+          Math.floor(Math.random() * (oilsSubset.length + 1));
+
+        oilsSubset.splice(insertPos, 0, {
+          card: ind,
+          isIndicator: true
+        });
+
         const finalDeck = shuffle(oilsSubset);
 
         startShuffleThenFan(finalDeck, true);
       });
+
       indicatorSelect.appendChild(item);
     });
   }
 
-               // ---------- 扇形排開（完美正 U 型）佈局計算 ----------
+  // ==================================================
+  // 唯一更改：
+  // 左右直線＋底部半圓的馬蹄形 U
+  // ==================================================
   function layoutFan(){
     const n = fanItems.length;
-    const spreadAngle = Math.min(150, Math.max(70, n * 10)); // 最低保底 70 度，避免卡片少時弧度太平
-    const startAngle = -spreadAngle / 2;
-    const radius = 260;
+
+    if(!n) return;
+
+    // 依 LIFF 實際寬度縮放。
+    const stageWidth = fanStage.clientWidth || 600;
+
+    // U 型半圓半徑。
+    const radius = Math.min(
+      240,
+      Math.max(125, stageWidth * 0.4)
+    );
+
+    // 左右直線段高度。
+    const armHeight = Math.min(
+      230,
+      Math.max(145, stageWidth * 0.38)
+    );
+
+    // 底部半圓的路徑長度。
+    const arcLength = Math.PI * radius;
+
+    // 左直線＋底部半圓＋右直線。
+    const totalLength =
+      armHeight * 2 + arcLength;
+
+    // 確保舞台有足夠空間容納完整馬蹄形。
+    fanStage.style.height =
+      `${Math.ceil(armHeight + radius + 125)}px`;
+
     fanItems.forEach((item, i) => {
-        const t = n === 1 ? 0.5 : i / (n - 1);
-        const angle = startAngle + t * spreadAngle;
-        const rad = angle * Math.PI / 180;
-        const x = Math.sin(rad) * radius;
-      
-      // 💡 關鍵 3：修正 Y 軸凹形。中間最低，兩側對稱抬高
-      const y = (Math.cos(rad) - 1) * radius; // 中心點 y=0，往兩側逐漸上揚
-      
-      // 💡 關鍵 4：角度反轉，讓卡牌向內收束，形成碗狀邊緣
-      item.el.style.transform = `translateX(${x}px) translateY(${y}px) rotate(${angle}deg)`;
-        item.el.style.zIndex = i;
+      const t =
+        n === 1 ? 0.5 : i / (n - 1);
+
+      const distance =
+        t * totalLength;
+
+      let x;
+      let y;
+      let rotation;
+
+      if(distance < armHeight){
+        // 左側直線：由上往下。
+        x = -radius;
+        y = distance;
+        rotation = 0;
+
+      }else if(distance <= armHeight + arcLength){
+        // 底部半圓：
+        // 由左側繞過底部，再走到右側。
+        const arcDistance =
+          distance - armHeight;
+
+        const angle =
+          Math.PI + arcDistance / radius;
+
+        x = Math.cos(angle) * radius;
+
+        y =
+          armHeight -
+          Math.sin(angle) * radius;
+
+        rotation =
+          (angle - Math.PI) *
+          180 /
+          Math.PI;
+
+      }else{
+        // 右側直線：由下往上。
+        const rightDistance =
+          distance -
+          armHeight -
+          arcLength;
+
+        x = radius;
+        y = armHeight - rightDistance;
+        rotation = 180;
+      }
+
+      item.el.style.transform =
+        `translate(-50%, -50%) ` +
+        `translate(${x}px, ${y}px) ` +
+        `rotate(${rotation}deg)`;
+
+      item.el.style.zIndex = i;
     });
-}
-
-
-
-
-
-
+  }
 
   function startShuffleThenFan(deckItems, mode5){
     fanWrap.style.display = 'flex';
     fanStage.innerHTML = '';
     fanStage.classList.add('shuffling');
-    deckHint.textContent = '正在洗牌，請稍候……';
+
+    deckHint.textContent =
+      '正在洗牌，請稍候……';
+
     drawnRow.innerHTML = '';
+
     revealDetail.innerHTML = '';
     revealDetail.classList.remove('active');
+
     drawnCount = 0;
     collectedResults = [];
 
-    fanItems = deckItems.map(d => ({ ...d, el: null }));
+    fanItems = deckItems.map(d => ({
+      ...d,
+      el: null
+    }));
 
     setTimeout(() => {
       fanStage.classList.remove('shuffling');
-      fanItems.forEach((item) => {
-        const el = document.createElement('div');
+
+      fanItems.forEach(item => {
+        const el =
+          document.createElement('div');
+
         el.className = 'fan-card';
+
         fanStage.appendChild(el);
         item.el = el;
       });
+
       layoutFan();
 
-      if (mode5) {
-        deckHint.textContent = '點擊扇形中任一張牌，感應你的指示牌位置';
+      if(mode5){
+        deckHint.textContent =
+          '點擊扇形中任一張牌，感應你的指示牌位置';
+
         fanItems.forEach(item => {
-          item.el.addEventListener('click', () => revealMode5());
+          item.el.addEventListener(
+            'click',
+            () => revealMode5()
+          );
         });
-      } else {
-        deckHint.textContent = `依序點擊卡牌，抽出第 1 張（共需 ${drawPlan.length} 張）`;
+
+      }else{
+        deckHint.textContent =
+          `依序點擊卡牌，抽出第 1 張（共需 ${drawPlan.length} 張）`;
+
         fanItems.forEach(item => {
-          item.el.addEventListener('click', () => drawStandardCard(item));
+          item.el.addEventListener(
+            'click',
+            () => drawStandardCard(item)
+          );
         });
       }
     }, 900);
@@ -214,226 +374,580 @@
 
   function flipCardInPlace(item, label){
     item.el.classList.add('revealed');
-    item.el.innerHTML = `<img src="${item.card.image_url}" alt="${item.card.name}"><div class="mini-cap">${item.card.name}</div>`;
+
+    item.el.innerHTML = `
+      <img
+        src="${item.card.image_url}"
+        alt="${item.card.name}"
+      >
+      <div class="mini-cap">
+        ${item.card.name}
+      </div>
+    `;
   }
 
   function drawStandardCard(item){
-    if (item.el.classList.contains('revealed') || item.el.classList.contains('dimmed')) return;
-    if (drawnCount >= drawPlan.length) return;
+    if(
+      item.el.classList.contains('revealed') ||
+      item.el.classList.contains('dimmed')
+    ){
+      return;
+    }
+
+    if(drawnCount >= drawPlan.length){
+      return;
+    }
 
     const label = drawPlan[drawnCount];
+
     flipCardInPlace(item, label);
     renderDrawnCard(label, item.card);
     appendDetail(label, item.card);
-    collectedResults.push({ label, card: item.card });
+
+    collectedResults.push({
+      label,
+      card: item.card
+    });
+
     drawnCount++;
 
-    if (drawnCount >= drawPlan.length) {
-      deckHint.textContent = '解讀完成 ✦ 願這份訊息與你同在';
-      fanItems.forEach(i => { if(!i.el.classList.contains('revealed')) i.el.classList.add('dimmed'); });
+    if(drawnCount >= drawPlan.length){
+      deckHint.textContent =
+        '解讀完成 ✦ 願這份訊息與你同在';
+
+      fanItems.forEach(i => {
+        if(!i.el.classList.contains('revealed')){
+          i.el.classList.add('dimmed');
+        }
+      });
+
       finishAndSend();
-    } else {
-      deckHint.textContent = `依序點擊卡牌，抽出第 ${drawnCount + 1} 張（共需 ${drawPlan.length} 張）`;
+
+    }else{
+      deckHint.textContent =
+        `依序點擊卡牌，抽出第 ${drawnCount + 1} 張（共需 ${drawPlan.length} 張）`;
     }
   }
 
   function revealMode5(){
-    if (drawnCount > 0) return;
+    if(drawnCount > 0){
+      return;
+    }
+
     drawnCount = 1;
 
-    const idx = fanItems.findIndex(i => i.isIndicator);
+    const idx =
+      fanItems.findIndex(i => i.isIndicator);
+
     const leftIdx = idx - 1;
     const rightIdx = idx + 1;
 
     fanItems.forEach((item, i) => {
-      if (i === idx || i === leftIdx || i === rightIdx) {
+      if(
+        i === idx ||
+        i === leftIdx ||
+        i === rightIdx
+      ){
         item.el.classList.add('spotlight');
-      } else {
+      }else{
         item.el.classList.add('dimmed');
       }
     });
 
-    deckHint.textContent = `「${selectedIndicatorName}」指示牌現身，為你點出主題……`;
+    deckHint.textContent =
+      `「${selectedIndicatorName}」指示牌現身，為你點出主題……`;
 
     const indicatorItem = fanItems[idx];
-    flipCardInPlace(indicatorItem, '指示牌');
-    renderDrawnCard('指示牌', indicatorItem.card);
-    appendDetail('指示牌', indicatorItem.card);
-    collectedResults.push({ label: '指示牌', card: indicatorItem.card });
+
+    flipCardInPlace(
+      indicatorItem,
+      '指示牌'
+    );
+
+    renderDrawnCard(
+      '指示牌',
+      indicatorItem.card
+    );
+
+    appendDetail(
+      '指示牌',
+      indicatorItem.card
+    );
+
+    collectedResults.push({
+      label: '指示牌',
+      card: indicatorItem.card
+    });
 
     setTimeout(() => {
-      deckHint.textContent = '正在揭示左右兩側的精油指引……';
+      deckHint.textContent =
+        '正在揭示左右兩側的精油指引……';
 
-      const revealSide = (sideIdx, label, delay) => {
+      const revealSide = (
+        sideIdx,
+        label,
+        delay
+      ) => {
         setTimeout(() => {
-          if (sideIdx < 0 || sideIdx >= fanItems.length) return;
-          const sideItem = fanItems[sideIdx];
-          flipCardInPlace(sideItem, label);
-          renderDrawnCard(label, sideItem.card);
-          appendDetail(label, sideItem.card);
-          collectedResults.push({ label, card: sideItem.card });
+          if(
+            sideIdx < 0 ||
+            sideIdx >= fanItems.length
+          ){
+            return;
+          }
+
+          const sideItem =
+            fanItems[sideIdx];
+
+          flipCardInPlace(
+            sideItem,
+            label
+          );
+
+          renderDrawnCard(
+            label,
+            sideItem.card
+          );
+
+          appendDetail(
+            label,
+            sideItem.card
+          );
+
+          collectedResults.push({
+            label,
+            card: sideItem.card
+          });
         }, delay);
       };
-      revealSide(leftIdx, `「${selectedIndicatorName}」左側提升精油`, 0);
-      revealSide(rightIdx, `「${selectedIndicatorName}」右側提升精油`, 500);
+
+      revealSide(
+        leftIdx,
+        `「${selectedIndicatorName}」左側提升精油`,
+        0
+      );
+
+      revealSide(
+        rightIdx,
+        `「${selectedIndicatorName}」右側提升精油`,
+        500
+      );
 
       setTimeout(() => {
-        deckHint.textContent = '解讀完成 ✦ 願這份訊息與你同在';
+        deckHint.textContent =
+          '解讀完成 ✦ 願這份訊息與你同在';
+
         finishAndSend();
       }, 1100);
     }, 900);
   }
 
   function renderDrawnCard(label, card){
-    const slot = document.createElement('div');
+    const slot =
+      document.createElement('div');
+
     slot.className = 'drawn-slot';
+
     slot.innerHTML = `
-      <div class="slot-label">${label}</div>
+      <div class="slot-label">
+        ${label}
+      </div>
+
       <div class="drawn-card">
-        <img src="${card.image_url}" alt="${card.name}">
-        <div class="cap"><b>${card.name}</b><span>${card.name_en || ''}</span></div>
-      </div>`;
+        <img
+          src="${card.image_url}"
+          alt="${card.name}"
+        >
+
+        <div class="cap">
+          <b>${card.name}</b>
+          <span>${card.name_en || ''}</span>
+        </div>
+      </div>
+    `;
+
     drawnRow.appendChild(slot);
   }
 
   function appendDetail(label, card){
-    const el = document.createElement('div');
+    const el =
+      document.createElement('div');
+
     el.className = 'detail-card';
+
     el.innerHTML = `
-      <div class="dc-label">${label}</div>
-      <div class="dc-name">${card.name}</div>
-      <div class="dc-name-en">${card.name_en || ''}</div>
-      ${card.keywords ? `<div class="dc-keywords">${card.keywords}</div>` : ''}
-      ${card.guidance ? `<div class="dc-guidance">${card.guidance}</div>` : ''}
-      ${card.chakra ? `<div class="dc-chakra">脈輪：${card.chakra}</div>` : ''}
+      <div class="dc-label">
+        ${label}
+      </div>
+
+      <div class="dc-name">
+        ${card.name}
+      </div>
+
+      <div class="dc-name-en">
+        ${card.name_en || ''}
+      </div>
+
+      ${
+        card.keywords
+          ? `<div class="dc-keywords">${card.keywords}</div>`
+          : ''
+      }
+
+      ${
+        card.guidance
+          ? `<div class="dc-guidance">${card.guidance}</div>`
+          : ''
+      }
+
+      ${
+        card.chakra
+          ? `<div class="dc-chakra">脈輪：${card.chakra}</div>`
+          : ''
+      }
     `;
+
     revealDetail.appendChild(el);
     revealDetail.classList.add('active');
   }
 
-  // ---------- 組 Flex carousel JSON，透過 liff.sendMessages() 送回 LINE 聊天室 ----------
+  // 組 Flex carousel JSON，
+  // 透過 liff.sendMessages() 送回 LINE 聊天室。
   function buildBubble(label, card){
     const bodyContents = [
       {
-        type: "box", layout: "baseline",
+        type: "box",
+        layout: "baseline",
         contents: [
-          { type: "text", text: "關鍵詞", size: "xs", color: "#B08968", flex: 1 },
-          { type: "text", text: card.keywords || "無", size: "sm", color: "#555555", flex: 4, wrap: true },
+          {
+            type: "text",
+            text: "關鍵詞",
+            size: "xs",
+            color: "#B08968",
+            flex: 1
+          },
+          {
+            type: "text",
+            text: card.keywords || "無",
+            size: "sm",
+            color: "#555555",
+            flex: 4,
+            wrap: true
+          },
         ],
       },
     ];
-    if (card.chakra) {
+
+    if(card.chakra){
       bodyContents.unshift({
-        type: "box", layout: "baseline",
+        type: "box",
+        layout: "baseline",
         contents: [
-          { type: "text", text: "脈輪", size: "xs", color: "#B08968", flex: 1 },
-          { type: "text", text: card.chakra, size: "sm", color: "#555555", flex: 4, wrap: true },
+          {
+            type: "text",
+            text: "脈輪",
+            size: "xs",
+            color: "#B08968",
+            flex: 1
+          },
+          {
+            type: "text",
+            text: card.chakra,
+            size: "sm",
+            color: "#555555",
+            flex: 4,
+            wrap: true
+          },
         ],
       });
     }
-    bodyContents.push({ type: "separator", margin: "md" });
-    bodyContents.push({ type: "text", text: card.guidance || "無", wrap: true, margin: "md", size: "sm", color: "#333333" });
-    if (card.description) {
-      bodyContents.push({ type: "separator", margin: "md" });
-      bodyContents.push({ type: "text", text: card.description, wrap: true, margin: "md", size: "xs", color: "#777777" });
+
+    bodyContents.push({
+      type: "separator",
+      margin: "md"
+    });
+
+    bodyContents.push({
+      type: "text",
+      text: card.guidance || "無",
+      wrap: true,
+      margin: "md",
+      size: "sm",
+      color: "#333333"
+    });
+
+    if(card.description){
+      bodyContents.push({
+        type: "separator",
+        margin: "md"
+      });
+
+      bodyContents.push({
+        type: "text",
+        text: card.description,
+        wrap: true,
+        margin: "md",
+        size: "xs",
+        color: "#777777"
+      });
     }
 
     return {
       type: "bubble",
+
       header: {
-        type: "box", layout: "vertical",
+        type: "box",
+        layout: "vertical",
         contents: [
-          { type: "text", text: label, size: "xs", color: "#B08968", align: "center" },
-          { type: "text", text: card.name, weight: "bold", size: "xl", align: "center" },
-          { type: "text", text: card.name_en || "", size: "sm", align: "center", color: "#888888" },
+          {
+            type: "text",
+            text: label,
+            size: "xs",
+            color: "#B08968",
+            align: "center"
+          },
+          {
+            type: "text",
+            text: card.name,
+            weight: "bold",
+            size: "xl",
+            align: "center"
+          },
+          {
+            type: "text",
+            text: card.name_en || "",
+            size: "sm",
+            align: "center",
+            color: "#888888"
+          },
         ],
       },
-      hero: { type: "image", url: card.image_url, size: "full", aspectRatio: "4:3", aspectMode: "cover" },
-      body: { type: "box", layout: "vertical", spacing: "sm", contents: bodyContents },
+
+      hero: {
+        type: "image",
+        url: card.image_url,
+        size: "full",
+        aspectRatio: "4:3",
+        aspectMode: "cover"
+      },
+
+      body: {
+        type: "box",
+        layout: "vertical",
+        spacing: "sm",
+        contents: bodyContents
+      },
     };
   }
 
   function logDrawToBackend(){
-    if (!collectedResults.length) return;
+    if(!collectedResults.length){
+      return;
+    }
+
     const payload = {
-      user_id: liffProfile ? liffProfile.userId : '',
-      display_name: liffProfile ? liffProfile.displayName : '',
+      user_id:
+        liffProfile
+          ? liffProfile.userId
+          : '',
+
+      display_name:
+        liffProfile
+          ? liffProfile.displayName
+          : '',
+
       mode: `mode_${currentMode}`,
-      cards: collectedResults.map(r => r.card.name),
+
+      cards:
+        collectedResults.map(
+          r => r.card.name
+        ),
     };
+
     fetch(`${API_BASE}/api/log-draw`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+
+      headers: {
+        'Content-Type': 'application/json'
+      },
+
       body: JSON.stringify(payload),
-    }).catch((e) => console.error('[log-draw error]', e));
+
+    }).catch(e => {
+      console.error(
+        '[log-draw error]',
+        e
+      );
+    });
   }
 
   function finishAndSend(){
     showAgainButton();
     logDrawToBackend();
 
-    if (!liffReady || !window.liff || !liff.isInClient()) {
-      sendStatus.textContent = '（非 LINE 內開啟，結果僅顯示於本頁面）';
+    if(
+      !liffReady ||
+      !window.liff ||
+      !liff.isInClient()
+    ){
+      sendStatus.textContent =
+        '（非 LINE 內開啟，結果僅顯示於本頁面）';
+
       return;
     }
 
-    const bubbles = collectedResults.map(r => buildBubble(r.label, r.card));
-    const modeTitle = MODE_CONFIG[currentMode] ? MODE_CONFIG[currentMode].title : '指示牌';
-    const altText = `${modeTitle}牌陣結果：` + collectedResults.map(r => r.card.name).join('、');
+    const bubbles =
+      collectedResults.map(
+        r => buildBubble(r.label, r.card)
+      );
+
+    const modeTitle =
+      MODE_CONFIG[currentMode]
+        ? MODE_CONFIG[currentMode].title
+        : '指示牌';
+
+    const altText =
+      `${modeTitle}牌陣結果：` +
+      collectedResults
+        .map(r => r.card.name)
+        .join('、');
 
     const flexMessage = {
       type: "flex",
       altText: altText,
-      contents: bubbles.length > 1 ? { type: "carousel", contents: bubbles } : bubbles[0],
+
+      contents:
+        bubbles.length > 1
+          ? {
+              type: "carousel",
+              contents: bubbles
+            }
+          : bubbles[0],
     };
 
-    sendStatus.textContent = '正在將結果送回聊天室……';
-    liff.sendMessages([flexMessage]).then(() => {
-      sendStatus.textContent = '已送回 LINE 聊天室 ✓ 即將自動關閉';
-      setTimeout(() => { try { liff.closeWindow(); } catch(e){} }, 1200);
-    }).catch((err) => {
-      const reason = (err && err.message) ? err.message : String(err);
-      sendStatus.textContent = `送回聊天室失敗：${reason}`;
-      console.error('[liff.sendMessages error]', err);
-    });
+    sendStatus.textContent =
+      '正在將結果送回聊天室……';
+
+    liff.sendMessages([flexMessage])
+      .then(() => {
+        sendStatus.textContent =
+          '已送回 LINE 聊天室 ✓ 即將自動關閉';
+
+        setTimeout(() => {
+          try{
+            liff.closeWindow();
+          }catch(e){}
+        }, 1200);
+      })
+      .catch(err => {
+        const reason =
+          err && err.message
+            ? err.message
+            : String(err);
+
+        sendStatus.textContent =
+          `送回聊天室失敗：${reason}`;
+
+        console.error(
+          '[liff.sendMessages error]',
+          err
+        );
+      });
   }
 
   function showAgainButton(){
-    againBtn.style.display = 'inline-block';
+    againBtn.style.display =
+      'inline-block';
   }
 
-  modeSelect.addEventListener('click', (e) => {
-    const btn = e.target.closest('.mode-btn');
-    if (!btn) return;
-    enterStage(Number(btn.dataset.mode));
-  });
+  modeSelect.addEventListener(
+    'click',
+    e => {
+      const btn =
+        e.target.closest('.mode-btn');
 
-  backBtn.addEventListener('click', showModeSelect);
-  againBtn.addEventListener('click', showModeSelect);
+      if(!btn){
+        return;
+      }
+
+      enterStage(
+        Number(btn.dataset.mode)
+      );
+    }
+  );
+
+  backBtn.addEventListener(
+    'click',
+    showModeSelect
+  );
+
+  againBtn.addEventListener(
+    'click',
+    showModeSelect
+  );
 
   function initFromQuery(){
-    const params = new URLSearchParams(window.location.search);
-    const m = Number(params.get('mode'));
-    if (m >= 1 && m <= 5) enterStage(m);
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+    const m =
+      Number(params.get('mode'));
+
+    if(m >= 1 && m <= 5){
+      enterStage(m);
+    }
   }
 
   function initLiff(){
-    if (!window.liff) return Promise.resolve();
-    return liff.init({ liffId: LIFF_ID })
+    if(!window.liff){
+      return Promise.resolve();
+    }
+
+    return liff
+      .init({
+        liffId: LIFF_ID
+      })
       .then(() => {
         liffReady = true;
-        if (liff.isLoggedIn && liff.isLoggedIn()) {
-          return liff.getProfile().then(p => { liffProfile = p; }).catch(() => {});
+
+        if(
+          liff.isLoggedIn &&
+          liff.isLoggedIn()
+        ){
+          return liff
+            .getProfile()
+            .then(p => {
+              liffProfile = p;
+            })
+            .catch(() => {});
         }
       })
-      .catch((e) => console.error('[liff.init error]', e));
+      .catch(e => {
+        console.error(
+          '[liff.init error]',
+          e
+        );
+      });
   }
 
-  Promise.all([loadData(), initLiff()]).then(() => {
-    instruction.textContent = '';
-    initFromQuery();
-  }).catch((e) => {
-    console.error('[loadData error]', e);
-    instruction.textContent = '資料讀取失敗，請重新整理頁面再試一次。';
-  });
+  Promise
+    .all([
+      loadData(),
+      initLiff()
+    ])
+    .then(() => {
+      instruction.textContent = '';
+      initFromQuery();
+    })
+    .catch(e => {
+      console.error(
+        '[loadData error]',
+        e
+      );
+
+      instruction.textContent =
+        '資料讀取失敗，請重新整理頁面再試一次。';
+    });
 })();
