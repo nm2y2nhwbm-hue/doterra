@@ -49,7 +49,7 @@
     "熊": "若你的問題與老闆有關",
   };
 
-  const FAN_POOL_SIZE = 30;   // 扇形展示張數（U型可容納較多，不必犧牲卡片大小）
+  const FAN_POOL_SIZE = 16;   // 扇形展示張數（U型可容納較多，不必犧牲卡片大小）
   let fanItems = [];
   let drawPlan = [];
   let drawnCount = 0;
@@ -148,59 +148,32 @@
     });
   }
 
-           // ---------- 馬蹄形正 U 型排列 ----------
-function layoutFan() {
-  const n = fanItems.length;
-  if (!n) return;
-
-  const radius = 280;       // U 型半圓寬度的一半
-  const armHeight = 320;    // 左右直立段高度
-
-  // 半圓與兩側直線的總路徑長度
-  const arcLength = Math.PI * radius;
-  const totalLength = armHeight * 2 + arcLength;
-
-  fanItems.forEach((item, i) => {
-    const t = n === 1 ? 0.5 : i / (n - 1);
-    const distance = t * totalLength;
-
-    let x;
-    let y;
-    let rotation;
-
-    if (distance < armHeight) {
-      // 左側直立段：由上往下
-      x = -radius;
-      y = -armHeight + distance;
-      rotation = 0;
-
-    } else if (distance < armHeight + arcLength) {
-      // 底部半圓：由左側繞過底部到右側
-      const arcDistance = distance - armHeight;
-      const angle = Math.PI + arcDistance / radius;
-
-      x = Math.cos(angle) * radius;
-      y = -Math.sin(angle) * radius;
-
-      // 左端 0°、底部 90°、右端 180°
-      rotation = (angle - Math.PI) * 180 / Math.PI;
-
-    } else {
-      // 右側直立段：由下往上
-      const rightDistance =
-        distance - armHeight - arcLength;
-
-      x = radius;
-      y = -rightDistance;
-      rotation = 180;
-    }
-
-    item.el.style.transform =
-      `translate(-50%, -50%) translate(${x}px, ${y}px) rotate(${rotation}deg)`;
-
-    item.el.style.zIndex = String(i + 1);
-  });
+               // ---------- 扇形排開（完美正 U 型）佈局計算 ----------
+  function layoutFan(){
+    const n = fanItems.length;
+    const spreadAngle = Math.min(150, Math.max(70, n * 10)); // 最低保底 70 度，避免卡片少時弧度太平
+    const startAngle = -spreadAngle / 2;
+    const radius = 260;
+    fanItems.forEach((item, i) => {
+        const t = n === 1 ? 0.5 : i / (n - 1);
+        const angle = startAngle + t * spreadAngle;
+        const rad = angle * Math.PI / 180;
+        const x = Math.sin(rad) * radius;
+      
+      // 💡 關鍵 3：修正 Y 軸凹形。中間最低，兩側對稱抬高
+      const y = (Math.cos(rad) - 1) * radius; // 中心點 y=0，往兩側逐漸上揚
+      
+      // 💡 關鍵 4：角度反轉，讓卡牌向內收束，形成碗狀邊緣
+      item.el.style.transform = `translateX(${x}px) translateY(${y}px) rotate(${angle}deg)`;
+        item.el.style.zIndex = i;
+    });
 }
+
+
+
+
+
+
 
   function startShuffleThenFan(deckItems, mode5){
     fanWrap.style.display = 'flex';
