@@ -148,25 +148,49 @@
     });
   }
 
-              function layoutFan(){
+             function layoutFan() {
     const n = fanItems.length;
-    const arcRatio = 0.5;
-    const arcCount = Math.max(2, Math.round(n * arcRatio));
-    const straightCount = Math.floor((n - arcCount) / 2);
+    if (n === 0) return;
 
-    const arcAngleTotal = 90;   // 底部弧形展開角度（左右各 45 度）
-    const radius = 190;
-    const straightGap = 24;
+    // 69 張牌的固定分配
+    const leftCount = 17;
+    const arcCount = 35;
+    const rightCount = 17;
 
-    // 中段：底部圓弧。中心角度=0 時 y 最大（谷底），往兩側角度增加時 y 持續變小（持續上升，不反轉）
+    if (n !== leftCount + arcCount + rightCount) {
+        console.error(
+            `牌數錯誤：目前 ${n} 張，牌陣設定需要 69 張`
+        );
+        return;
+    }
+
+    // 保留原本 90° 底部弧形
+    const arcAngleTotal = 90;
+
+    // 放大排列，避免牌卡擠成一堆
+    const radiusX = 460;
+    const radiusY = 260;
+    const straightGap = 58;
+
     const arcPositions = [];
+
+    // 底部弧形：35 張
     for (let i = 0; i < arcCount; i++) {
-        const t = arcCount === 1 ? 0.5 : i / (arcCount - 1);
-        const angle = -arcAngleTotal / 2 + t * arcAngleTotal;
+        const t = i / (arcCount - 1);
+
+        const angle =
+            -arcAngleTotal / 2 +
+            t * arcAngleTotal;
+
         const rad = angle * Math.PI / 180;
-        const x = Math.sin(rad) * radius;
-        const y = Math.cos(rad) * radius;   // 中心(rad=0)→y最大(谷底)；兩側角度越大→y越小(持續上升)
-        arcPositions.push({ x, y, angle });
+
+        arcPositions.push({
+            x: Math.sin(rad) * radiusX,
+            y: Math.cos(rad) * radiusY,
+
+            // 只保留輕微傾斜
+            angle: angle * 0.45
+        });
     }
 
     const leftEdge = arcPositions[0];
@@ -174,33 +198,42 @@
 
     const positions = [];
 
-    // 左側直線臂：延續谷底往上「持續上升」的同一個方向，x 固定、y 持續遞減（不反轉）
-    for (let i = straightCount; i >= 1; i--) {
+    // 左側直線：17 張，由上往下
+    for (let i = leftCount; i >= 1; i--) {
         positions.push({
             x: leftEdge.x,
-            y: leftEdge.y - straightGap * i,   // 持續減少 = 持續往上，跟弧形段方向一致
-            angle: leftEdge.angle,
+            y: leftEdge.y - straightGap * i,
+            angle: 0
         });
     }
 
+    // 底部弧形：35 張
     positions.push(...arcPositions);
 
-    // 右側直線臂：鏡像同理，方向一致不反轉
-    for (let i = 1; i <= straightCount; i++) {
+    // 右側直線：17 張，由下往上
+    for (let i = 1; i <= rightCount; i++) {
         positions.push({
             x: rightEdge.x,
             y: rightEdge.y - straightGap * i,
-            angle: rightEdge.angle,
+            angle: 0
         });
     }
 
     fanItems.forEach((item, i) => {
-        const pos = positions[i] || positions[positions.length - 1];
-        item.el.style.transform = `translateX(${pos.x}px) translateY(${pos.y}px) rotate(${pos.angle}deg)`;
-        item.el.style.zIndex = i;
+        const pos = positions[i];
+
+        item.el.style.left = "50%";
+        item.el.style.top = "0";
+
+        item.el.style.transform = [
+            "translateX(-50%)",
+            `translate3d(${pos.x}px, ${pos.y}px, 0)`,
+            `rotate(${pos.angle}deg)`
+        ].join(" ");
+
+        item.el.style.zIndex = String(i + 1);
     });
 }
-
 
 
 
