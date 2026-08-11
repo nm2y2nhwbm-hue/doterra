@@ -148,56 +148,75 @@
     });
   }
 
-              function layoutFan(){
+              function layoutFan() {
     const n = fanItems.length;
-    const arcRatio = 0.5;
-    const arcCount = Math.max(2, Math.round(n * arcRatio));
-    const straightCount = Math.floor((n - arcCount) / 2);
+    if (!n) return;
 
-    const arcAngleTotal = 90;   // 底部弧形展開角度（左右各 45 度）
-    const radius = 190;
-    const straightGap = 24;
+    // 底部半圓約占總牌數 40%
+    const arcCount = Math.max(5, Math.round(n * 0.4));
 
-    // 中段：底部圓弧。中心角度=0 時 y 最大（谷底），往兩側角度增加時 y 持續變小（持續上升，不反轉）
+    // 左右分開計算，避免奇數時少一個座標
+    const remaining = n - arcCount;
+    const leftCount = Math.floor(remaining / 2);
+    const rightCount = remaining - leftCount;
+
+    const arcAngleTotal = 110;
+    const radiusX = 235;
+    const radiusY = 145;
+    const straightGap = 62;
+
     const arcPositions = [];
+
+    // 底部橢圓半弧：中央最低，左右端逐漸升高
     for (let i = 0; i < arcCount; i++) {
         const t = arcCount === 1 ? 0.5 : i / (arcCount - 1);
         const angle = -arcAngleTotal / 2 + t * arcAngleTotal;
         const rad = angle * Math.PI / 180;
-        const x = Math.sin(rad) * radius;
-        const y = Math.cos(rad) * radius;   // 中心(rad=0)→y最大(谷底)；兩側角度越大→y越小(持續上升)
-        arcPositions.push({ x, y, angle });
+
+        arcPositions.push({
+            x: Math.sin(rad) * radiusX,
+            y: Math.cos(rad) * radiusY,
+
+            // 底部牌只做輕微轉向，避免變成強烈扇形
+            rotate: angle * 0.32
+        });
     }
 
     const leftEdge = arcPositions[0];
     const rightEdge = arcPositions[arcPositions.length - 1];
-
     const positions = [];
 
-    // 左側直線臂：延續谷底往上「持續上升」的同一個方向，x 固定、y 持續遞減（不反轉）
-    for (let i = straightCount; i >= 1; i--) {
+    // 左側垂直直線
+    for (let i = leftCount; i >= 1; i--) {
         positions.push({
             x: leftEdge.x,
-            y: leftEdge.y - straightGap * i,   // 持續減少 = 持續往上，跟弧形段方向一致
-            angle: leftEdge.angle,
+            y: leftEdge.y - straightGap * i,
+            rotate: 0
         });
     }
 
+    // 底部半圓
     positions.push(...arcPositions);
 
-    // 右側直線臂：鏡像同理，方向一致不反轉
-    for (let i = 1; i <= straightCount; i++) {
+    // 右側垂直直線
+    for (let i = 1; i <= rightCount; i++) {
         positions.push({
             x: rightEdge.x,
             y: rightEdge.y - straightGap * i,
-            angle: rightEdge.angle,
+            rotate: 0
         });
     }
 
     fanItems.forEach((item, i) => {
-        const pos = positions[i] || positions[positions.length - 1];
-        item.el.style.transform = `translateX(${pos.x}px) translateY(${pos.y}px) rotate(${pos.angle}deg)`;
-        item.el.style.zIndex = i;
+        const pos = positions[i];
+
+        item.el.style.transform = `
+            translate(-50%, -50%)
+            translate(${pos.x}px, ${pos.y}px)
+            rotate(${pos.rotate}deg)
+        `;
+
+        item.el.style.zIndex = String(i + 1);
     });
 }
 
