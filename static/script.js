@@ -151,7 +151,7 @@
                // ---------- 扇形排開（完美正 U 型）佈局計算 ----------
   function layoutFan(){
     const n = fanItems.length;
-    const spreadAngle = Math.min(150, Math.max(70, n * 10)); // 最低保底 70 度，避免卡片少時弧度太平
+    const spreadAngle = Math.min(150, Math.max(70, n * 7)); // 最低保底 70 度，避免卡片少時弧度太平
     const startAngle = -spreadAngle / 2;
     const radius = 260;
     fanItems.forEach((item, i) => {
