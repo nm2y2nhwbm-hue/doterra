@@ -154,7 +154,7 @@ function layoutFan() {
   if (!n) return;
 
   const fanWidth = 680;  // 整體寬度
-  const uDepth = 110;    // 中央下沉深度
+  const uDepth = 160;    // 中央下沉深度
   const maxRotate = 32;  // 左右最大傾斜角度
 
   fanItems.forEach((item, i) => {
