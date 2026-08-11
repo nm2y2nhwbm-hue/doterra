@@ -152,23 +152,22 @@
     const n = fanItems.length;
     if (!n) return;
 
-    // 維持原算法：一半牌放底部弧形
+    // 保留原算法
     const arcRatio = 0.5;
     const arcCount = Math.max(2, Math.round(n * arcRatio));
 
-    // 分別計算左右數量，確保座標總數等於牌數
     const remaining = n - arcCount;
     const leftCount = Math.floor(remaining / 2);
     const rightCount = remaining - leftCount;
 
-    // 維持原本參數
+    // 保留 90°底部弧形，只放大排列尺寸
     const arcAngleTotal = 90;
-    const radius = 190;
-    const straightGap = 24;
+    const radiusX = 460;
+    const radiusY = 260;
+    const straightGap = 58;
 
     const arcPositions = [];
 
-    // 底部圓弧：中央最低，左右逐漸上升
     for (let i = 0; i < arcCount; i++) {
         const t = arcCount === 1
             ? 0.5
@@ -181,9 +180,11 @@
         const rad = angle * Math.PI / 180;
 
         arcPositions.push({
-            x: Math.sin(rad) * radius,
-            y: Math.cos(rad) * radius,
-            angle
+            x: Math.sin(rad) * radiusX,
+            y: Math.cos(rad) * radiusY,
+
+            // 保留弧形方向，但減少牌面傾斜
+            angle: angle * 0.45
         });
     }
 
@@ -191,7 +192,7 @@
     const rightEdge = arcPositions[arcPositions.length - 1];
     const positions = [];
 
-    // 左側直線：由上往下銜接底部弧線
+    // 左側垂直直線
     for (let i = leftCount; i >= 1; i--) {
         positions.push({
             x: leftEdge.x,
@@ -200,9 +201,10 @@
         });
     }
 
+    // 底部 90°圓弧
     positions.push(...arcPositions);
 
-    // 右側直線：由底部弧線往上
+    // 右側垂直直線
     for (let i = 1; i <= rightCount; i++) {
         positions.push({
             x: rightEdge.x,
@@ -214,16 +216,18 @@
     fanItems.forEach((item, i) => {
         const pos = positions[i];
 
+        item.el.style.left = "50%";
+        item.el.style.top = "0";
+
         item.el.style.transform = [
-            `translateX(${pos.x}px)`,
-            `translateY(${pos.y}px)`,
+            "translateX(-50%)",
+            `translate3d(${pos.x}px, ${pos.y}px, 0)`,
             `rotate(${pos.angle}deg)`
         ].join(" ");
 
         item.el.style.zIndex = String(i + 1);
     });
 }
-
 
 
 
