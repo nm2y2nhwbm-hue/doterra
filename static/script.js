@@ -148,21 +148,87 @@
     });
   }
 
-               // ---------- 扇形排開（完美正 U 型）佈局計算 ----------
-  function layoutFan(){
-    const n = fanItems.length;
-    const spreadAngle = Math.min(150, Math.max(70, n * 10));
-    const startAngle = -spreadAngle / 2;
-    const radius = 260;
-    fanItems.forEach((item, i) => {
-        const t = n === 1 ? 0.5 : i / (n - 1);
-        const angle = startAngle + t * spreadAngle;
-        const rad = angle * Math.PI / 180;
-        const x = Math.sin(rad) * radius;
-        const y = (1 - Math.cos(rad)) * radius; // 修正方向：中心點 y=0，兩側往下沉（正值），符合真實扇形手感
-        item.el.style.transform = `translateX(${x}px) translateY(${y}px) rotate(${angle}deg)`;
-        item.el.style.zIndex = i;
-    });
+               // ---------- 完美正 U 型佈局 ----------
+// 結構：左直線 → 底部半圓 → 右直線
+// 角度：90° → 0° → -90°
+
+function layoutFan() {
+  const n = fanItems.length;
+
+  if (!n) return;
+
+  // U 型尺寸，可依畫面調整
+  const radiusX = 260;       // U 型寬度的一半
+  const radiusY = 210;       // 底部圓弧深度
+  const sideHeight = 230;    // 左右直邊高度
+  const centerX = 0;         // 水平中心
+  const topY = 0;            // 左右頂端位置
+
+  // 三段路徑的近似長度
+  const leftLength = sideHeight;
+  const arcLength =
+    Math.PI * Math.sqrt(
+      (radiusX * radiusX + radiusY * radiusY) / 2
+    );
+  const rightLength = sideHeight;
+  const totalLength =
+    leftLength + arcLength + rightLength;
+
+  fanItems.forEach((item, i) => {
+    // 讓牌沿整條 U 型路徑平均分布
+    const progress = n === 1 ? 0.5 : i / (n - 1);
+    const distance = progress * totalLength;
+
+    let x;
+    let y;
+    let angle;
+
+    if (distance <= leftLength) {
+      // 左側直排：牌橫向放置並往下排列
+      const t = distance / leftLength;
+
+      x = centerX - radiusX;
+      y = topY + t * sideHeight;
+      angle = 90;
+
+    } else if (distance <= leftLength + arcLength) {
+      // 底部半橢圓
+      const t =
+        (distance - leftLength) / arcLength;
+
+      // theta：π → 0
+      const theta = Math.PI * (1 - t);
+
+      x = centerX + Math.cos(theta) * radiusX;
+      y =
+        topY +
+        sideHeight +
+        Math.sin(theta) * radiusY;
+
+      // 左端 90°、中央 0°、右端 -90°
+      angle = 90 - t * 180;
+
+    } else {
+      // 右側直排：由底部往上排列
+      const t =
+        (distance - leftLength - arcLength) /
+        rightLength;
+
+      x = centerX + radiusX;
+      y = topY + sideHeight * (1 - t);
+      angle = -90;
+    }
+
+    item.el.style.left = "50%";
+    item.el.style.top = "0";
+    item.el.style.transform = `
+      translateX(calc(-50% + ${x}px))
+      translateY(${y}px)
+      rotate(${angle}deg)
+    `;
+    item.el.style.transformOrigin = "center center";
+    item.el.style.zIndex = String(i + 1);
+  });
 }
 
 
