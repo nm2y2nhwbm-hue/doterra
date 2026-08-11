@@ -148,32 +148,36 @@
     });
   }
 
-            // ---------- 30 張卡牌正 U 型排列 ----------
+           // ---------- 30 張卡牌圓弧正 U 型排列 ----------
 function layoutFan() {
   const n = fanItems.length;
   if (!n) return;
 
-  const fanWidth = 680; // 整體寬度
-  const uDepth = 160;   // 中央下沉深度
-  const maxRotate = 32; // 左右最大傾斜角度
+  const spreadAngle = 76; // 左右展開角度
+  const radiusX = 570;    // 整體寬度
+  const uDepth = 155;     // 中央下沉深度
+  const maxRotate = 34;   // 兩端最大傾斜角
 
   fanItems.forEach((item, i) => {
     const t = n === 1 ? 0.5 : i / (n - 1);
     const normalized = t * 2 - 1;
+    const rad = normalized * (spreadAngle / 2) * Math.PI / 180;
 
-    // 左右兩端：-340px 到 340px
-    const x = normalized * (fanWidth / 2);
+    // 圓弧式水平分布，卡片會自然重疊
+    const x = Math.sin(rad) * radiusX;
 
-    // 左右兩端 y=0，中央 y=160，形成正 U 型
-    const y = uDepth * (1 - normalized * normalized);
+    // 兩側 y=0，中央向下，形成平滑正 U
+    const curve =
+      (Math.cos(rad) - Math.cos((spreadAngle / 2) * Math.PI / 180)) /
+      (1 - Math.cos((spreadAngle / 2) * Math.PI / 180));
 
-    // 左右對稱傾斜
+    const y = curve * uDepth;
     const rotation = normalized * maxRotate;
 
     item.el.style.transform =
-      `translateX(${x}px) translateY(${y}px) rotate(${rotation}deg)`;
+      `translate(-50%, 0) translate(${x}px, ${y}px) rotate(${rotation}deg)`;
 
-    // 中央卡牌在最上層
+    // 中央卡片盖在两侧卡片上方
     item.el.style.zIndex =
       String(Math.round(100 - Math.abs(normalized) * 50));
   });
