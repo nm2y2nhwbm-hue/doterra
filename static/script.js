@@ -148,23 +148,55 @@
     });
   }
 
-               // ---------- 扇形排開（完美正 U 型）佈局計算 ----------
-  function layoutFan(){
+               function layoutFan(){
     const n = fanItems.length;
-    const spreadAngle = Math.min(150, Math.max(70, n * 10)); // 最低保底 70 度，避免卡片少時弧度太平
-    const startAngle = -spreadAngle / 2;
-    const radius = 260;
-    fanItems.forEach((item, i) => {
-        const t = n === 1 ? 0.5 : i / (n - 1);
-        const angle = startAngle + t * spreadAngle;
+    const arcRatio = 0.5;                // 中段圓弧佔比，其餘平均分配到左右兩側直線
+    const arcCount = Math.max(2, Math.round(n * arcRatio));
+    const straightCount = Math.floor((n - arcCount) / 2);
+
+    const arcAngleTotal = 90;            // 底部弧形的總展開角度
+    const radius = 190;
+    const straightGap = 24;              // 兩側直線段，每張卡片的垂直間距
+
+    // 中段：底部圓弧
+    const arcPositions = [];
+    for (let i = 0; i < arcCount; i++) {
+        const t = arcCount === 1 ? 0.5 : i / (arcCount - 1);
+        const angle = -arcAngleTotal / 2 + t * arcAngleTotal;
         const rad = angle * Math.PI / 180;
         const x = Math.sin(rad) * radius;
-      
-      // 💡 關鍵 3：修正 Y 軸凹形。中間最低，兩側對稱抬高
-      const y = (Math.cos(rad) - 1) * radius; // 中心點 y=0，往兩側逐漸上揚
-      
-      // 💡 關鍵 4：角度反轉，讓卡牌向內收束，形成碗狀邊緣
-      item.el.style.transform = `translateX(${x}px) translateY(${y}px) rotate(${angle}deg)`;
+        const y = (1 - Math.cos(rad)) * radius;
+        arcPositions.push({ x, y, angle });
+    }
+
+    const leftEdge = arcPositions[0];
+    const rightEdge = arcPositions[arcPositions.length - 1];
+
+    const positions = [];
+
+    // 左側：從圓弧左端固定角度，純垂直往上直線延伸
+    for (let i = straightCount; i >= 1; i--) {
+        positions.push({
+            x: leftEdge.x,
+            y: leftEdge.y - straightGap * i,
+            angle: leftEdge.angle,
+        });
+    }
+
+    positions.push(...arcPositions);
+
+    // 右側：從圓弧右端固定角度，純垂直往上直線延伸（鏡像）
+    for (let i = 1; i <= straightCount; i++) {
+        positions.push({
+            x: rightEdge.x,
+            y: rightEdge.y - straightGap * i,
+            angle: rightEdge.angle,
+        });
+    }
+
+    fanItems.forEach((item, i) => {
+        const pos = positions[i] || positions[positions.length - 1];
+        item.el.style.transform = `translateX(${pos.x}px) translateY(${pos.y}px) rotate(${pos.angle}deg)`;
         item.el.style.zIndex = i;
     });
 }
