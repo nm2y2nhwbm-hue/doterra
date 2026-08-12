@@ -17,6 +17,10 @@
   const sendStatus = document.getElementById('send-status');
   const againBtn = document.getElementById('again-btn');
   const backBtn = document.getElementById('back-btn');
+  const navBookBtn = document.getElementById('nav-book-btn');
+  const barDrawBtn = document.getElementById('bar-draw-btn');
+  const barGiftBtn = document.getElementById('bar-gift-btn');
+  const siteToast = document.getElementById('site-toast');
 
   let OILS = [];
   let INDICATORS = [];
@@ -515,6 +519,29 @@
 
   backBtn.addEventListener('click', showModeSelect);
   againBtn.addEventListener('click', showModeSelect);
+
+  let toastTimer = null;
+  function showToast(msg){
+    if (!siteToast) return;
+    siteToast.textContent = msg;
+    siteToast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => siteToast.classList.remove('show'), 2400);
+  }
+
+  if (barDrawBtn) {
+    barDrawBtn.addEventListener('click', () => {
+      showModeSelect();
+      modeSelect.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+  // 「預約體驗」與「預約禮盒」需串接預約表單／商城（Phase 2），目前先提供明確提示
+  if (navBookBtn) {
+    navBookBtn.addEventListener('click', () => showToast('貴賓預約功能即將上線，敬請期待 🌿'));
+  }
+  if (barGiftBtn) {
+    barGiftBtn.addEventListener('click', () => showToast('體驗禮盒購買功能即將上線，敬請期待 🌿'));
+  }
 
   function initFromQuery(){
     const params = new URLSearchParams(window.location.search);
