@@ -45,7 +45,8 @@
     "熊": "若你的問題與老闆有關",
   };
 
-  const FAN_POOL_SIZE = 20;
+  const FAN_POOL_TARGET = 50; // 想呈現的牌陣密度（目標張數，實際會依精油資料庫數量自動封頂）
+  function fanPoolSize(){ return Math.max(3, Math.min(FAN_POOL_TARGET, OILS.length)); }
   let fanItems = [];
   let drawPlan = [];
   let drawnCount = 0;
@@ -113,7 +114,7 @@
     const cfg = MODE_CONFIG[modeId];
     stageTitle.textContent = cfg.title;
     drawPlan = cfg.labels;
-    const pool = shuffle(OILS).slice(0, FAN_POOL_SIZE).map(c => ({card:c, isIndicator:false}));
+    const pool = shuffle(OILS).slice(0, fanPoolSize()).map(c => ({card:c, isIndicator:false}));
     startShuffleThenFan(pool);
   }
 
@@ -133,7 +134,7 @@
         indicatorSelect.style.display = 'none';
         instruction.textContent = `「${ind.name}」已插入牌組，正在洗牌……洗牌之後，抽三張牌～`;
 
-        const oilsSubset = shuffle(OILS).slice(0, FAN_POOL_SIZE - 1).map(c => ({card:c, isIndicator:false}));
+        const oilsSubset = shuffle(OILS).slice(0, fanPoolSize() - 1).map(c => ({card:c, isIndicator:false}));
         const insertPos = Math.floor(Math.random() * (oilsSubset.length + 1));
         oilsSubset.splice(insertPos, 0, {card: ind, isIndicator:true});
         const finalDeck = shuffle(oilsSubset);
