@@ -40,13 +40,14 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 12px
 
 #fan-wrap{width:100%;display:none;flex-direction:column;align-items:center;}
 #fan-stage{
-  position:relative; width:100%; max-width:600px; height:320px;
-  margin:8px auto 4px; display:flex; align-items:flex-end; justify-content:center;
+  position:relative; width:100%; max-width:600px;
+  height:min(72vh, 640px); min-height:440px;
+  margin:8px auto 4px; overflow:visible;
 }
 #fan-stage.shuffling .fan-card{ animation:fanShuffle .9s ease-in-out infinite; }
 @keyframes fanShuffle{ 0%,100%{filter:brightness(1);} 50%{filter:brightness(1.06);} }
 .fan-card{
-  position:absolute; bottom:0;
+  position:absolute;
   width:clamp(52px, 7.5vw, 78px);
   height:calc(clamp(52px, 7.5vw, 78px) * 1.4);
   border-radius:9px;
@@ -56,7 +57,7 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 12px
   border:1.6px solid var(--gold);
   box-shadow:0 3px 8px rgba(63,51,43,.18);
   transform-origin:bottom center;
-  transition:transform .25s ease, box-shadow .25s ease;
+  transition:left .25s ease, top .25s ease, width .25s ease, height .25s ease, transform .25s ease, box-shadow .25s ease;
   cursor:pointer;
 }
 .fan-card:active{ box-shadow:0 6px 16px rgba(140,59,70,.3); }

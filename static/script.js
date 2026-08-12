@@ -144,56 +144,141 @@
     });
   }
 
-  // ---------- 馬蹄形 U 型佈局：兩側直線 + 底部半圓，方向全程一致不反轉 ----------
+  // ---------- 馬蹄形 U 型佈局：單一連續參數曲線 ----------
+  // 整條路徑（左臂頂端 → 左臂/圓弧交界 → 圓弧底部 → 圓弧/右臂交界 → 右臂頂端）
+  // 由同一個函式 rawHorseshoePoint(p) 依 p∈[0,1] 連續計算座標與切線角度，
+  // 兩側直臂與底部圓弧在交界處位置、切線方向皆連續銜接（非三段硬接）。
+  // 位置再依「弧長」重新取樣，讓從頂端到底部的牌卡密度全程一致。
+
+  function computeHorseshoeParams(containerW, containerH, cardH){
+    const topPad = cardH * 1.02;               // 近直立的中央牌會整張凸出頂端，預留空間
+    const bottomPad = Math.max(10, cardH * 0.12);
+    const availableH = Math.max(containerH - topPad - bottomPad, cardH * 2);
+
+    let R = (containerW * 0.74) / 2;            // U 形最大寬度 ≈ 容器寬度的 74%
+    let armLength = availableH - R;
+    if (armLength < R) {
+      // 容器偏矮或偏寬時，縮小寬度而非放大，確保「高度明顯大於寬度」且不超出容器
+      R = availableH / 2.3;
+      armLength = availableH - R;
+    }
+    armLength = Math.max(armLength, R * 0.3);
+
+    return { R, armLength, bottomPad };
+  }
+
+  function rawHorseshoePoint(p, params){
+    const { R, armLength } = params;
+    const arcLen = Math.PI * R;
+    const total = armLength * 2 + arcLen;
+    const p1 = armLength / total;
+    const p2 = (armLength + arcLen) / total;
+
+    let x, y;
+    if (p <= p1) {                              // 左臂：頂端 → 交界，垂直直線 x=-R 全程不變
+      const s = p1 === 0 ? 0 : p / p1;
+      const u = 1 - s;
+      x = -R;
+      y = -armLength * u;
+    } else if (p <= p2) {                        // 底部圓弧：左交界 → 右交界，完整半圓
+      const s2 = (p2 === p1) ? 0 : (p - p1) / (p2 - p1);
+      const theta = (180 + s2 * 180) * Math.PI / 180;
+      x = R * Math.cos(theta);
+      y = -R * Math.sin(theta);
+    } else {                                      // 右臂：交界 → 頂端，垂直直線 x=+R 全程不變
+      const s3 = (1 - p2) === 0 ? 0 : (p - p2) / (1 - p2);
+      const u = s3;
+      x = R;
+      y = -armLength * u;
+    }
+
+    // 單一連續函式決定切線旋轉角：左臂頂端≈+90°(近乎平躺)、底部中央=0°(直立)、右臂頂端≈-90°
+    const angle = 90 * Math.cos(Math.PI * p);
+    return { x, y, angle };
+  }
+
+  function sampleHorseshoe(params, resolution){
+    const pts = [];
+    for (let i = 0; i <= resolution; i++){
+      const p = i / resolution;
+      const pt = rawHorseshoePoint(p, params);
+      pts.push({ p, x: pt.x, y: pt.y, angle: pt.angle, len: 0 });
+    }
+    let acc = 0;
+    for (let i = 1; i < pts.length; i++){
+      const dx = pts[i].x - pts[i-1].x, dy = pts[i].y - pts[i-1].y;
+      acc += Math.sqrt(dx*dx + dy*dy);
+      pts[i].len = acc;
+    }
+    return { pts, totalLen: acc };
+  }
+
+  function pointAtLength(sample, targetLen){
+    const { pts, totalLen } = sample;
+    if (targetLen <= 0) return pts[0];
+    if (targetLen >= totalLen) return pts[pts.length - 1];
+    let lo = 0, hi = pts.length - 1;
+    while (lo < hi - 1){
+      const mid = (lo + hi) >> 1;
+      if (pts[mid].len < targetLen) lo = mid; else hi = mid;
+    }
+    const a = pts[lo], b = pts[hi];
+    const t = (b.len - a.len) === 0 ? 0 : (targetLen - a.len) / (b.len - a.len);
+    return {
+      x: a.x + (b.x - a.x) * t,
+      y: a.y + (b.y - a.y) * t,
+      angle: a.angle + (b.angle - a.angle) * t,
+    };
+  }
+
   function layoutFan(){
     const n = fanItems.length;
-    const arcRatio = 0.5;
-    const arcCount = Math.max(2, Math.round(n * arcRatio));
-    const straightCount = Math.floor((n - arcCount) / 2);
+    if (!n) return;
 
-    const arcAngleTotal = 90;
-    const radius = 190;
-    const straightGap = 22;
+    const rect = fanStage.getBoundingClientRect();
+    const containerW = rect.width || fanStage.clientWidth || 320;
+    const containerH = rect.height || fanStage.clientHeight || 440;
 
-    const arcPositions = [];
-    for (let i = 0; i < arcCount; i++) {
-      const t = arcCount === 1 ? 0.5 : i / (arcCount - 1);
-      const angle = -arcAngleTotal / 2 + t * arcAngleTotal;
-      const rad = angle * Math.PI / 180;
-      const x = Math.sin(rad) * radius;
-      const y = Math.cos(rad) * radius; // 中心(rad=0)→y最大(谷底)；兩側角度越大→y越小(持續上升，不反轉)
-      arcPositions.push({ x, y, angle });
-    }
+    const sampleEl = fanItems[0].el;
+    const cardW = (sampleEl && sampleEl.offsetWidth) || 68;
+    const cardH = (sampleEl && sampleEl.offsetHeight) || 95;
 
-    const leftEdge = arcPositions[0];
-    const rightEdge = arcPositions[arcPositions.length - 1];
+    const params = computeHorseshoeParams(containerW, containerH, cardH);
+    const sample = sampleHorseshoe(params, 480);
 
-    const positions = [];
+    // 牌數過多、等距間隔小於可辨識的最小露出邊寬時，縮小牌面而非撐寬 U 形
+    const spacing = n > 1 ? sample.totalLen / (n - 1) : sample.totalLen;
+    const minVisibleEdge = Math.max(10, cardW * 0.22);
+    const cardScale = (n > 1 && spacing < minVisibleEdge)
+      ? Math.max(0.42, spacing / minVisibleEdge)
+      : 1;
 
-    for (let i = straightCount; i >= 1; i--) {
-      positions.push({
-        x: leftEdge.x,
-        y: leftEdge.y - straightGap * i,
-        angle: leftEdge.angle,
-      });
-    }
-
-    positions.push(...arcPositions);
-
-    for (let i = 1; i <= straightCount; i++) {
-      positions.push({
-        x: rightEdge.x,
-        y: rightEdge.y - straightGap * i,
-        angle: rightEdge.angle,
-      });
-    }
+    const curveCenterX = containerW / 2;
+    const curveBottomY = containerH - params.bottomPad;
+    const offsetY = curveBottomY - params.R;
 
     fanItems.forEach((item, i) => {
-      const pos = positions[i] || positions[positions.length - 1];
-      item.el.style.transform = `translateX(${pos.x}px) translateY(${pos.y}px) rotate(${pos.angle}deg)`;
+      const targetLen = n > 1 ? (i / (n - 1)) * sample.totalLen : sample.totalLen / 2;
+      const pt = pointAtLength(sample, targetLen);
+      const px = curveCenterX + pt.x;
+      const py = offsetY + pt.y;
+
+      const w = cardW * cardScale, h = cardH * cardScale;
+      item.el.style.width = w + 'px';
+      item.el.style.height = h + 'px';
+      item.el.style.left = (px - w / 2) + 'px';
+      item.el.style.top = (py - h) + 'px';
+      item.el.style.transform = `rotate(${pt.angle}deg)`;
       item.el.style.zIndex = i;
     });
   }
+
+  let fanResizeRAF = null;
+  window.addEventListener('resize', () => {
+    if (fanWrap.style.display !== 'flex' || !fanItems.length) return;
+    if (fanResizeRAF) cancelAnimationFrame(fanResizeRAF);
+    fanResizeRAF = requestAnimationFrame(layoutFan);
+  });
 
   function startShuffleThenFan(deckItems, mode5){
     fanWrap.style.display = 'flex';
