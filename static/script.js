@@ -3,6 +3,8 @@
 
   const API_BASE = "https://doterra-73pv.onrender.com";
   const LIFF_ID = "2010916161-HrIOEAda";
+  const LINE_OA_URL = "https://lin.ee/wubPzzI";
+  const LINE_FOLLOW_KEY = "oc_line_follow_confirmed";
 
   const modeSelect = document.getElementById('mode-select');
   const stage = document.getElementById('stage');
@@ -13,7 +15,7 @@
   const fanStage = document.getElementById('fan-stage');
   const deckHint = document.getElementById('deck-hint');
   const drawnRow = document.getElementById('drawn-row');
-  const revealDetail = document.getElementById('reveal-detail');
+  const experiencePanel = document.getElementById('experience-panel');
   const sendStatus = document.getElementById('send-status');
   const againBtn = document.getElementById('again-btn');
   const backBtn = document.getElementById('back-btn');
@@ -80,8 +82,8 @@
     fanStage.innerHTML = '';
     fanStage.classList.remove('shuffling');
     drawnRow.innerHTML = '';
-    revealDetail.innerHTML = '';
-    revealDetail.classList.remove('active');
+    experiencePanel.innerHTML = '';
+    experiencePanel.style.display = 'none';
     sendStatus.textContent = '';
     againBtn.style.display = 'none';
     fanItems = [];
@@ -287,8 +289,8 @@
     fanStage.classList.add('shuffling');
     deckHint.textContent = '正在洗牌，請稍候……';
     drawnRow.innerHTML = '';
-    revealDetail.innerHTML = '';
-    revealDetail.classList.remove('active');
+    experiencePanel.innerHTML = '';
+    experiencePanel.style.display = 'none';
     drawnCount = 0;
     collectedResults = [];
 
@@ -330,7 +332,6 @@
     const label = drawPlan[drawnCount];
     flipCardInPlace(item, label);
     renderDrawnCard(label, item.card);
-    appendDetail(label, item.card);
     collectedResults.push({ label, card: item.card });
     drawnCount++;
 
@@ -364,7 +365,6 @@
     const indicatorItem = fanItems[idx];
     flipCardInPlace(indicatorItem, '指示牌');
     renderDrawnCard('指示牌', indicatorItem.card);
-    appendDetail('指示牌', indicatorItem.card);
     collectedResults.push({ label: '指示牌', card: indicatorItem.card });
 
     setTimeout(() => {
@@ -376,7 +376,6 @@
           const sideItem = fanItems[sideIdx];
           flipCardInPlace(sideItem, label);
           renderDrawnCard(label, sideItem.card);
-          appendDetail(label, sideItem.card);
           collectedResults.push({ label, card: sideItem.card });
         }, delay);
       };
@@ -393,28 +392,97 @@
   function renderDrawnCard(label, card){
     const slot = document.createElement('div');
     slot.className = 'drawn-slot';
-    slot.innerHTML = `
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'drawn-card';
+    btn.innerHTML = `
       <div class="slot-label">${label}</div>
-      <div class="drawn-card">
-        <img src="${card.image_url}" alt="${card.name}">
-        <div class="cap"><b>${card.name}</b><span>${card.name_en || ''}</span></div>
-      </div>`;
+      <img src="${card.image_url}" alt="${card.name}">
+      <div class="cap"><b>${card.name}</b><span>${card.name_en || ''}</span></div>
+      <div class="read-link">閱讀訊息 →</div>`;
+    btn.addEventListener('click', () => openInsightModal(label, card));
+    slot.appendChild(btn);
     drawnRow.appendChild(slot);
   }
 
-  function appendDetail(label, card){
+  function splitKeywords(keywords){
+    if (!keywords) return [];
+    return keywords.split(/[,，、\s]+/).map(s => s.trim()).filter(Boolean);
+  }
+
+  let insightModalEl = null;
+  function ensureInsightModal(){
+    if (insightModalEl) return insightModalEl;
     const el = document.createElement('div');
-    el.className = 'detail-card';
+    el.className = 'insight-modal';
     el.innerHTML = `
-      <div class="dc-label">${label}</div>
-      <div class="dc-name">${card.name}</div>
-      <div class="dc-name-en">${card.name_en || ''}</div>
-      ${card.keywords ? `<div class="dc-keywords">${card.keywords}</div>` : ''}
-      ${card.guidance ? `<div class="dc-guidance">${card.guidance}</div>` : ''}
-      ${card.chakra ? `<div class="dc-chakra">脈輪：${card.chakra}</div>` : ''}
-    `;
-    revealDetail.appendChild(el);
-    revealDetail.classList.add('active');
+      <div class="insight-modal-card">
+        <button type="button" class="insight-modal-close" aria-label="關閉">✕</button>
+        <div class="insight-modal-img"><img id="im-img" src="" alt=""></div>
+        <div class="insight-modal-body">
+          <div class="im-eyebrow" id="im-label"></div>
+          <div class="im-name" id="im-name"></div>
+          <div class="im-name-en" id="im-name-en"></div>
+          <div class="im-pills" id="im-pills"></div>
+          <div id="im-locked-content">
+            <div class="im-gate">
+              <div class="gate-eyebrow">SAVE YOUR INSIGHT</div>
+              <div class="gate-title">保存這次的洞悉</div>
+              <div class="gate-desc">加入 LINE 官方帳號，即可查看完整訊息，並接收本次抽卡紀錄與後續說明。</div>
+              <div class="gate-note">是否加入由您自由選擇；不加入仍可查看本次簡要訊息。</div>
+              <div class="gate-qr"><img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(LINE_OA_URL)}" alt="LINE 官方帳號 QR Code"></div>
+              <button type="button" class="gate-confirm-btn" id="im-gate-confirm">我已完成加入，查看完整訊息</button>
+              <button type="button" class="gate-skip-btn" id="im-gate-skip">暫時略過，查看簡要訊息</button>
+            </div>
+          </div>
+          <div id="im-unlocked-content" style="display:none;">
+            <div class="im-guidance" id="im-guidance"></div>
+            <div class="im-chakra" id="im-chakra"></div>
+          </div>
+        </div>
+      </div>`;
+    document.body.appendChild(el);
+    el.querySelector('.insight-modal-close').addEventListener('click', closeInsightModal);
+    el.addEventListener('click', (e) => { if (e.target === el) closeInsightModal(); });
+    el.querySelector('#im-gate-confirm').addEventListener('click', () => {
+      try { localStorage.setItem(LINE_FOLLOW_KEY, '1'); } catch(e){}
+      showUnlockedContent(el);
+    });
+    el.querySelector('#im-gate-skip').addEventListener('click', closeInsightModal);
+    insightModalEl = el;
+    return el;
+  }
+
+  function showUnlockedContent(el){
+    el.querySelector('#im-locked-content').style.display = 'none';
+    el.querySelector('#im-unlocked-content').style.display = 'block';
+  }
+
+  function isLineFollowConfirmed(){
+    try { return localStorage.getItem(LINE_FOLLOW_KEY) === '1'; } catch(e){ return false; }
+  }
+
+  function openInsightModal(label, card){
+    const el = ensureInsightModal();
+    el.querySelector('#im-img').src = card.image_url;
+    el.querySelector('#im-img').alt = card.name;
+    el.querySelector('#im-label').textContent = label;
+    el.querySelector('#im-name').textContent = card.name;
+    el.querySelector('#im-name-en').textContent = card.name_en || '';
+    el.querySelector('#im-pills').innerHTML = splitKeywords(card.keywords)
+      .map(k => `<span class="im-pill">${k}</span>`).join('');
+    el.querySelector('#im-guidance').textContent = card.guidance || '';
+    el.querySelector('#im-chakra').textContent = card.chakra ? `脈輪：${card.chakra}` : '';
+
+    el.querySelector('#im-locked-content').style.display = 'block';
+    el.querySelector('#im-unlocked-content').style.display = 'none';
+    if (isLineFollowConfirmed()) showUnlockedContent(el);
+
+    el.classList.add('open');
+  }
+
+  function closeInsightModal(){
+    if (insightModalEl) insightModalEl.classList.remove('open');
   }
 
   function buildBubble(label, card){
@@ -477,30 +545,68 @@
     showAgainButton();
     logDrawToBackend();
 
-    if (!liffReady || !window.liff || !liff.isInClient()) {
-      sendStatus.textContent = '（非 LINE 內開啟，結果僅顯示於本頁面）';
-      return;
-    }
-
-    const bubbles = collectedResults.map(r => buildBubble(r.label, r.card));
     const modeTitle = MODE_CONFIG[currentMode] ? MODE_CONFIG[currentMode].title : '指示牌';
-    const altText = `${modeTitle}牌陣結果：` + collectedResults.map(r => r.card.name).join('、');
+    const resultsPayload = collectedResults.map(r => ({
+      label: r.label, card_name: r.card.name, card_name_en: r.card.name_en || '', image_url: r.card.image_url,
+    }));
+    const lineUserId = liffProfile ? liffProfile.userId : null;
+    const lineDisplayName = liffProfile ? liffProfile.displayName : null;
 
-    const flexMessage = {
-      type: "flex",
-      altText: altText,
-      contents: bubbles.length > 1 ? { type: "carousel", contents: bubbles } : bubbles[0],
-    };
+    const getCode = (window.OracleSupabase && window.OracleSupabase.saveDrawAndGetCode)
+      ? window.OracleSupabase.saveDrawAndGetCode(currentMode, resultsPayload, lineUserId, lineDisplayName)
+      : Promise.resolve({ code: null, persisted: false });
 
-    sendStatus.textContent = '正在將結果送回聊天室……';
-    liff.sendMessages([flexMessage]).then(() => {
-      sendStatus.textContent = '已送回 LINE 聊天室 ✓ 即將自動關閉';
-      setTimeout(() => { try { liff.closeWindow(); } catch(e){} }, 1200);
-    }).catch((err) => {
-      const reason = (err && err.message) ? err.message : String(err);
-      sendStatus.textContent = `送回聊天室失敗：${reason}`;
-      console.error('[liff.sendMessages error]', err);
+    getCode.then(({ code, persisted }) => {
+      renderExperiencePanel(code, persisted, modeTitle);
     });
+  }
+
+  function renderExperiencePanel(code, persisted, modeTitle){
+    experiencePanel.style.display = 'block';
+    experiencePanel.innerHTML = `
+      <div class="ep-label">妳的專屬貴賓體驗碼</div>
+      <div class="ep-code">${code || '（產生中，請稍候）'}</div>
+      <div class="ep-desc">將此碼傳給 LINE 顧問，可詢問本次牌卡與禮盒體驗。${persisted ? '' : '<br>（尚未連接雲端保存，此碼僅供本次顯示）'}</div>
+      <button type="button" class="ep-send-btn" id="ep-send-btn">傳送體驗碼，了解禮盒</button>
+      <a class="ep-book-link" href="booking.html${code ? '?code=' + encodeURIComponent(code) : ''}">或直接預約貴賓體驗 →</a>`;
+    const btn = experiencePanel.querySelector('#ep-send-btn');
+    btn.addEventListener('click', () => sendExperienceCode(code, modeTitle));
+  }
+
+  function sendExperienceCode(code, modeTitle){
+    const btn = experiencePanel.querySelector('#ep-send-btn');
+    if (btn) btn.disabled = true;
+
+    if (liffReady && window.liff && liff.isInClient()) {
+      const bubbles = collectedResults.map(r => buildBubble(r.label, r.card));
+      const altText = `${modeTitle}牌陣結果：` + collectedResults.map(r => r.card.name).join('、');
+      const flexMessage = {
+        type: "flex",
+        altText: altText,
+        contents: bubbles.length > 1 ? { type: "carousel", contents: bubbles } : bubbles[0],
+      };
+      const codeMessage = { type: "text", text: `體驗碼：${code}\n請提供給您的精油顧問，即可了解禮盒體驗 🌿` };
+
+      sendStatus.textContent = '正在將結果送回聊天室……';
+      liff.sendMessages([flexMessage, codeMessage]).then(() => {
+        sendStatus.textContent = '已送回 LINE 聊天室 ✓';
+        if (btn) btn.disabled = false;
+      }).catch((err) => {
+        const reason = (err && err.message) ? err.message : String(err);
+        sendStatus.textContent = `送回聊天室失敗：${reason}`;
+        console.error('[liff.sendMessages error]', err);
+        if (btn) btn.disabled = false;
+      });
+    } else {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(code).catch(() => {});
+      }
+      sendStatus.textContent = '體驗碼已複製，加入 LINE 官方帳號後貼給顧問即可';
+      if (LINE_OA_URL && !LINE_OA_URL.includes('YOUR-OA-LINK')) {
+        window.open(LINE_OA_URL, '_blank');
+      }
+      if (btn) btn.disabled = false;
+    }
   }
 
   function showAgainButton(){

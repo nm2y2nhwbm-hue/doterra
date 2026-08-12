@@ -222,3 +222,156 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 16px
 .home-feature-card span{ font-size:12.5px; color:var(--ink-soft); line-height:1.7; }
 
 .home-footer{ width:100%; text-align:center; padding:20px 16px 8px; font-size:11px; color:var(--sage); letter-spacing:.05em; }
+
+/* ---------- 抽牌結果：平放卡片列（點擊看詳情） ---------- */
+#drawn-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:12px;width:100%;max-width:520px;margin-top:14px;}
+.drawn-slot{display:flex;}
+.drawn-card{
+  width:100%; border-radius:12px; overflow:hidden; border:1.5px solid rgba(184,145,46,.4);
+  box-shadow:0 4px 12px rgba(58,54,46,.12); background:#fffaf3; display:flex; flex-direction:column;
+  animation:cardReveal .5s ease; cursor:pointer; text-align:left; padding:0; font:inherit; color:inherit;
+}
+.drawn-card:active{ transform:scale(.98); }
+@keyframes cardReveal{ from{opacity:0;transform:translateY(10px) scale(.95);} to{opacity:1;transform:translateY(0) scale(1);} }
+.drawn-card .slot-label{font-size:10.5px;color:var(--sage);letter-spacing:.05em;text-align:center;padding:8px 6px 6px;}
+.drawn-card img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;}
+.drawn-card .cap{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:8px 6px 4px;text-align:center;gap:2px;}
+.drawn-card .cap b{font-size:13px;color:var(--forest-deep);}
+.drawn-card .cap span{font-size:9.5px;color:var(--ink-soft);}
+.drawn-card .read-link{font-size:10.5px;color:var(--forest);padding:0 6px 10px;text-align:center;}
+
+/* ---------- 專屬體驗碼面板 ---------- */
+.experience-panel{
+  width:100%; max-width:420px; margin:22px auto 0; text-align:center;
+  background:#fffaf3; border:1px solid rgba(184,145,46,.4); border-radius:16px;
+  padding:18px 20px; box-shadow:0 3px 10px rgba(58,54,46,.08);
+}
+.experience-panel .ep-label{font-size:11px;color:var(--sage);letter-spacing:.1em;margin-bottom:6px;}
+.experience-panel .ep-code{font-family:"Cormorant Garamond",serif;font-size:22px;letter-spacing:.06em;color:var(--forest-deep);font-weight:600;margin-bottom:8px;word-break:break-all;}
+.experience-panel .ep-desc{font-size:11.5px;color:var(--ink-soft);line-height:1.7;margin-bottom:14px;}
+.experience-panel .ep-send-btn{
+  width:100%; min-height:44px; background:var(--forest); color:#fff; border:none; border-radius:22px;
+  font-size:13.5px; letter-spacing:.03em; cursor:pointer; box-shadow:0 3px 10px rgba(51,70,58,.28);
+}
+.experience-panel .ep-send-btn:active{ transform:scale(.98); }
+.experience-panel .ep-send-btn:disabled{ opacity:.6; }
+.experience-panel .ep-book-link{ display:block; margin-top:12px; font-size:11.5px; color:var(--forest); text-decoration:none; }
+
+/* ---------- 詳情彈窗 ---------- */
+.insight-modal{
+  position:fixed; inset:0; z-index:300; display:none;
+  background:rgba(58,54,46,.55); backdrop-filter:blur(2px);
+  align-items:center; justify-content:center; padding:16px;
+}
+.insight-modal.open{ display:flex; }
+.insight-modal-card{
+  width:100%; max-width:640px; max-height:88vh; overflow-y:auto;
+  background:var(--paper); border-radius:18px; box-shadow:0 20px 50px rgba(0,0,0,.3);
+  display:flex; flex-wrap:wrap; position:relative;
+}
+.insight-modal-img{ flex:1 1 240px; min-width:0; }
+.insight-modal-img img{ width:100%; height:100%; min-height:220px; object-fit:cover; display:block; }
+.insight-modal-body{ flex:1 1 280px; min-width:0; padding:22px 22px 20px; }
+.insight-modal-close{
+  position:absolute; top:10px; right:10px; z-index:2; width:36px; height:36px; border-radius:50%;
+  background:rgba(255,255,255,.85); border:none; font-size:16px; cursor:pointer; color:var(--ink);
+  display:flex; align-items:center; justify-content:center;
+}
+.im-eyebrow{ font-size:10.5px; letter-spacing:.22em; color:var(--sage); margin-bottom:10px; }
+.im-name{ font-family:"Cormorant Garamond","Noto Serif TC",serif; font-size:24px; color:var(--forest-deep); font-weight:600; }
+.im-name-en{ font-size:12px; color:var(--ink-soft); margin-bottom:12px; }
+.im-pills{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px; }
+.im-pill{ font-size:11px; padding:4px 12px; border-radius:14px; background:var(--paper-deep); color:var(--forest-deep); }
+.im-guidance{ font-size:13.5px; line-height:1.85; color:var(--ink); margin-bottom:10px; white-space:pre-line; }
+.im-chakra{ font-size:11.5px; color:var(--sage); margin-top:4px; }
+
+.im-gate{ border-top:1px solid rgba(184,145,46,.3); margin-top:14px; padding-top:16px; text-align:center; }
+.im-gate .gate-eyebrow{ font-size:10px; letter-spacing:.2em; color:var(--gold-soft); margin-bottom:8px; }
+.im-gate .gate-title{ font-size:15px; color:var(--forest-deep); font-weight:600; margin-bottom:8px; }
+.im-gate .gate-desc{ font-size:11.5px; color:var(--ink-soft); line-height:1.7; margin-bottom:6px; }
+.im-gate .gate-note{ font-size:10.5px; color:var(--sage); margin-bottom:14px; }
+.im-gate .gate-qr{ width:150px; height:150px; margin:0 auto 14px; border-radius:10px; overflow:hidden; border:1px solid rgba(184,145,46,.3); background:#fff; }
+.im-gate .gate-qr img{ width:100%; height:100%; object-fit:contain; }
+.im-gate .gate-confirm-btn{
+  width:100%; min-height:44px; background:var(--forest-deep); color:#fff; border:none; border-radius:22px;
+  font-size:13.5px; cursor:pointer; margin-bottom:10px;
+}
+.im-gate .gate-skip-btn{ background:none; border:none; font-size:12px; color:var(--ink-soft); text-decoration:underline; cursor:pointer; min-height:44px; }
+
+/* ---------- 貴賓體驗預約表單 ---------- */
+#booking-form-wrap{ width:100%; max-width:480px; }
+.booking-intro{ font-size:13px; color:var(--ink-soft); line-height:1.8; text-align:center; margin:0 0 22px; }
+.booking-form{ display:flex; flex-direction:column; gap:16px; }
+.form-field{ display:flex; flex-direction:column; gap:6px; }
+.form-label{ font-size:12.5px; color:var(--forest-deep); letter-spacing:.03em; }
+.form-label .req{ color:var(--gold); }
+.form-input{
+  min-height:44px; padding:0 14px; border-radius:10px; border:1px solid rgba(184,145,46,.4);
+  background:#fffaf3; font-family:inherit; font-size:14px; color:var(--ink);
+}
+.form-input:focus{ outline:2px solid var(--forest); outline-offset:1px; }
+.form-textarea{ min-height:88px; padding:10px 14px; resize:vertical; }
+.draw-code-note{ font-size:12px; color:var(--forest); background:var(--paper-deep); border-radius:10px; padding:10px 14px; }
+.form-submit-btn{
+  min-height:48px; background:var(--forest); color:#fff; border:none; border-radius:24px;
+  font-size:14.5px; letter-spacing:.03em; cursor:pointer; box-shadow:0 4px 14px rgba(51,70,58,.28);
+}
+.form-submit-btn:active{ transform:scale(.98); }
+.form-submit-btn:disabled{ opacity:.6; }
+.booking-disclaimer{ font-size:10.5px; color:var(--sage); line-height:1.7; text-align:center; margin:2px 0 0; }
+
+.booking-confirm{
+  width:100%; max-width:420px; margin:0 auto; text-align:center;
+  background:#fffaf3; border:1px solid rgba(184,145,46,.4); border-radius:16px;
+  padding:26px 22px; box-shadow:0 3px 10px rgba(58,54,46,.08);
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+}
+.booking-confirm .home-cta{ margin-top:14px; }
+
+/* ---------- 管理後台 ---------- */
+.admin-login-wrap{ width:100%; max-width:360px; display:flex; flex-direction:column; gap:16px; margin:0 auto; }
+.admin-msg{ font-size:12.5px; color:var(--sage); text-align:center; min-height:16px; }
+
+.admin-dashboard{ width:100%; max-width:640px; }
+.admin-stats-row{ display:flex; gap:12px; margin-bottom:18px; }
+.admin-stat-card{
+  flex:1; background:#fffaf3; border:1px solid rgba(184,145,46,.35); border-radius:14px;
+  padding:16px; text-align:center; display:flex; flex-direction:column; gap:4px;
+}
+.admin-stat-card b{ font-family:"Cormorant Garamond",serif; font-size:28px; color:var(--forest-deep); }
+.admin-stat-card span{ font-size:11.5px; color:var(--ink-soft); }
+
+.admin-toolbar{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+.admin-toolbar .form-input{ flex:1 1 160px; min-width:0; }
+.admin-status-filter{ flex:0 0 120px; }
+.admin-logout-btn{ min-height:44px; padding:0 16px; }
+
+.booking-list{ display:flex; flex-direction:column; gap:14px; }
+.booking-card{
+  background:#fffaf3; border:1px solid rgba(184,145,46,.35); border-radius:14px;
+  padding:16px 18px; box-shadow:0 2px 8px rgba(58,54,46,.08);
+}
+.booking-card-head{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; gap:10px; }
+.booking-receipt{ font-family:"Cormorant Garamond",serif; font-size:17px; color:var(--forest-deep); font-weight:600; }
+.booking-created{ font-size:10.5px; color:var(--sage); }
+.status-badge{ font-size:11px; padding:4px 12px; border-radius:12px; white-space:nowrap; flex-shrink:0; }
+.status-badge.status-pending{ background:#F3E7C9; color:#7A5C1E; }
+.status-badge.status-contacted{ background:#DCE7E0; color:var(--forest-deep); }
+.status-badge.status-done{ background:var(--forest); color:#fff; }
+.status-badge.status-cancelled{ background:#EADCDC; color:#7A3B3B; }
+
+.booking-row{ font-size:12.5px; color:var(--ink); line-height:1.7; }
+.booking-actions{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+.booking-status-select{ flex:0 0 120px; min-height:40px; }
+.draw-toggle-btn{
+  min-height:40px; padding:0 14px; border-radius:10px; border:1px solid var(--forest); background:none;
+  color:var(--forest); font-size:12.5px; cursor:pointer;
+}
+
+.draw-detail{ margin-top:12px; padding-top:12px; border-top:1px solid rgba(184,145,46,.3); }
+.draw-detail-meta{ font-size:11px; color:var(--sage); margin-bottom:8px; }
+.draw-detail-cards{ display:flex; flex-wrap:wrap; gap:10px; }
+.draw-detail-card{ width:76px; text-align:center; }
+.draw-detail-card img{ width:76px; height:57px; object-fit:cover; border-radius:8px; border:1px solid rgba(184,145,46,.35); }
+.draw-detail-card .ddc-label{ font-size:9px; color:var(--sage); margin-top:4px; }
+.draw-detail-card .ddc-name{ font-size:10.5px; color:var(--forest-deep); }

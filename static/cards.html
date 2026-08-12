@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>多特瑞精油洞悉卡</title>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<link rel="stylesheet" href="style.css?v=7">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
 
@@ -38,13 +39,14 @@
       <div id="drawn-row"></div>
     </div>
 
-    <div id="reveal-detail"></div>
+    <div id="experience-panel" class="experience-panel" style="display:none;"></div>
     <div class="send-status" id="send-status"></div>
     <button class="again-btn" id="again-btn" style="display:none;">再抽一次 / 選擇其他牌陣</button>
   </div>
 
 </main>
 
-<script src="script.js?v=7"></script>
+<script src="supabase-client.js?v=1"></script>
+<script src="script.js?v=8"></script>
 </body>
 </html>
