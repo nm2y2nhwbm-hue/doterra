@@ -1,12 +1,8 @@
 (function(){
   "use strict";
 
-  // ⚠️ 請依照 cards.html 實際部署位置調整這裡：
-  // 若 cards.html 跑在 Render 上（跟 API 同網域），可以把 API_BASE 改成空字串 ''，
-  // 直接用相對路徑 fetch('/api/oils') 即可，不需要跨網域。
-  // 若 cards.html 跑在 Vercel（跟 API 不同網域），才需要填完整 Render 網址。
   const API_BASE = "https://doterra-73pv.onrender.com";
-  const LIFF_ID = "2010916161-HrIOEAda"; // 雫之洞悉・返魂堂（開發環境）
+  const LIFF_ID = "2010916161-HrIOEAda";
 
   const modeSelect = document.getElementById('mode-select');
   const stage = document.getElementById('stage');
@@ -49,7 +45,7 @@
     "熊": "若你的問題與老闆有關",
   };
 
-  const FAN_POOL_SIZE = 16;   // 扇形展示張數（U型可容納較多，不必犧牲卡片大小）
+  const FAN_POOL_SIZE = 20;
   let fanItems = [];
   let drawPlan = [];
   let drawnCount = 0;
@@ -148,25 +144,25 @@
     });
   }
 
-    function layoutFan(){
+  // ---------- 馬蹄形 U 型佈局：兩側直線 + 底部半圓，方向全程一致不反轉 ----------
+  function layoutFan(){
     const n = fanItems.length;
     const arcRatio = 0.5;
     const arcCount = Math.max(2, Math.round(n * arcRatio));
     const straightCount = Math.floor((n - arcCount) / 2);
 
-    const arcAngleTotal = 90;   // 底部弧形展開角度（左右各 45 度）
+    const arcAngleTotal = 90;
     const radius = 190;
-    const straightGap = 24;
+    const straightGap = 22;
 
-    // 中段：底部圓弧。中心角度=0 時 y 最大（谷底），往兩側角度增加時 y 持續變小（持續上升，不反轉）
     const arcPositions = [];
     for (let i = 0; i < arcCount; i++) {
-        const t = arcCount === 1 ? 0.5 : i / (arcCount - 1);
-        const angle = -arcAngleTotal / 2 + t * arcAngleTotal;
-        const rad = angle * Math.PI / 180;
-        const x = Math.sin(rad) * radius;
-        const y = Math.cos(rad) * radius;   // 中心(rad=0)→y最大(谷底)；兩側角度越大→y越小(持續上升)
-        arcPositions.push({ x, y, angle });
+      const t = arcCount === 1 ? 0.5 : i / (arcCount - 1);
+      const angle = -arcAngleTotal / 2 + t * arcAngleTotal;
+      const rad = angle * Math.PI / 180;
+      const x = Math.sin(rad) * radius;
+      const y = Math.cos(rad) * radius; // 中心(rad=0)→y最大(谷底)；兩側角度越大→y越小(持續上升，不反轉)
+      arcPositions.push({ x, y, angle });
     }
 
     const leftEdge = arcPositions[0];
@@ -174,36 +170,30 @@
 
     const positions = [];
 
-    // 左側直線臂：延續谷底往上「持續上升」的同一個方向，x 固定、y 持續遞減（不反轉）
     for (let i = straightCount; i >= 1; i--) {
-        positions.push({
-            x: leftEdge.x,
-            y: leftEdge.y - straightGap * i,   // 持續減少 = 持續往上，跟弧形段方向一致
-            angle: leftEdge.angle,
-        });
+      positions.push({
+        x: leftEdge.x,
+        y: leftEdge.y - straightGap * i,
+        angle: leftEdge.angle,
+      });
     }
 
     positions.push(...arcPositions);
 
-    // 右側直線臂：鏡像同理，方向一致不反轉
     for (let i = 1; i <= straightCount; i++) {
-        positions.push({
-            x: rightEdge.x,
-            y: rightEdge.y - straightGap * i,
-            angle: rightEdge.angle,
-        });
+      positions.push({
+        x: rightEdge.x,
+        y: rightEdge.y - straightGap * i,
+        angle: rightEdge.angle,
+      });
     }
 
     fanItems.forEach((item, i) => {
-        const pos = positions[i] || positions[positions.length - 1];
-        item.el.style.transform = `translateX(${pos.x}px) translateY(${pos.y}px) rotate(${pos.angle}deg)`;
-        item.el.style.zIndex = i;
+      const pos = positions[i] || positions[positions.length - 1];
+      item.el.style.transform = `translateX(${pos.x}px) translateY(${pos.y}px) rotate(${pos.angle}deg)`;
+      item.el.style.zIndex = i;
     });
-}
-
-
-
-
+  }
 
   function startShuffleThenFan(deckItems, mode5){
     fanWrap.style.display = 'flex';
@@ -341,7 +331,6 @@
     revealDetail.classList.add('active');
   }
 
-  // ---------- 組 Flex carousel JSON，透過 liff.sendMessages() 送回 LINE 聊天室 ----------
   function buildBubble(label, card){
     const bodyContents = [
       {
