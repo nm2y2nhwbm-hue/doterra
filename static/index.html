@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<script>
+  // LINE 入口偵測：由 LINE App 內建瀏覽器開啟時（例如 LINE OA 選單連結），
+  // 外層首頁只會瞬間閃過，立刻導向內層抽卡工具頁，不停留在行銷首頁。
+  // 放在 <head> 最前面、樣式表載入之前，盡量縮短這個瞬間。
+  (function(){
+    try {
+      if (/\bLine\//i.test(navigator.userAgent)) {
+        window.location.replace('cards.html' + window.location.search);
+      }
+    } catch (e) {}
+  })();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>多特瑞精油洞悉卡｜MODERN OIL ORACLE</title>
+<link rel="stylesheet" href="style.css?v=7">
+</head>
+<body class="has-fixed-nav has-fixed-bar">
+
+<header class="site-nav">
+  <div class="site-nav-inner">
+    <span class="site-nav-logo">多特瑞精油洞悉卡</span>
+    <nav class="site-nav-links">
+      <a href="cards.html">線上抽牌</a>
+      <a href="#gift" id="nav-gift-link">貴賓禮盒</a>
+      <a href="#about">卡牌說明</a>
+    </nav>
+    <button class="site-nav-cta" id="nav-book-btn" type="button">立即預約</button>
+  </div>
+</header>
+
+<main style="padding:0;">
+
+  <section class="home-hero">
+    <div class="home-hero-text">
+      <div class="home-kicker">MODERN OIL ORACLE</div>
+      <h1>停下來，<br>讓一張牌接住此刻的你</h1>
+      <p class="home-sub">結合多特瑞精油與塔羅直覺，為忙碌的現代人打造的 3 分鐘身心校準儀式——不需要懂占卜，只需要深呼吸，讓直覺帶你抽出屬於此刻的訊息。</p>
+      <div class="home-cta-row">
+        <a class="home-cta primary" href="cards.html">🔮 免費線上抽卡</a>
+        <button class="home-cta secondary" id="hero-gift-btn" type="button">💎 預約貴賓體驗禮盒</button>
+      </div>
+      <p class="home-disclaimer">此服務為身心靈探索工具，不做醫療、心理或投資專業建議</p>
+    </div>
+    <div class="home-hero-visual">
+      <div class="home-card-mock">
+        <div class="spark">✦</div>
+        <div class="eyebrow">INSIGHT</div>
+        <div class="title">洞悉</div>
+        <div class="line">精油的氣息<br>照見此刻的訊息</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="home-section" id="about">
+    <div class="home-section-title">五種牌陣，回應不同的此刻</div>
+    <div class="home-feature-grid">
+      <div class="home-feature-card"><b>今日能量</b><span>單張心靈肯定小語，快速校準一天的心情</span></div>
+      <div class="home-feature-card"><b>生活導引</b><span>兩張牌看見現階段狀態與接下來的方向</span></div>
+      <div class="home-feature-card"><b>三牌陣</b><span>身・心・靈全方位的深度解析</span></div>
+      <div class="home-feature-card"><b>了解自我</b><span>探索別人眼中的你，與真正的自己</span></div>
+      <div class="home-feature-card"><b>指示牌占卜</b><span>針對明確的困擾主題，指定指示牌進行對應占卜</span></div>
+    </div>
+  </section>
+
+  <section class="home-section" id="gift">
+    <div class="home-section-title">貴賓體驗禮盒</div>
+    <div class="home-feature-grid">
+      <div class="home-feature-card"><b>一對一預約諮詢</b><span>依抽牌結果搭配專屬精油體驗，由專人為你解讀</span></div>
+      <div class="home-feature-card"><b>限量體驗禮盒</b><span>抽牌結果將對應推薦的精油組合，預約即可安排收到禮盒</span></div>
+    </div>
+  </section>
+
+</main>
+
+<div class="home-footer">多特瑞精油洞悉卡 · MODERN OIL ORACLE</div>
+
+<nav class="mobile-bar">
+  <a class="mobile-bar-btn primary" href="cards.html" style="display:flex;align-items:center;justify-content:center;text-decoration:none;">線上抽卡</a>
+  <button class="mobile-bar-btn secondary" id="bar-gift-btn" type="button">預約禮盒</button>
+</nav>
+<div class="site-toast" id="site-toast"></div>
+
+<script src="home.js?v=1"></script>
+</body>
+</html>

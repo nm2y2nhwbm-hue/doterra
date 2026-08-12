@@ -15,7 +15,13 @@ body{
   background:radial-gradient(ellipse at top,#FAF6EC 0%,var(--paper) 55%,var(--paper-deep) 100%);
   color:var(--ink); min-height:100vh; display:flex; flex-direction:column;
   -webkit-tap-highlight-color:transparent; overflow-x:hidden; width:100%;
-  padding-top:var(--nav-h); padding-bottom:calc(var(--bar-h) + env(safe-area-inset-bottom));
+}
+body.has-fixed-nav{ padding-top:var(--nav-h); }
+body.has-fixed-bar{ padding-bottom:calc(var(--bar-h) + env(safe-area-inset-bottom)); }
+
+.back-home-link{
+  display:inline-flex; align-items:center; min-height:44px; padding:0 16px;
+  font-size:12.5px; color:var(--forest); text-decoration:none; letter-spacing:.03em;
 }
 
 /* ---------- 固定頂部導覽列 ---------- */
@@ -152,3 +158,67 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 16px
 .send-status{font-size:12.5px;color:var(--sage);text-align:center;margin-top:14px;min-height:16px;}
 .again-btn{margin:10px auto 0;background:var(--forest);color:#fff;border:none;border-radius:24px;padding:10px 28px;min-height:44px;font-size:13.5px;cursor:pointer;box-shadow:0 4px 12px rgba(51,70,58,.3);}
 .again-btn:active{transform:scale(.97);}
+
+/* ---------- 首頁（外層 / 1樓）專屬樣式 ---------- */
+.site-nav-links{ display:flex; align-items:center; gap:18px; }
+.site-nav-links a{
+  font-size:12.5px; color:var(--ink-soft); text-decoration:none; letter-spacing:.03em;
+  white-space:nowrap;
+}
+.site-nav-links a:hover{ color:var(--forest-deep); }
+
+.home-hero{
+  width:100%; max-width:1080px; margin:0 auto; padding:56px 16px 40px;
+  display:flex; flex-wrap:wrap; align-items:center; gap:48px;
+}
+.home-hero-text{ flex:1 1 360px; min-width:0; }
+.home-kicker{
+  display:flex; align-items:center; gap:10px; color:var(--gold-soft);
+  font-size:11px; letter-spacing:.32em; margin-bottom:18px;
+}
+.home-kicker::before,.home-kicker::after{ content:""; width:34px; height:1px; background:var(--gold-soft); opacity:.7; }
+.home-hero h1{
+  font-family:"Cormorant Garamond","Noto Serif TC",serif; font-weight:600;
+  font-size:clamp(30px,6vw,50px); line-height:1.35; color:var(--forest-deep);
+  margin:0 0 18px;
+}
+.home-hero p.home-sub{ font-size:14.5px; color:var(--ink-soft); line-height:1.8; margin:0 0 26px; max-width:38em; }
+.home-cta-row{ display:flex; flex-wrap:wrap; gap:12px; margin-bottom:14px; }
+.home-cta{
+  min-height:48px; padding:0 22px; border-radius:24px; font-size:14.5px; letter-spacing:.03em;
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  text-decoration:none; cursor:pointer; border:1px solid transparent;
+}
+.home-cta.primary{ background:var(--forest); color:#fff; box-shadow:0 4px 14px rgba(51,70,58,.28); }
+.home-cta.primary:active{ transform:scale(.98); }
+.home-cta.secondary{ background:transparent; border-color:var(--gold); color:var(--forest-deep); }
+.home-cta.secondary:active{ background:rgba(184,145,46,.1); }
+.home-disclaimer{ font-size:11px; color:var(--sage); letter-spacing:.02em; }
+
+.home-hero-visual{ flex:0 1 300px; min-width:220px; display:flex; justify-content:center; }
+.home-card-mock{
+  width:100%; max-width:260px; aspect-ratio:3/4; border-radius:16px;
+  background:linear-gradient(160deg,#EDF1E9,#DCE4D8);
+  border:1px solid rgba(75,99,80,.25); box-shadow:0 18px 40px rgba(58,54,46,.18);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+  padding:24px; text-align:center;
+}
+.home-card-mock .spark{ color:var(--gold); font-size:22px; }
+.home-card-mock .eyebrow{ font-size:10px; letter-spacing:.28em; color:var(--forest); }
+.home-card-mock .title{ font-family:"Cormorant Garamond","Noto Serif TC",serif; font-size:26px; color:var(--forest-deep); font-weight:600; }
+.home-card-mock .line{ font-size:11.5px; color:var(--ink-soft); line-height:1.7; }
+
+.home-section{ width:100%; max-width:1080px; margin:0 auto; padding:8px 16px 48px; }
+.home-section-title{
+  font-family:"Cormorant Garamond","Noto Serif TC",serif; font-size:20px; color:var(--forest-deep);
+  text-align:center; margin:0 0 22px; letter-spacing:.04em;
+}
+.home-feature-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; }
+.home-feature-card{
+  background:#fffaf3; border:1px solid rgba(184,145,46,.3); border-radius:14px;
+  padding:20px 18px; text-align:left;
+}
+.home-feature-card b{ display:block; font-size:14.5px; color:var(--forest-deep); margin-bottom:6px; }
+.home-feature-card span{ font-size:12.5px; color:var(--ink-soft); line-height:1.7; }
+
+.home-footer{ width:100%; text-align:center; padding:20px 16px 8px; font-size:11px; color:var(--sage); letter-spacing:.05em; }
