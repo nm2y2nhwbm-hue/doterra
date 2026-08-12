@@ -33,24 +33,22 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 12px
 .stage-title{font-size:14px;color:var(--rose-deep);letter-spacing:.05em;}
 .instruction{font-size:13px;color:#6b5d4f;text-align:center;margin:4px 0 6px;min-height:18px;}
 
-/* --- 模式5：指示標題選單 --- */
 #indicator-select{display:none;flex-direction:column;gap:8px;width:100%;max-width:420px;margin:8px 0 16px;}
 .indicator-item{background:#fffaf3;border:1px solid rgba(184,145,46,.35);border-radius:10px;padding:11px 16px;font-size:14px;color:var(--ink);cursor:pointer;display:flex;justify-content:space-between;align-items:center;}
 .indicator-item:active{background:var(--parchment-deep);}
 .indicator-item .en{font-size:10.5px;color:#9a8c7b;}
 
-/* --- 扇形排開（U型）牌組 --- */
 #fan-wrap{width:100%;display:none;flex-direction:column;align-items:center;}
 #fan-stage{
-  position:relative; width:100%; max-width:600px; height:230px;
+  position:relative; width:100%; max-width:600px; height:320px;
   margin:8px auto 4px; display:flex; align-items:flex-end; justify-content:center;
 }
 #fan-stage.shuffling .fan-card{ animation:fanShuffle .9s ease-in-out infinite; }
 @keyframes fanShuffle{ 0%,100%{filter:brightness(1);} 50%{filter:brightness(1.06);} }
 .fan-card{
   position:absolute; bottom:0;
-  width:clamp(58px, 8.5vw, 88px);
-  height:calc(clamp(58px, 8.5vw, 88px) * 1.4);
+  width:clamp(52px, 7.5vw, 78px);
+  height:calc(clamp(52px, 7.5vw, 78px) * 1.4);
   border-radius:9px;
   background-image:url("images/Gemini_Generated_Image.png");
   background-size:cover;
@@ -61,10 +59,8 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 12px
   transition:transform .25s ease, box-shadow .25s ease;
   cursor:pointer;
 }
-.fan-card::after{ content:none; }
 .fan-card:active{ box-shadow:0 6px 16px rgba(140,59,70,.3); }
-.fan-card.revealed{ background:#fff; pointer-events:none; }
-.fan-card.revealed::after{display:none;}
+.fan-card.revealed{ background-image:none; background:#fff; pointer-events:none; }
 .fan-card.revealed img{
   width:100%; height:72%; object-fit:cover; border-radius:9px 9px 0 0;
   transform:scale(1.35); transform-origin:center;
@@ -75,7 +71,6 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 12px
 
 .deck-hint{font-size:12px;color:var(--sage);margin-top:6px;}
 
-/* 已抽出的卡（詳解排列） */
 #drawn-row{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:14px;}
 .drawn-slot{display:flex;flex-direction:column;align-items:center;gap:6px;}
 .drawn-slot .slot-label{font-size:11px;color:var(--sage);letter-spacing:.05em;}
