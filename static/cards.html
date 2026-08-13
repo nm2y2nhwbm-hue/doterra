@@ -18,16 +18,30 @@
 
   <div id="mode-select">
     <a href="#" id="guide-book-link" class="guide-book-link">📖 卡牌說明書</a>
-    <div class="mode-btn" data-mode="1"><div class="mode-num">01</div><div class="mode-text"><b>今日能量</b><span>單張心靈肯定小語</span></div></div>
-    <div class="mode-btn" data-mode="2"><div class="mode-num">02</div><div class="mode-text"><b>生活導引</b><span>現階段狀態與方向指引</span></div></div>
-    <div class="mode-btn" data-mode="3"><div class="mode-num">03</div><div class="mode-text"><b>三牌陣</b><span>身・心・靈全方位深度解析</span></div></div>
-    <div class="mode-btn" data-mode="4"><div class="mode-num">04</div><div class="mode-text"><b>了解自我</b><span>別人眼中的你與真正的你</span></div></div>
-    <div class="mode-btn" data-mode="5"><div class="mode-num">05</div><div class="mode-text"><b>指示牌</b><span>單一指示牌與精油對應占卜</span></div></div>
-    <div class="mode-btn" data-mode="6"><div class="mode-num">06</div><div class="mode-text"><b>主題時間流</b><span>選定主題卡，看過去成因與未來轉化</span></div></div>
-    <div class="mode-btn" data-mode="7"><div class="mode-num">07</div><div class="mode-text"><b>生命大運流年</b><span>看流年／流月／流日的時間三部曲</span></div></div>
-    <div class="mode-btn" data-mode="8"><div class="mode-num">08</div><div class="mode-text"><b>二選一未來抉擇</b><span>兩個方案的當下心境與未來發展對照</span></div></div>
-    <div class="mode-btn" data-mode="9"><div class="mode-num">09</div><div class="mode-text"><b>三選一十字路口</b><span>固定十字路口卡，盲抽三條岔路</span></div></div>
-    <div class="mode-btn" data-mode="10"><div class="mode-num">10</div><div class="mode-text"><b>年度生命軌跡</b><span>純主題卡，看上下半年的重心位移</span></div></div>
+    <div class="category-question">今天，想怎麼問自己？</div>
+    <div class="category-row" id="category-row">
+      <button type="button" class="category-card" data-cat="mirror">
+        <div class="cc-icon">鏡</div>
+        <div class="cc-name">鏡子</div>
+        <div class="cc-tagline">照看你的此時此刻</div>
+      </button>
+      <button type="button" class="category-card" data-cat="river">
+        <div class="cc-icon">河</div>
+        <div class="cc-name">河流</div>
+        <div class="cc-tagline">陪伴你的時間流動</div>
+      </button>
+      <button type="button" class="category-card" data-cat="crossroad">
+        <div class="cc-icon">岔</div>
+        <div class="cc-name">岔路</div>
+        <div class="cc-tagline">站在十字路口的香氣陪伴</div>
+      </button>
+    </div>
+    <div class="category-detail" id="category-detail">
+      <div class="cd-eyebrow" id="cd-eyebrow"></div>
+      <div class="cd-title" id="cd-title"></div>
+      <div class="cd-sub" id="cd-sub"></div>
+      <div class="cd-modes" id="cd-modes"></div>
+    </div>
   </div>
 
   <div id="stage">
@@ -41,12 +55,6 @@
       <p class="mode5-intro-sub">先靜心看著牌堆，準備好後再選擇指示牌</p>
       <div class="mode5-card-back"></div>
       <button type="button" class="home-cta primary" id="mode5-ready-btn">準備好了，選擇指示牌</button>
-    </div>
-
-    <div id="mode7-tabs" class="mode7-tabs" style="display:none;">
-      <button type="button" class="mode7-tab-btn" data-sub="year">看流年</button>
-      <button type="button" class="mode7-tab-btn" data-sub="month">看流月</button>
-      <button type="button" class="mode7-tab-btn" data-sub="day">看流日</button>
     </div>
 
     <div id="indicator-select"></div>

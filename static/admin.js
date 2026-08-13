@@ -151,6 +151,15 @@
       </div>`;
   }
 
+  document.getElementById('module-inventory').querySelector('.amc-link').addEventListener('click', (e) => {
+    e.preventDefault();
+    alert('精油庫存管理｜敬請期待，近期上線。\n（將整合 Google 試算表同步、庫存與有效期限預警）');
+  });
+  document.getElementById('module-sites').querySelector('.amc-link').addEventListener('click', (e) => {
+    e.preventDefault();
+    alert('網站管理中心｜敬請期待，近期上線。\n（將整合 GitHub／LINE Developers／Render／Vercel／Supabase 多站狀態監看）');
+  });
+
   document.getElementById('admin-login-btn').addEventListener('click', async () => {
     const email = document.getElementById('a-email').value.trim();
     const password = document.getElementById('a-pass').value;

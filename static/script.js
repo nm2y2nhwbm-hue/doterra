@@ -7,13 +7,18 @@
   const LINE_FOLLOW_KEY = "oc_line_follow_confirmed";
 
   const modeSelect = document.getElementById('mode-select');
+  const categoryRow = document.getElementById('category-row');
+  const categoryDetail = document.getElementById('category-detail');
+  const cdEyebrow = document.getElementById('cd-eyebrow');
+  const cdTitle = document.getElementById('cd-title');
+  const cdSub = document.getElementById('cd-sub');
+  const cdModes = document.getElementById('cd-modes');
   const stage = document.getElementById('stage');
   const stageTitle = document.getElementById('stage-title');
   const instruction = document.getElementById('instruction');
   const indicatorSelect = document.getElementById('indicator-select');
   const mode5Intro = document.getElementById('mode5-intro');
   const mode5ReadyBtn = document.getElementById('mode5-ready-btn');
-  const mode7Tabs = document.getElementById('mode7-tabs');
   const fanWrap = document.getElementById('fan-wrap');
   const fanStage = document.getElementById('fan-stage');
   const deckHint = document.getElementById('deck-hint');
@@ -28,13 +33,20 @@
   let liffReady = false;
   let liffProfile = null;
 
+  const CATEGORY_CONFIG = {
+    mirror:     { name: '鏡子', icon: '鏡', eyebrow: 'MIRROR',     tagline: '照看你的此時此刻',   sub: '只映照當下，不推演過去與未來',       modes: [1,2,3,4,5] },
+    river:      { name: '河流', icon: '河', eyebrow: 'RIVER',      tagline: '陪伴你的時間流動',   sub: '順著時間的脈絡，看見不同階段的自己', modes: [6,7,8,9,10] },
+    crossroad:  { name: '岔路', icon: '岔', eyebrow: 'CROSSROAD',  tagline: '站在十字路口的香氣陪伴', sub: '在多個選項之間，先聽聽身體的聲音', modes: [11,12] },
+  };
+
   const MODE_CONFIG = {
-    1: { title: "今日能量", count: 1, labels: ["今日心靈小語"] },
-    2: { title: "生活導引", count: 2, labels: ["目前整體狀況", "生活中所需的建議及方向"] },
-    3: { title: "三牌陣",   count: 3, labels: ["身・目前身體狀況", "心・目前心理狀態", "靈・目前精神狀況"] },
-    4: { title: "了解自我", count: 3, labels: ["別人眼中的你", "私底下獨處時的你", "真正自我的你"] },
+    1: { title: "今日能量", category: 'mirror', desc: '單張心靈肯定小語', count: 1, labels: ["今日心靈小語"] },
+    2: { title: "生活導引", category: 'mirror', desc: '現階段狀態與方向指引', count: 2, labels: ["目前整體狀況", "生活中所需的建議及方向"] },
+    3: { title: "三牌陣",   category: 'mirror', desc: '身・心・靈全方位深度解析', count: 3, labels: ["身・目前身體狀況", "心・目前心理狀態", "靈・目前精神狀況"] },
+    4: { title: "了解自我", category: 'mirror', desc: '別人眼中的你與真正的你', count: 3, labels: ["別人眼中的你", "私底下獨處時的你", "真正自我的你"] },
+    5: { title: "指示牌",   category: 'mirror', desc: '單一指示牌與精油對應占卜' },
     6: {
-      title: "主題時間流",
+      title: "主題時間流", category: 'river', desc: '選定主題卡，看過去成因與未來轉化',
       sandwich: {
         center: (name) => `此刻想探索的主題：${name}`,
         left:   (name) => `回望：關於「${name}」，你留意到哪些情緒或慣性？`,
@@ -43,32 +55,34 @@
       prescriptionIndices: [2],
     },
     7: {
-      title: "生命大運流年",
-      pool: "oils",
-      subModes: {
-        year:  { tabName: "看流年",  labels: ["回望：這段時間裡，有哪些狀態你還沒放下？", "此刻：目前最需要你留意的課題是什麼？", "展望：接下來，你想為自己準備什麼樣的陪伴？"] },
-        month: { tabName: "看流月",  labels: ["月初：這個月延續下來的身心狀態是什麼？", "月中：此刻正在浮現的情緒重點是什麼？", "月底：你可以為自己安排什麼樣的能量出口？"] },
-        day:   { tabName: "看流日",  labels: ["稍早：昨日或今早，你留下了什麼樣的感受？", "此刻：今天最需要你面對的狀態是什麼？", "稍晚：晚一點，你想給自己什麼樣的陪伴？"] },
-      },
+      title: "生命大運流年・看流年", category: 'river', desc: '回望前期、當下課題、展望後續', pool: "oils",
+      labels: ["回望：這段時間裡，有哪些狀態你還沒放下？", "此刻：目前最需要你留意的課題是什麼？", "展望：接下來，你想為自己準備什麼樣的陪伴？"],
       prescriptionIndices: [2],
     },
     8: {
-      title: "二選一未來抉擇",
-      pool: "oils",
+      title: "生命大運流年・看流月", category: 'river', desc: '月初、月中、月底的狀態變化', pool: "oils",
+      labels: ["月初：這個月延續下來的身心狀態是什麼？", "月中：此刻正在浮現的情緒重點是什麼？", "月底：你可以為自己安排什麼樣的能量出口？"],
+      prescriptionIndices: [2],
+    },
+    9: {
+      title: "生命大運流年・看流日", category: 'river', desc: '稍早、此刻、稍晚的一日流動', pool: "oils",
+      labels: ["稍早：昨日或今早，你留下了什麼樣的感受？", "此刻：今天最需要你面對的狀態是什麼？", "稍晚：晚一點，你想給自己什麼樣的陪伴？"],
+      prescriptionIndices: [2],
+    },
+    10: {
+      title: "年度生命軌跡", category: 'river', desc: '純主題卡，看上下半年的重心位移', pool: "indicators",
+      labels: ["上半年：這段時間，你的重心可能放在哪裡？", "下半年：接下來，你想把焦點轉向哪裡？"],
+    },
+    11: {
+      title: "二選一未來抉擇", category: 'crossroad', desc: '兩個方案的當下心境與發展對照', pool: "oils",
       labels: ["方案 A：此刻你的心情與考量是什麼？", "方案 A：走這條路，你想為自己留意什麼？", "方案 B：此刻你的心情與考量是什麼？", "方案 B：走這條路，你想為自己留意什麼？"],
       prescriptionIndices: [1, 3],
     },
-    9: {
-      title: "三選一十字路口",
-      pool: "oils",
+    12: {
+      title: "三選一十字路口", category: 'crossroad', desc: '固定十字路口卡，盲抽三條岔路', pool: "oils",
       fixedIndicatorName: "十字路口",
       labels: ["核心：你正站在一個需要選擇的時刻", "選項一：走這個方向，你想留意什麼樣的感受？", "選項二：走這個方向，你想留意什麼樣的感受？", "選項三：走這個方向，你想留意什麼樣的感受？"],
       prescriptionIndices: [1, 2, 3],
-    },
-    10: {
-      title: "年度生命軌跡",
-      pool: "indicators",
-      labels: ["上半年：這段時間，你的重心可能放在哪裡？", "下半年：接下來，你想把焦點轉向哪裡？"],
     },
   };
 
@@ -95,7 +109,6 @@
   let selectedIndicatorName = null;
   let selectedIndicatorOrientation = 'upright'; // 'upright' | 'reversed'
   let isMode5 = false;
-  let currentSubMode = null; // 模式 7 的 year/month/day
   let currentMode = null;
   let collectedResults = [];
 
@@ -121,7 +134,6 @@
     indicatorSelect.style.display = 'none';
     indicatorSelect.innerHTML = '';
     mode5Intro.style.display = 'none';
-    mode7Tabs.style.display = 'none';
     fanWrap.style.display = 'none';
     fanStage.innerHTML = '';
     fanStage.classList.remove('shuffling');
@@ -138,7 +150,6 @@
     selectedIndicatorName = null;
     selectedIndicatorOrientation = 'upright';
     isMode5 = false;
-    currentSubMode = null;
     collectedResults = [];
   }
 
@@ -146,6 +157,32 @@
     stage.classList.remove('active');
     modeSelect.style.display = 'flex';
   }
+
+  let selectedCategory = 'mirror';
+
+  function renderCategoryDetail(catKey){
+    selectedCategory = catKey;
+    const cat = CATEGORY_CONFIG[catKey];
+    categoryRow.querySelectorAll('.category-card').forEach(el => {
+      el.classList.toggle('active', el.dataset.cat === catKey);
+    });
+    cdEyebrow.textContent = cat.eyebrow;
+    cdTitle.textContent = `${cat.name} → ${cat.tagline}`;
+    cdSub.textContent = cat.sub;
+    cdModes.innerHTML = cat.modes.map(m => {
+      const cfg = MODE_CONFIG[m];
+      const num = String(m).padStart(2, '0');
+      return `<div class="mode-btn" data-mode="${m}"><div class="mode-num">${num}</div><div class="mode-text"><b>${cfg.title}</b><span>${cfg.desc || ''}</span></div></div>`;
+    }).join('');
+  }
+
+  categoryRow.addEventListener('click', (e) => {
+    const card = e.target.closest('.category-card');
+    if (!card) return;
+    renderCategoryDetail(card.dataset.cat);
+  });
+
+  renderCategoryDetail(selectedCategory);
 
   function enterStage(modeId){
     modeSelect.style.display = 'none';
@@ -160,14 +197,8 @@
       return;
     }
 
-    if (modeId === 7) {
-      stageTitle.textContent = MODE_CONFIG[7].title;
-      renderMode7Tabs();
-      return;
-    }
-
-    if (modeId === 9) {
-      startMode9();
+    if (modeId === 12) {
+      startFixedIndicatorMode();
       return;
     }
 
@@ -180,8 +211,8 @@
     startShuffleThenFan(pool);
   }
 
-  function startMode9(){
-    const cfg = MODE_CONFIG[9];
+  function startFixedIndicatorMode(){
+    const cfg = MODE_CONFIG[currentMode];
     stageTitle.textContent = cfg.title;
     const fixedCard = INDICATORS.find(i => i.name === cfg.fixedIndicatorName);
     drawPlan = cfg.labels.slice(1);
@@ -191,28 +222,9 @@
       renderDrawnCard(cfg.labels[0], fixedCard);
       collectedResults.push({ label: cfg.labels[0], card: fixedCard });
     } else {
-      instruction.textContent = '找不到「十字路口」指示卡資料，請確認指示卡資料庫。';
+      instruction.textContent = `找不到「${cfg.fixedIndicatorName}」指示卡資料，請確認指示卡資料庫。`;
     }
   }
-
-  function renderMode7Tabs(){
-    instruction.textContent = '請選擇想觀看的時間尺度';
-    mode7Tabs.style.display = 'flex';
-  }
-
-  mode7Tabs.querySelectorAll('.mode7-tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const sub = btn.dataset.sub;
-      const subCfg = MODE_CONFIG[7].subModes[sub];
-      mode7Tabs.style.display = 'none';
-      currentSubMode = sub;
-      stageTitle.textContent = `${MODE_CONFIG[7].title}・${subCfg.tabName}`;
-      instruction.textContent = '';
-      drawPlan = subCfg.labels;
-      const pool = shuffle(OILS).slice(0, fanPoolSize()).map(c => ({card:c, isIndicator:false}));
-      startShuffleThenFan(pool);
-    });
-  });
 
   function renderMode5Intro(){
     instruction.textContent = '';
@@ -827,28 +839,40 @@
       diagram: ['過去成因', '主題', '未來轉化'],
     },
     {
-      num: '07', title: '生命大運流年',
-      how: '選擇想觀看的時間尺度（流年／流月／流日），抽三張油卡，依序代表前期、當下、後續三個階段。',
-      when: '想檢視一段時間內身心狀態的變化脈絡時。',
+      num: '07', title: '生命大運流年・看流年',
+      how: '抽三張油卡，依序代表前期殘留的狀態、當下核心課題、後續可以留意的方向。',
+      when: '想檢視一整年身心狀態的變化脈絡時。',
       diagram: ['前期', '當下', '後續'],
     },
     {
-      num: '08', title: '二選一未來抉擇',
-      how: '心中分別想著方案 A、方案 B，抽四張油卡：A 的心境、A 的發展、B 的心境、B 的發展。',
-      when: '卡在兩個具體方案之間，想對照兩條路的身心感受時。',
-      diagram: ['方案A心境', '方案A發展', '方案B心境', '方案B發展'],
+      num: '08', title: '生命大運流年・看流月',
+      how: '抽三張油卡，依序代表這個月的月初、月中、月底三個階段。',
+      when: '想檢視這個月身心狀態的變化脈絡時。',
+      diagram: ['月初', '月中', '月底'],
     },
     {
-      num: '09', title: '三選一十字路口',
-      how: '系統會固定顯示「十字路口」主題卡作為核心背景，接著盲抽三張油卡，分別對應三個不同的選擇方向。',
-      when: '面臨三個以上的選項、需要多方比較時。',
-      diagram: ['核心', '選項一', '選項二', '選項三'],
+      num: '09', title: '生命大運流年・看流日',
+      how: '抽三張油卡，依序代表稍早、此刻、稍晚三個時段。',
+      when: '想檢視一天之內身心狀態的變化脈絡時。',
+      diagram: ['稍早', '此刻', '稍晚'],
     },
     {
       num: '10', title: '年度生命軌跡',
       how: '不使用精油卡，純粹從 12 張主題卡中抽兩張，分別代表上半年與下半年的生命重心。',
       when: '想從較長的時間跨度，看見整體生命焦點的位移時。',
       diagram: ['上半年', '下半年'],
+    },
+    {
+      num: '11', title: '二選一未來抉擇',
+      how: '心中分別想著方案 A、方案 B，抽四張油卡：A 的心境、A 的發展、B 的心境、B 的發展。',
+      when: '卡在兩個具體方案之間，想對照兩條路的身心感受時。',
+      diagram: ['方案A心境', '方案A發展', '方案B心境', '方案B發展'],
+    },
+    {
+      num: '12', title: '三選一十字路口',
+      how: '系統會固定顯示「十字路口」主題卡作為核心背景，接著盲抽三張油卡，分別對應三個不同的選擇方向。',
+      when: '面臨三個以上的選項、需要多方比較時。',
+      diagram: ['核心', '選項一', '選項二', '選項三'],
     },
   ];
 
