@@ -476,3 +476,12 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 16px
 .amc-title{ font-size:14.5px; color:var(--forest-deep); font-weight:600; margin-bottom:6px; }
 .amc-desc{ font-size:11px; color:var(--ink-soft); line-height:1.6; margin-bottom:10px; }
 .amc-link{ font-size:12px; color:var(--forest); text-decoration:none; }
+
+/* ---------- 庫存管理：新增/編輯表單 ---------- */
+.inv-form-wrap{
+  width:100%; display:flex; flex-direction:column; gap:12px; margin-bottom:20px;
+  background:#fffaf3; border:1px solid rgba(184,145,46,.4); border-radius:14px; padding:16px 18px;
+}
+.inv-form-actions{ display:flex; gap:10px; }
+.inv-form-actions .form-submit-btn{ flex:1; }
+.inv-form-actions .mode7-tab-btn{ flex:1; min-height:44px; }

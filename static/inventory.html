@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>精油庫存管理｜多特瑞精油洞悉卡</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="style.css?v=8">
+</head>
+<body>
+
+<a class="back-home-link" href="admin.html">← 管理後台</a>
+<div class="brand-title"><h1>精油庫存管理</h1><p>WAREHOUSE CONTROL</p></div>
+<div class="ornament-divider">❀</div>
+
+<main>
+  <div id="admin-login-wrap" class="admin-login-wrap">
+    <div class="form-field">
+      <label class="form-label" for="a-email">Email</label>
+      <input class="form-input" id="a-email" type="email" autocomplete="username">
+    </div>
+    <div class="form-field">
+      <label class="form-label" for="a-pass">密碼</label>
+      <input class="form-input" id="a-pass" type="password" autocomplete="current-password">
+    </div>
+    <button type="button" class="form-submit-btn" id="admin-login-btn">登入</button>
+    <div id="admin-login-msg" class="admin-msg"></div>
+  </div>
+
+  <div id="inventory-dashboard" class="admin-dashboard" style="display:none;">
+    <div class="admin-stats-row">
+      <div class="admin-stat-card"><b id="stat-items">–</b><span>庫存品項</span></div>
+      <div class="admin-stat-card"><b id="stat-expiring">–</b><span>60天內到期</span></div>
+    </div>
+
+    <div class="admin-toolbar">
+      <input class="form-input" id="inv-search" type="text" placeholder="搜尋精油名稱">
+      <button type="button" class="mode-btn" id="inv-add-btn" style="flex:0 0 auto;">＋ 新增品項</button>
+    </div>
+
+    <div id="inv-form-wrap" class="inv-form-wrap" style="display:none;">
+      <div class="form-field"><label class="form-label">精油名稱</label><input class="form-input" id="inv-f-name"></div>
+      <div class="form-field"><label class="form-label">庫存數量</label><input class="form-input" id="inv-f-qty" type="number" step="0.01"></div>
+      <div class="form-field"><label class="form-label">使用中數量</label><input class="form-input" id="inv-f-inuse" type="number" step="0.01"></div>
+      <div class="form-field"><label class="form-label">單位</label><input class="form-input" id="inv-f-unit" placeholder="瓶"></div>
+      <div class="form-field"><label class="form-label">容量</label><input class="form-input" id="inv-f-capacity" placeholder="例如 15ml"></div>
+      <div class="form-field"><label class="form-label">有效期限</label><input class="form-input" id="inv-f-expiry" type="date"></div>
+      <div class="form-field"><label class="form-label">備註</label><input class="form-input" id="inv-f-note"></div>
+      <div class="inv-form-actions">
+        <button type="button" class="form-submit-btn" id="inv-save-btn">儲存</button>
+        <button type="button" class="mode7-tab-btn" id="inv-cancel-btn">取消</button>
+      </div>
+    </div>
+
+    <div id="admin-msg" class="admin-msg"></div>
+    <div id="inventory-list" class="booking-list"></div>
+  </div>
+</main>
+
+<script src="supabase-client.js?v=1"></script>
+<script src="inventory.js?v=1"></script>
+</body>
+</html>
