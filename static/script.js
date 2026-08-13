@@ -53,6 +53,7 @@
   let drawPlan = [];
   let drawnCount = 0;
   let selectedIndicatorName = null;
+  let selectedIndicatorOrientation = 'upright'; // 'upright' | 'reversed'
   let isMode5 = false;
   let currentMode = null;
   let collectedResults = [];
@@ -90,6 +91,7 @@
     drawPlan = [];
     drawnCount = 0;
     selectedIndicatorName = null;
+    selectedIndicatorOrientation = 'upright';
     isMode5 = false;
     collectedResults = [];
   }
@@ -133,18 +135,38 @@
         </div>`;
       item.addEventListener('click', () => {
         selectedIndicatorName = ind.name;
-        indicatorSelect.style.display = 'none';
-        instruction.textContent = `「${ind.name}」已插入牌組，正在洗牌……洗牌之後，抽三張牌～`;
-
-        const oilsSubset = shuffle(OILS).slice(0, fanPoolSize() - 1).map(c => ({card:c, isIndicator:false}));
-        const insertPos = Math.floor(Math.random() * (oilsSubset.length + 1));
-        oilsSubset.splice(insertPos, 0, {card: ind, isIndicator:true});
-        const finalDeck = shuffle(oilsSubset);
-
-        startShuffleThenFan(finalDeck, true);
+        renderOrientationPicker(ind);
       });
       indicatorSelect.appendChild(item);
     });
+  }
+
+  function renderOrientationPicker(ind){
+    instruction.textContent = `已選擇「${ind.name}」，請設定這張指示牌的正逆位`;
+    indicatorSelect.innerHTML = `
+      <div class="orientation-picker">
+        <button type="button" class="orientation-btn" data-o="upright">🙂 正位</button>
+        <button type="button" class="orientation-btn" data-o="reversed">🙃 逆位</button>
+      </div>`;
+    indicatorSelect.querySelectorAll('.orientation-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedIndicatorOrientation = btn.dataset.o;
+        indicatorSelect.style.display = 'none';
+        proceedWithIndicator(ind);
+      });
+    });
+  }
+
+  function proceedWithIndicator(ind){
+    const orientLabel = selectedIndicatorOrientation === 'reversed' ? '逆位' : '正位';
+    instruction.textContent = `「${ind.name}」（${orientLabel}）已插入牌組，正在洗牌……洗牌之後，抽三張牌～`;
+
+    const oilsSubset = shuffle(OILS).slice(0, fanPoolSize() - 1).map(c => ({card:c, isIndicator:false}));
+    const insertPos = Math.floor(Math.random() * (oilsSubset.length + 1));
+    oilsSubset.splice(insertPos, 0, {card: ind, isIndicator:true});
+    const finalDeck = shuffle(oilsSubset);
+
+    startShuffleThenFan(finalDeck, true);
   }
 
   // ---------- 馬蹄形 U 型佈局：單一連續參數曲線 ----------
