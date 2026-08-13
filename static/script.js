@@ -11,6 +11,8 @@
   const stageTitle = document.getElementById('stage-title');
   const instruction = document.getElementById('instruction');
   const indicatorSelect = document.getElementById('indicator-select');
+  const mode5Intro = document.getElementById('mode5-intro');
+  const mode5ReadyBtn = document.getElementById('mode5-ready-btn');
   const fanWrap = document.getElementById('fan-wrap');
   const fanStage = document.getElementById('fan-stage');
   const deckHint = document.getElementById('deck-hint');
@@ -79,6 +81,7 @@
   function resetStageDom(){
     indicatorSelect.style.display = 'none';
     indicatorSelect.innerHTML = '';
+    mode5Intro.style.display = 'none';
     fanWrap.style.display = 'none';
     fanStage.innerHTML = '';
     fanStage.classList.remove('shuffling');
@@ -110,8 +113,7 @@
     if (modeId === 5) {
       isMode5 = true;
       stageTitle.textContent = '指示牌';
-      instruction.textContent = '請先從下方選擇一個你想探索的主題';
-      renderIndicatorList();
+      renderMode5Intro();
       return;
     }
 
@@ -121,6 +123,17 @@
     const pool = shuffle(OILS).slice(0, fanPoolSize()).map(c => ({card:c, isIndicator:false}));
     startShuffleThenFan(pool);
   }
+
+  function renderMode5Intro(){
+    instruction.textContent = '';
+    mode5Intro.style.display = 'flex';
+  }
+
+  mode5ReadyBtn.addEventListener('click', () => {
+    mode5Intro.style.display = 'none';
+    instruction.textContent = '請先從下方選擇一個你想探索的主題';
+    renderIndicatorList();
+  });
 
   function renderIndicatorList(){
     indicatorSelect.style.display = 'flex';
@@ -644,10 +657,85 @@
   backBtn.addEventListener('click', showModeSelect);
   againBtn.addEventListener('click', showModeSelect);
 
+  const GUIDE_CONTENT = [
+    {
+      num: '01', title: '單張心靈小語',
+      how: '洗牌時在心中默念「當下所需的心靈小語是什麼？」抽出一張，作為今日或此刻的心靈肯定與指引。',
+      when: '每天早晨或有需要時，快速聽見當下的內在訊息。',
+      diagram: ['指引'],
+    },
+    {
+      num: '02', title: '生活導引牌陣',
+      how: '洗牌後抽兩張牌。第一張放左邊，代表目前整體狀況；第二張放右邊，代表生活中所需的建議與方向。',
+      when: '想了解現階段狀態、找方向的時候。',
+      diagram: ['整體狀況', '建議'],
+    },
+    {
+      num: '03', title: '療癒身心靈牌陣',
+      how: '心中默念「目前我的身心靈所需要的是什麼？」抽三張牌：第一張置下方代表身；第二張置左上方代表心；第三張置右上方代表靈。',
+      when: '想從身、心、靈三個層面全方位檢視自己時。',
+      diagram: ['心', '靈', '身'],
+    },
+    {
+      num: '04', title: '了解自我牌陣',
+      how: '思考「別人眼中的自己、私底下的自己、真正的自己，是如何呈現的？」抽三張牌，由左至右依序代表這三個層面。',
+      when: '想探索自我認同、內外落差時。',
+      diagram: ['別人眼中', '私下獨處', '真正的你'],
+    },
+    {
+      num: '05', title: '單一指示牌陣',
+      how: '先選擇一張代表你關注主題的指示牌，設定正位或逆位後置入牌組重新洗牌，再抽出指示牌左右兩側的精油牌，分別代表提升用油與心靈小語。',
+      when: '已經有明確的困擾主題，想針對它獲得具體對應占卜時。',
+      diagram: ['左側用油', '指示牌', '右側小語'],
+    },
+  ];
+
+  let guideModalEl = null;
+  function ensureGuideModal(){
+    if (guideModalEl) return guideModalEl;
+    const el = document.createElement('div');
+    el.className = 'guide-modal';
+    el.innerHTML = `
+      <div class="guide-modal-card">
+        <button type="button" class="guide-modal-close" aria-label="關閉">✕</button>
+        <div class="guide-modal-eyebrow">GUIDE BOOK</div>
+        <div class="guide-modal-title">卡牌說明書</div>
+        <div class="guide-modal-sub">請先安靜洗牌，將注意力放回此刻，再依問題選擇牌陣。</div>
+        <div class="guide-grid">
+          ${GUIDE_CONTENT.map(g => `
+            <div class="guide-item">
+              <div class="gi-num">${g.num}</div>
+              <div class="gi-title">${g.title}</div>
+              <div class="gi-h">使用方法</div>
+              <div class="gi-p">${g.how}</div>
+              <div class="gi-h">適用範圍</div>
+              <div class="gi-p">${g.when}</div>
+              <div class="guide-diagram">
+                ${g.diagram.map(d => `<div class="gd-box${g.diagram.length === 1 ? ' gd-circle' : ''}">${d}</div>`).join('')}
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+    document.body.appendChild(el);
+    el.querySelector('.guide-modal-close').addEventListener('click', closeGuideModal);
+    el.addEventListener('click', (e) => { if (e.target === el) closeGuideModal(); });
+    guideModalEl = el;
+    return el;
+  }
+
+  function openGuideModal(){ ensureGuideModal().classList.add('open'); }
+  function closeGuideModal(){ if (guideModalEl) guideModalEl.classList.remove('open'); }
+
+  const guideBookLink = document.getElementById('guide-book-link');
+  if (guideBookLink) {
+    guideBookLink.addEventListener('click', (e) => { e.preventDefault(); openGuideModal(); });
+  }
+
   function initFromQuery(){
     const params = new URLSearchParams(window.location.search);
     const m = Number(params.get('mode'));
     if (m >= 1 && m <= 5) enterStage(m);
+    if (params.get('guide') === '1') openGuideModal();
   }
 
   function initLiff(){
