@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>管理後台｜多特瑞精油洞悉卡</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="style.css?v=8">
+</head>
+<body>
+
+<a class="back-home-link" href="index.html">← 首頁</a>
+<div class="brand-title"><h1>受付與抽牌紀錄管理</h1><p>ADMIN</p></div>
+<div class="ornament-divider">❀</div>
+
+<main>
+  <div id="admin-login-wrap" class="admin-login-wrap">
+    <div class="form-field">
+      <label class="form-label" for="a-email">Email</label>
+      <input class="form-input" id="a-email" type="email" autocomplete="username">
+    </div>
+    <div class="form-field">
+      <label class="form-label" for="a-pass">密碼</label>
+      <input class="form-input" id="a-pass" type="password" autocomplete="current-password">
+    </div>
+    <button type="button" class="form-submit-btn" id="admin-login-btn">登入</button>
+    <div id="admin-login-msg" class="admin-msg"></div>
+  </div>
+
+  <div id="admin-dashboard" class="admin-dashboard" style="display:none;">
+    <div class="admin-stats-row">
+      <div class="admin-stat-card"><b id="stat-bookings">–</b><span>預約總數</span></div>
+      <div class="admin-stat-card"><b id="stat-draws">–</b><span>抽牌總數</span></div>
+    </div>
+
+    <div class="admin-toolbar">
+      <input class="form-input" id="admin-search" type="text" placeholder="搜尋受付編號／姓名／LINE ID">
+      <select class="form-input admin-status-filter" id="admin-status-filter">
+        <option value="">全部狀態</option>
+        <option value="待處理">待處理</option>
+        <option value="已聯繫">已聯繫</option>
+        <option value="已完成">已完成</option>
+        <option value="取消">取消</option>
+      </select>
+      <button type="button" class="mode-btn admin-logout-btn" id="admin-logout-btn" style="flex:0 0 auto;">登出</button>
+    </div>
+
+    <div id="admin-msg" class="admin-msg"></div>
+    <div id="booking-list" class="booking-list"></div>
+  </div>
+</main>
+
+<script src="supabase-client.js?v=1"></script>
+<script src="admin.js?v=1"></script>
+</body>
+</html>
