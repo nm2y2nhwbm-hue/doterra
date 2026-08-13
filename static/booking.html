@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>貴賓體驗預約｜多特瑞精油洞悉卡</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="style.css?v=8">
+</head>
+<body>
+
+<a class="back-home-link" href="index.html">← 首頁</a>
+<div class="brand-title"><h1>貴賓體驗預約</h1><p>MODERN OIL ORACLE</p></div>
+<div class="ornament-divider">❀</div>
+
+<main>
+  <div id="booking-form-wrap">
+    <p class="booking-intro">留下你的聯絡方式與此刻的心情，我們會依你的抽牌結果安排專屬的精油體驗諮詢與禮盒。</p>
+
+    <form id="booking-form" class="booking-form">
+      <div class="form-field">
+        <label class="form-label" for="f-name">姓名 <span class="req">*</span></label>
+        <input class="form-input" id="f-name" name="name" type="text" required maxlength="60">
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="f-email">Email</label>
+        <input class="form-input" id="f-email" name="email" type="email" maxlength="120">
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="f-line">LINE ID</label>
+        <input class="form-input" id="f-line" name="lineId" type="text" maxlength="60">
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="f-date">預約日期</label>
+        <input class="form-input" id="f-date" name="bookingDate" type="date">
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="f-concern">主要困擾</label>
+        <input class="form-input" id="f-concern" name="mainConcern" type="text" maxlength="120" placeholder="例如：工作壓力、人際關係、睡眠品質……">
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="f-mood">當下心情</label>
+        <input class="form-input" id="f-mood" name="mood" type="text" maxlength="120" placeholder="例如：焦慮、平靜、期待……">
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="f-question">諮詢問題</label>
+        <textarea class="form-input form-textarea" id="f-question" name="question" maxlength="500" rows="3"></textarea>
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="f-note">補充說明</label>
+        <textarea class="form-input form-textarea" id="f-note" name="note" maxlength="500" rows="3"></textarea>
+      </div>
+
+      <div id="draw-code-note" class="draw-code-note" style="display:none;"></div>
+
+      <button type="submit" class="form-submit-btn" id="booking-submit-btn">送出預約</button>
+      <p class="booking-disclaimer">送出即表示同意我們以上述聯絡方式與你確認預約內容。此服務不做醫療、心理或投資專業建議。</p>
+    </form>
+
+    <div id="booking-confirm" class="booking-confirm" style="display:none;"></div>
+  </div>
+</main>
+
+<script src="supabase-client.js?v=1"></script>
+<script src="booking.js?v=1"></script>
+</body>
+</html>
