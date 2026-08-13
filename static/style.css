@@ -422,3 +422,24 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 16px
   background-image:url("images/Gemini_Generated_Image.png"); background-size:cover; background-position:center;
   border:1.6px solid var(--gold); box-shadow:0 10px 26px rgba(58,54,46,.22);
 }
+
+/* ---------- 模式七：流年/流月/流日 分頁選擇 ---------- */
+.mode7-tabs{ width:100%; max-width:420px; display:flex; flex-direction:column; gap:10px; margin:12px auto 0; }
+.mode7-tab-btn{
+  min-height:48px; border-radius:14px; border:1px solid rgba(184,145,46,.4); background:#fffaf3;
+  color:var(--forest-deep); font-size:14px; cursor:pointer;
+}
+.mode7-tab-btn:active{ transform:scale(.98); }
+
+/* ---------- O2O 實體精油處方箋 ---------- */
+.o2o-panel{
+  width:100%; max-width:480px; margin:18px auto 0; background:#fffaf3;
+  border:1px solid rgba(184,145,46,.4); border-radius:14px; padding:16px 18px;
+}
+.o2o-title{ font-size:13.5px; color:var(--forest-deep); font-weight:600; margin-bottom:10px; }
+.o2o-item{ padding:10px 0; border-top:1px solid rgba(184,145,46,.25); }
+.o2o-item:first-of-type{ border-top:none; }
+.o2o-label{ font-size:11px; color:var(--sage); margin-bottom:2px; }
+.o2o-card-name{ font-size:13px; color:var(--forest-deep); font-weight:600; margin-bottom:4px; }
+.o2o-text{ font-size:12px; color:var(--ink); line-height:1.8; white-space:pre-line; }
+.o2o-note{ font-size:10px; color:var(--sage); line-height:1.6; margin-top:10px; }

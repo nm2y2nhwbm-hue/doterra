@@ -13,6 +13,7 @@
   const indicatorSelect = document.getElementById('indicator-select');
   const mode5Intro = document.getElementById('mode5-intro');
   const mode5ReadyBtn = document.getElementById('mode5-ready-btn');
+  const mode7Tabs = document.getElementById('mode7-tabs');
   const fanWrap = document.getElementById('fan-wrap');
   const fanStage = document.getElementById('fan-stage');
   const deckHint = document.getElementById('deck-hint');
@@ -32,6 +33,43 @@
     2: { title: "生活導引", count: 2, labels: ["目前整體狀況", "生活中所需的建議及方向"] },
     3: { title: "三牌陣",   count: 3, labels: ["身・目前身體狀況", "心・目前心理狀態", "靈・目前精神狀況"] },
     4: { title: "了解自我", count: 3, labels: ["別人眼中的你", "私底下獨處時的你", "真正自我的你"] },
+    6: {
+      title: "主題時間流",
+      sandwich: {
+        center: (name) => `此刻關注的主題：${name}`,
+        left:   (name) => `過去：形成「${name}」這個主題的情緒根源與潛意識慣性`,
+        right:  (name) => `未來：「${name}」可能的轉化方向與植物指引`,
+      },
+      prescriptionIndices: [2],
+    },
+    7: {
+      title: "生命大運流年",
+      pool: "oils",
+      subModes: {
+        year:  { tabName: "看流年",  labels: ["先前：近期尚未放下的心結與慣性模式", "此刻：目前面對的核心課題", "後續：接下來可以留意的轉化方向與精油陪伴"] },
+        month: { tabName: "看流月",  labels: ["月初：這個月延續的身心狀態", "月中：此刻正在浮現的情緒重點", "月底：可以運用的能量出口與香氣陪伴"] },
+        day:   { tabName: "看流日",  labels: ["稍早：昨日或今早殘留的身心感受", "此刻：白天最需要面對的狀態", "稍晚：晚間放鬆或明日出門的陪伴精油"] },
+      },
+      prescriptionIndices: [2],
+    },
+    8: {
+      title: "二選一未來抉擇",
+      pool: "oils",
+      labels: ["方案 A：此刻的心境與內在考量", "方案 A：這個選擇可能帶來的發展", "方案 B：此刻的心境與內在考量", "方案 B：這個選擇可能帶來的發展"],
+      prescriptionIndices: [1, 3],
+    },
+    9: {
+      title: "三選一十字路口",
+      pool: "oils",
+      fixedIndicatorName: "十字路口",
+      labels: ["核心：十字路口，代表你正站在抉擇的時刻", "選項一：這個方向可能帶來的感受與能量", "選項二：這個方向可能帶來的感受與能量", "選項三：這個方向可能帶來的感受與能量"],
+      prescriptionIndices: [1, 2, 3],
+    },
+    10: {
+      title: "年度生命軌跡",
+      pool: "indicators",
+      labels: ["上半年：生命重心與可能面對的課題", "下半年：重心的轉移方向與學習焦點"],
+    },
   };
 
   const INDICATOR_THEMES = {
@@ -57,6 +95,7 @@
   let selectedIndicatorName = null;
   let selectedIndicatorOrientation = 'upright'; // 'upright' | 'reversed'
   let isMode5 = false;
+  let currentSubMode = null; // 模式 7 的 year/month/day
   let currentMode = null;
   let collectedResults = [];
 
@@ -82,6 +121,7 @@
     indicatorSelect.style.display = 'none';
     indicatorSelect.innerHTML = '';
     mode5Intro.style.display = 'none';
+    mode7Tabs.style.display = 'none';
     fanWrap.style.display = 'none';
     fanStage.innerHTML = '';
     fanStage.classList.remove('shuffling');
@@ -90,12 +130,15 @@
     experiencePanel.style.display = 'none';
     sendStatus.textContent = '';
     againBtn.style.display = 'none';
+    const existingO2O = document.getElementById('o2o-panel');
+    if (existingO2O) existingO2O.remove();
     fanItems = [];
     drawPlan = [];
     drawnCount = 0;
     selectedIndicatorName = null;
     selectedIndicatorOrientation = 'upright';
     isMode5 = false;
+    currentSubMode = null;
     collectedResults = [];
   }
 
@@ -110,19 +153,66 @@
     resetStageDom();
     currentMode = modeId;
 
-    if (modeId === 5) {
+    if (modeId === 5 || modeId === 6) {
       isMode5 = true;
-      stageTitle.textContent = '指示牌';
+      stageTitle.textContent = MODE_CONFIG[modeId] ? MODE_CONFIG[modeId].title : '指示牌';
       renderMode5Intro();
+      return;
+    }
+
+    if (modeId === 7) {
+      stageTitle.textContent = MODE_CONFIG[7].title;
+      renderMode7Tabs();
+      return;
+    }
+
+    if (modeId === 9) {
+      startMode9();
       return;
     }
 
     const cfg = MODE_CONFIG[modeId];
     stageTitle.textContent = cfg.title;
     drawPlan = cfg.labels;
-    const pool = shuffle(OILS).slice(0, fanPoolSize()).map(c => ({card:c, isIndicator:false}));
+    const poolSource = cfg.pool === 'indicators' ? INDICATORS : OILS;
+    const poolSize = cfg.pool === 'indicators' ? Math.min(12, poolSource.length) : fanPoolSize();
+    const pool = shuffle(poolSource).slice(0, poolSize).map(c => ({card:c, isIndicator:false}));
     startShuffleThenFan(pool);
   }
+
+  function startMode9(){
+    const cfg = MODE_CONFIG[9];
+    stageTitle.textContent = cfg.title;
+    const fixedCard = INDICATORS.find(i => i.name === cfg.fixedIndicatorName);
+    drawPlan = cfg.labels.slice(1);
+    const pool = shuffle(OILS).slice(0, fanPoolSize()).map(c => ({card:c, isIndicator:false}));
+    startShuffleThenFan(pool);
+    if (fixedCard) {
+      renderDrawnCard(cfg.labels[0], fixedCard);
+      collectedResults.push({ label: cfg.labels[0], card: fixedCard });
+    } else {
+      instruction.textContent = '找不到「十字路口」指示卡資料，請確認指示卡資料庫。';
+    }
+  }
+
+  function renderMode7Tabs(){
+    instruction.textContent = '請選擇想觀看的時間尺度';
+    mode7Tabs.style.display = 'flex';
+  }
+
+  mode7Tabs.querySelectorAll('.mode7-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const sub = btn.dataset.sub;
+      const subCfg = MODE_CONFIG[7].subModes[sub];
+      mode7Tabs.style.display = 'none';
+      currentSubMode = sub;
+      stageTitle.textContent = `${MODE_CONFIG[7].title}・${subCfg.tabName}`;
+      instruction.textContent = '';
+      drawPlan = subCfg.labels;
+      const pool = shuffle(OILS).slice(0, fanPoolSize()).map(c => ({card:c, isIndicator:false}));
+      startShuffleThenFan(pool);
+    });
+  });
 
   function renderMode5Intro(){
     instruction.textContent = '';
@@ -326,6 +416,8 @@
     drawnRow.innerHTML = '';
     experiencePanel.innerHTML = '';
     experiencePanel.style.display = 'none';
+    const existingO2O2 = document.getElementById('o2o-panel');
+    if (existingO2O2) existingO2O2.remove();
     drawnCount = 0;
     collectedResults = [];
 
@@ -395,12 +487,17 @@
       }
     });
 
+    const sandwichCfg = MODE_CONFIG[currentMode] && MODE_CONFIG[currentMode].sandwich;
+    const centerLabel = sandwichCfg ? sandwichCfg.center(selectedIndicatorName) : '指示牌';
+    const leftLabel = sandwichCfg ? sandwichCfg.left(selectedIndicatorName) : `「${selectedIndicatorName}」左側提升精油`;
+    const rightLabel = sandwichCfg ? sandwichCfg.right(selectedIndicatorName) : `「${selectedIndicatorName}」右側提升精油`;
+
     deckHint.textContent = `「${selectedIndicatorName}」指示牌現身，為你點出主題……`;
 
     const indicatorItem = fanItems[idx];
-    flipCardInPlace(indicatorItem, '指示牌');
-    renderDrawnCard('指示牌', indicatorItem.card);
-    collectedResults.push({ label: '指示牌', card: indicatorItem.card });
+    flipCardInPlace(indicatorItem, centerLabel);
+    renderDrawnCard(centerLabel, indicatorItem.card);
+    collectedResults.push({ label: centerLabel, card: indicatorItem.card });
 
     setTimeout(() => {
       deckHint.textContent = '正在揭示左右兩側的精油指引……';
@@ -414,8 +511,8 @@
           collectedResults.push({ label, card: sideItem.card });
         }, delay);
       };
-      revealSide(leftIdx, `「${selectedIndicatorName}」左側提升精油`, 0);
-      revealSide(rightIdx, `「${selectedIndicatorName}」右側提升精油`, 500);
+      revealSide(leftIdx, leftLabel, 0);
+      revealSide(rightIdx, rightLabel, 500);
 
       setTimeout(() => {
         deckHint.textContent = '解讀完成 ✦ 願這份訊息與你同在';
@@ -581,6 +678,7 @@
     logDrawToBackend();
 
     const modeTitle = MODE_CONFIG[currentMode] ? MODE_CONFIG[currentMode].title : '指示牌';
+    renderO2OPrescription();
     const resultsPayload = collectedResults.map(r => ({
       label: r.label, card_name: r.card.name, card_name_en: r.card.name_en || '', image_url: r.card.image_url,
     }));
@@ -594,6 +692,40 @@
     getCode.then(({ code, persisted }) => {
       renderExperiencePanel(code, persisted, modeTitle);
     });
+  }
+
+  // 模式 6-9：在解牌結果最後，依「未來/解方」位置抽到的精油卡，附上一份通用的
+  // 擴香與滾珠調油建議（標準芳療稀釋比例，非醫療劑量指示）。
+  function buildO2OSuggestion(card){
+    return `擴香建議：3～5 滴「${card.name}」加入擴香機，讓香氣陪伴這段轉化。\n`
+      + `滾珠調油：「${card.name}」3～4 滴＋10ml 基底油（如荷荷芭油），約 2% 稀釋濃度，可隨身滾塗於手腕或頸後。`;
+  }
+
+  function renderO2OPrescription(){
+    const cfg = MODE_CONFIG[currentMode];
+    if (!cfg || !cfg.prescriptionIndices || !cfg.prescriptionIndices.length) return;
+
+    const targets = cfg.prescriptionIndices
+      .map(i => collectedResults[i])
+      .filter(Boolean);
+    if (!targets.length) return;
+
+    const existing = document.getElementById('o2o-panel');
+    if (existing) existing.remove();
+
+    const el = document.createElement('div');
+    el.id = 'o2o-panel';
+    el.className = 'o2o-panel';
+    el.innerHTML = `
+      <div class="o2o-title">🌿 實體精油處方箋</div>
+      ${targets.map(t => `
+        <div class="o2o-item">
+          <div class="o2o-label">${t.label}</div>
+          <div class="o2o-card-name">${t.card.name}</div>
+          <div class="o2o-text">${buildO2OSuggestion(t.card)}</div>
+        </div>`).join('')}
+      <div class="o2o-note">以上為一般芳療稀釋比例參考，並非醫療劑量指示；孕期、嬰幼兒或特殊體質請先諮詢專業人員。</div>`;
+    drawnRow.insertAdjacentElement('afterend', el);
   }
 
   function renderExperiencePanel(code, persisted, modeTitle){
@@ -687,6 +819,36 @@
       how: '先選擇一張代表你關注主題的指示牌，設定正位或逆位後置入牌組重新洗牌，再抽出指示牌左右兩側的精油牌，分別代表提升用油與心靈小語。',
       when: '已經有明確的困擾主題，想針對它獲得具體對應占卜時。',
       diagram: ['左側用油', '指示牌', '右側小語'],
+    },
+    {
+      num: '06', title: '主題時間流',
+      how: '選定一張想關注的主題卡，置入油卡牌組重新洗牌，抽出主題卡左右兩側的精油牌，分別代表過去成因與未來轉化方向。',
+      when: '想針對某個具體主題，看見它的來龍去脈時。',
+      diagram: ['過去成因', '主題', '未來轉化'],
+    },
+    {
+      num: '07', title: '生命大運流年',
+      how: '選擇想觀看的時間尺度（流年／流月／流日），抽三張油卡，依序代表前期、當下、後續三個階段。',
+      when: '想檢視一段時間內身心狀態的變化脈絡時。',
+      diagram: ['前期', '當下', '後續'],
+    },
+    {
+      num: '08', title: '二選一未來抉擇',
+      how: '心中分別想著方案 A、方案 B，抽四張油卡：A 的心境、A 的發展、B 的心境、B 的發展。',
+      when: '卡在兩個具體方案之間，想對照兩條路的身心感受時。',
+      diagram: ['方案A心境', '方案A發展', '方案B心境', '方案B發展'],
+    },
+    {
+      num: '09', title: '三選一十字路口',
+      how: '系統會固定顯示「十字路口」主題卡作為核心背景，接著盲抽三張油卡，分別對應三個不同的選擇方向。',
+      when: '面臨三個以上的選項、需要多方比較時。',
+      diagram: ['核心', '選項一', '選項二', '選項三'],
+    },
+    {
+      num: '10', title: '年度生命軌跡',
+      how: '不使用精油卡，純粹從 12 張主題卡中抽兩張，分別代表上半年與下半年的生命重心。',
+      when: '想從較長的時間跨度，看見整體生命焦點的位移時。',
+      diagram: ['上半年', '下半年'],
     },
   ];
 
