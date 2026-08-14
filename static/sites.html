@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>網站管理中心｜多特瑞精油洞悉卡</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="style.css?v=8">
+</head>
+<body>
+
+<a class="back-home-link" href="admin.html">← 管理後台</a>
+<div class="brand-title"><h1>網站管理中心</h1><p>SITES CONTROL</p></div>
+<div class="ornament-divider">❀</div>
+
+<main>
+  <div id="admin-login-wrap" class="admin-login-wrap">
+    <div class="form-field">
+      <label class="form-label" for="a-email">Email</label>
+      <input class="form-input" id="a-email" type="email" autocomplete="username">
+    </div>
+    <div class="form-field">
+      <label class="form-label" for="a-pass">密碼</label>
+      <input class="form-input" id="a-pass" type="password" autocomplete="current-password">
+    </div>
+    <button type="button" class="form-submit-btn" id="admin-login-btn">登入</button>
+    <div id="admin-login-msg" class="admin-msg"></div>
+  </div>
+
+  <div id="sites-dashboard" class="admin-dashboard" style="display:none;">
+    <button type="button" class="mode-btn" id="refresh-btn" style="margin-bottom:16px;">🔄 重新檢查全部</button>
+
+    <div class="home-section-title" style="margin:0 0 12px;">區塊一・雲端廠商基礎設施狀態</div>
+    <div id="vendor-status-list" class="booking-list"></div>
+
+    <div class="home-section-title" style="margin:28px 0 12px;">區塊二・專案自身運行狀態</div>
+    <div id="project-status-list" class="booking-list"></div>
+
+    <div id="sites-msg" class="admin-msg"></div>
+  </div>
+</main>
+
+<script src="supabase-client.js?v=1"></script>
+<script src="sites.js?v=1"></script>
+</body>
+</html>
