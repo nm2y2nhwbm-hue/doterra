@@ -123,6 +123,27 @@
   addBtn.addEventListener('click', () => openForm(null));
   cancelBtn.addEventListener('click', () => { formWrap.style.display = 'none'; });
 
+  const syncBtn = document.getElementById('inv-sync-btn');
+  syncBtn.addEventListener('click', async () => {
+    const baseUrl = window.OracleSupabase && window.OracleSupabase.SUPABASE_URL;
+    if (!baseUrl) { adminMsg.textContent = 'Supabase 尚未設定，無法同步。'; return; }
+    syncBtn.disabled = true;
+    adminMsg.textContent = '正在從 Google 試算表同步……';
+    try {
+      const res = await fetch(`${baseUrl}/functions/v1/sync-inventory`, { method: 'POST' });
+      const data = await res.json();
+      if (data.ok) {
+        adminMsg.textContent = `同步完成：新增 ${data.inserted} 筆、更新 ${data.updated} 筆`;
+        await loadData();
+      } else {
+        adminMsg.textContent = '同步失敗：' + data.error;
+      }
+    } catch (e) {
+      adminMsg.textContent = '同步失敗：' + e.message;
+    }
+    syncBtn.disabled = false;
+  });
+
   saveBtn.addEventListener('click', async () => {
     const payload = {
       oil_name: fName.value.trim(),
