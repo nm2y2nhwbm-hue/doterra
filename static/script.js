@@ -33,12 +33,10 @@
   let liffReady = false;
   let liffProfile = null;
 
-  const CATEGORY_CONFIG = {
-    mirror:     { name: '鏡子', icon: '鏡', eyebrow: 'MIRROR',     tagline: '照看你的此時此刻',   sub: '只映照當下，不推演過去與未來',       modes: [1,2,3,4,5] },
-    river:      { name: '河流', icon: '河', eyebrow: 'RIVER',      tagline: '陪伴你的時間流動',   sub: '順著時間的脈絡，看見不同階段的自己', modes: [6,7,8,9,10] },
-    crossroad:  { name: '岔路', icon: '岔', eyebrow: 'CROSSROAD',  tagline: '站在十字路口的香氣陪伴', sub: '在多個選項之間，先聽聽身體的聲音', modes: [11,12] },
-  };
+  // 分類資料改由 mode-catalog.js 提供（首頁與這裡共用同一份，避免文字各改各的）
+  const CATEGORY_CONFIG = window.CATEGORY_CATALOG;
 
+  // 注意：title / category / desc 需與 mode-catalog.js 的 MODE_CATALOG 保持一致
   const MODE_CONFIG = {
     1: { title: "今日能量", category: 'mirror', desc: '單張心靈肯定小語', count: 1, labels: ["今日心靈小語"] },
     2: { title: "生活導引", category: 'mirror', desc: '現階段狀態與方向指引', count: 2, labels: ["目前整體狀況", "生活中所需的建議及方向"] },
@@ -920,8 +918,10 @@
   function initFromQuery(){
     const params = new URLSearchParams(window.location.search);
     const m = Number(params.get('mode'));
-    if (m >= 1 && m <= 5) enterStage(m);
+    if (m >= 1 && m <= 12) enterStage(m);
     if (params.get('guide') === '1') openGuideModal();
+    const cat = params.get('cat');
+    if (!m && cat && CATEGORY_CONFIG[cat]) renderCategoryDetail(cat);
   }
 
   function initLiff(){

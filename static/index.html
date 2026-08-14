@@ -18,7 +18,7 @@
 <title>多特瑞精油洞悉卡｜MODERN OIL ORACLE</title>
 <link rel="stylesheet" href="style.css?v=7">
 </head>
-<body class="has-fixed-nav has-fixed-bar">
+<body class="has-fixed-nav">
 
 <header class="site-nav">
   <div class="site-nav-inner">
@@ -55,15 +55,30 @@
     </div>
   </section>
 
-  <section class="home-section" id="about">
-    <div class="home-section-title">五種牌陣，回應不同的此刻</div>
-    <div class="home-feature-grid">
-      <div class="home-feature-card"><b>今日能量</b><span>單張心靈肯定小語，快速校準一天的心情</span></div>
-      <div class="home-feature-card"><b>生活導引</b><span>兩張牌看見現階段狀態與接下來的方向</span></div>
-      <div class="home-feature-card"><b>三牌陣</b><span>身・心・靈全方位的深度解析</span></div>
-      <div class="home-feature-card"><b>了解自我</b><span>探索別人眼中的你，與真正的自己</span></div>
-      <div class="home-feature-card"><b>指示牌占卜</b><span>針對明確的困擾主題，指定指示牌進行對應占卜</span></div>
+  <section class="home-section" id="quick-lead">
+    <div class="quick-lead-card">
+      <div class="ql-title">想讓芳療師為你調配這瓶專屬守護油、或進行一對一深度諮詢嗎？</div>
+      <div class="ql-sub">請留下你的聯絡方式：</div>
+      <div class="ql-fields">
+        <input class="form-input" id="ql-email" type="email" placeholder="E-mail（必填）">
+        <input class="form-input" id="ql-line" type="text" placeholder="LINE ID（任意）">
+        <select class="form-input" id="ql-concern">
+          <option value="">主要困擾（請選擇）</option>
+          <option>工作壓力</option>
+          <option>睡眠品質</option>
+          <option>情緒起伏</option>
+          <option>人際關係</option>
+          <option>其他</option>
+        </select>
+      </div>
+      <button type="button" class="home-cta primary" id="ql-submit-btn" style="width:100%;justify-content:center;">送出，留下這份心意</button>
+      <div id="ql-msg" class="admin-msg"></div>
     </div>
+  </section>
+
+  <section class="home-section" id="about">
+    <div class="home-section-title">今天，想怎麼問自己？</div>
+    <div class="category-row" id="home-category-row"></div>
   </section>
 
   <section class="home-section" id="gift">
@@ -76,12 +91,11 @@
 
 </main>
 
-<div class="home-footer">多特瑞精油洞悉卡 · MODERN OIL ORACLE</div>
+<div class="home-footer">多特瑞精油洞悉卡 · MODERN OIL ORACLE　<a href="admin.html" class="admin-entry-link">後台管理</a></div>
 
-<nav class="mobile-bar">
-  <a class="mobile-bar-btn primary" href="cards.html" style="display:flex;align-items:center;justify-content:center;text-decoration:none;">線上抽卡</a>
-  <a class="mobile-bar-btn secondary" href="booking.html" style="display:flex;align-items:center;justify-content:center;text-decoration:none;">預約禮盒</a>
-</nav>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-client.js?v=1"></script>
+<script src="mode-catalog.js?v=1"></script>
+<script src="home.js?v=1"></script>
 </body>
 </html>
