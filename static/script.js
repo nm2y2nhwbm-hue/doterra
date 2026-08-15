@@ -105,7 +105,6 @@
   let drawPlan = [];
   let drawnCount = 0;
   let selectedIndicatorName = null;
-  let selectedIndicatorOrientation = 'upright'; // 'upright' | 'reversed'
   let isMode5 = false;
   let currentMode = null;
   let collectedResults = [];
@@ -146,7 +145,6 @@
     drawPlan = [];
     drawnCount = 0;
     selectedIndicatorName = null;
-    selectedIndicatorOrientation = 'upright';
     isMode5 = false;
     collectedResults = [];
   }
@@ -248,31 +246,15 @@
         </div>`;
       item.addEventListener('click', () => {
         selectedIndicatorName = ind.name;
-        renderOrientationPicker(ind);
+        indicatorSelect.style.display = 'none';
+        proceedWithIndicator(ind);
       });
       indicatorSelect.appendChild(item);
     });
   }
 
-  function renderOrientationPicker(ind){
-    instruction.textContent = `已選擇「${ind.name}」，請設定這張指示牌的正逆位`;
-    indicatorSelect.innerHTML = `
-      <div class="orientation-picker">
-        <button type="button" class="orientation-btn" data-o="upright">🙂 正位</button>
-        <button type="button" class="orientation-btn" data-o="reversed">🙃 逆位</button>
-      </div>`;
-    indicatorSelect.querySelectorAll('.orientation-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        selectedIndicatorOrientation = btn.dataset.o;
-        indicatorSelect.style.display = 'none';
-        proceedWithIndicator(ind);
-      });
-    });
-  }
-
   function proceedWithIndicator(ind){
-    const orientLabel = selectedIndicatorOrientation === 'reversed' ? '逆位' : '正位';
-    instruction.textContent = `「${ind.name}」（${orientLabel}）已插入牌組，正在洗牌……洗牌之後，抽三張牌～`;
+    instruction.textContent = `「${ind.name}」已插入牌組，正在洗牌……洗牌之後，抽三張牌～`;
 
     const oilsSubset = shuffle(OILS).slice(0, fanPoolSize() - 1).map(c => ({card:c, isIndicator:false}));
     const insertPos = Math.floor(Math.random() * (oilsSubset.length + 1));
@@ -420,6 +402,7 @@
 
   function startShuffleThenFan(deckItems, mode5){
     fanWrap.style.display = 'flex';
+    fanStage.style.display = '';
     fanStage.innerHTML = '';
     fanStage.classList.add('shuffling');
     deckHint.textContent = '正在洗牌，請稍候……';
@@ -686,6 +669,7 @@
   function finishAndSend(){
     showAgainButton();
     logDrawToBackend();
+    fanStage.style.display = 'none'; // 抽完收起扇形，只留結果卡片，避免跟下面的內容擠在一起
 
     const modeTitle = MODE_CONFIG[currentMode] ? MODE_CONFIG[currentMode].title : '指示牌';
     renderO2OPrescription();
@@ -826,7 +810,7 @@
     },
     {
       num: '05', title: '單一指示牌陣',
-      how: '先選擇一張代表你關注主題的指示牌，設定正位或逆位後置入牌組重新洗牌，再抽出指示牌左右兩側的精油牌，分別代表提升用油與心靈小語。',
+      how: '先選擇一張代表你關注主題的指示牌，置入牌組重新洗牌，再抽出指示牌左右兩側的精油牌，分別代表提升用油與心靈小語。',
       when: '已經有明確的困擾主題，想針對它獲得具體對應占卜時。',
       diagram: ['左側用油', '指示牌', '右側小語'],
     },
