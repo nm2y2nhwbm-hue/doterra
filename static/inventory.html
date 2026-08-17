@@ -28,18 +28,34 @@
   </div>
 
   <div id="inventory-dashboard" class="admin-dashboard" style="display:none;">
+    <div class="admin-toolbar">
+      <input class="form-input" id="inv-search" type="text" placeholder="搜尋產品ID或精油名稱">
+      <button type="button" class="mode-btn" id="inv-scan-btn" style="flex:0 0 auto;">📷 掃描</button>
+    </div>
+
     <div class="admin-stats-row">
+      <div class="admin-stat-card"><b id="stat-bottles">–</b><span>庫存瓶數</span></div>
       <div class="admin-stat-card"><b id="stat-items">–</b><span>庫存品項</span></div>
       <div class="admin-stat-card"><b id="stat-expiring">–</b><span>60天內到期</span></div>
     </div>
 
+    <div class="admin-stats-row">
+      <div class="admin-stat-card"><b id="stat-single">–</b><span>單方</span></div>
+      <div class="admin-stat-card"><b id="stat-blend">–</b><span>複方</span></div>
+    </div>
+
+    <div class="admin-stats-row">
+      <div class="admin-stat-card"><b id="stat-coconut">–</b><span>椰子油</span></div>
+      <div class="admin-stat-card"><b id="stat-other">–</b><span>其他</span></div>
+    </div>
+
     <div class="admin-toolbar">
-      <input class="form-input" id="inv-search" type="text" placeholder="搜尋精油名稱">
-      <button type="button" class="mode-btn" id="inv-sync-btn" style="flex:0 0 auto;">🔄 同步試算表</button>
+      <button type="button" class="mode-btn" id="inv-sync-btn" style="flex:1;">🔄 同步試算表</button>
       <button type="button" class="mode-btn" id="inv-add-btn" style="flex:0 0 auto;">＋ 新增品項</button>
     </div>
 
     <div id="inv-form-wrap" class="inv-form-wrap" style="display:none;">
+      <div class="form-field"><label class="form-label">產品編號</label><input class="form-input" id="inv-f-pid" placeholder="例如 3030"></div>
       <div class="form-field"><label class="form-label">精油名稱</label><input class="form-input" id="inv-f-name"></div>
       <div class="form-field"><label class="form-label">庫存數量</label><input class="form-input" id="inv-f-qty" type="number" step="0.01"></div>
       <div class="form-field"><label class="form-label">使用中數量</label><input class="form-input" id="inv-f-inuse" type="number" step="0.01"></div>

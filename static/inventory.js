@@ -4,7 +4,37 @@
   const loginMsg = document.getElementById('admin-login-msg');
   const adminMsg = document.getElementById('admin-msg');
   const invList = document.getElementById('inventory-list');
+  // 來源：doTERRA 官網「單方精油」分類（TW 官網 4 頁完整清單，已去除「精油/油/呵護系列/滾珠瓶」等後綴）
+  const SINGLE_OIL_KEYWORDS = [
+    '羅勒','肉桂','丁香','乳香','天竺葵','葡萄柚','薰衣草','檸檬草','檸檬','馬鬱蘭','茶樹','沒藥',
+    '野橘','牛至','薄荷','迷迭香','檀香','百里香','伊蘭','永久花','快樂鼠尾草','岩蘭草','胡荽','佛手柑',
+    '洋甘菊','香蜂草','萊姆','廣藿香','尤加利','冷杉','綠薄荷','冬青','黑胡椒','茴香','雪松',
+    '豆蔻','側柏','玫瑰','穗甘松','苦橙葉','橙花','茉莉','山雞椒','麥蘆卡','古巴香脂','藍艾菊','蓍草',
+    '薑黃','粉紅胡椒','青橘','黑雲杉','絲柏','桂皮','生薑','香草','鼠尾草','癒創木','樺樹','艾草',
+  ];
+  // 來源：doTERRA 官網「複方精油」分類（TW 官網 2 頁完整清單，已去除「複方/精油/滾珠瓶/呵護系列」等後綴）
+  const BLEND_OIL_KEYWORDS = [
+    '安定平衡','柑橘清新','樂活','舒緩','淨化清新','芳香調理','元氣煥能','元氣','天然防護','靜謐',
+    '撫慰','鼓舞','寬容','熱情','順暢清新','幸福恬靜','歡欣','希望','全新嚮往','清肌調理','溫柔呵護',
+    '賦活清新','花漾年華','完美修護','強韌寶貝','復元寶貝','勇氣寶貝','柑橘綻放','樂釋','保衛','仕女',
+    '悠活寶貝','舒壓','怡家','新瑞活力','清醇薄荷',
+  ];
+
+  // 4 類互斥分類：椰子油優先判斷，接著單方，接著複方，都沒對到才算其他
+  function classifyOil(name){
+    if (!name) return 'other';
+    if (name.includes('椰子油')) return 'coconut';
+    if (SINGLE_OIL_KEYWORDS.some(k => name.includes(k) || k.includes(name))) return 'single';
+    if (BLEND_OIL_KEYWORDS.some(k => name.includes(k) || k.includes(name))) return 'blend';
+    return 'other';
+  }
+
+  const statBottles = document.getElementById('stat-bottles');
   const statItems = document.getElementById('stat-items');
+  const statSingle = document.getElementById('stat-single');
+  const statBlend = document.getElementById('stat-blend');
+  const statCoconut = document.getElementById('stat-coconut');
+  const statOther = document.getElementById('stat-other');
   const statExpiring = document.getElementById('stat-expiring');
   const searchInput = document.getElementById('inv-search');
   const addBtn = document.getElementById('inv-add-btn');
@@ -12,6 +42,7 @@
   const saveBtn = document.getElementById('inv-save-btn');
   const cancelBtn = document.getElementById('inv-cancel-btn');
 
+  const fPid = document.getElementById('inv-f-pid');
   const fName = document.getElementById('inv-f-name');
   const fQty = document.getElementById('inv-f-qty');
   const fInUse = document.getElementById('inv-f-inuse');
@@ -59,17 +90,24 @@
     if (error) { adminMsg.textContent = '讀取庫存資料失敗：' + error.message; return; }
     allItems = data || [];
     statItems.textContent = allItems.length;
+    statBottles.textContent = allItems.reduce((sum, i) => sum + (Number(i.quantity) || 0) + (Number(i.in_use) || 0), 0);
     statExpiring.textContent = allItems.filter(i => {
       const d = daysUntil(i.expiry_date);
       return d !== null && d <= 60;
     }).length;
+    const counts = { single: 0, blend: 0, coconut: 0, other: 0 };
+    allItems.forEach(i => { counts[classifyOil(i.oil_name)]++; });
+    statSingle.textContent = counts.single;
+    statBlend.textContent = counts.blend;
+    statCoconut.textContent = counts.coconut;
+    statOther.textContent = counts.other;
     adminMsg.textContent = '';
     renderList();
   }
 
   function renderList(){
     const kw = (searchInput.value || '').trim().toLowerCase();
-    const filtered = allItems.filter(i => !kw || (i.oil_name || '').toLowerCase().includes(kw));
+    const filtered = allItems.filter(i => !kw || (i.oil_name || '').toLowerCase().includes(kw) || (i.product_id || '').toLowerCase().includes(kw));
 
     if (!filtered.length) {
       invList.innerHTML = '<div class="admin-msg">沒有符合條件的庫存品項</div>';
@@ -87,7 +125,10 @@
       return `
         <div class="booking-card">
           <div class="booking-card-head">
-            <div class="booking-receipt">${i.oil_name}</div>
+            <div>
+              <div class="booking-receipt">${i.oil_name}</div>
+              ${i.product_id ? `<div class="booking-created">產品編號：${i.product_id}</div>` : ''}
+            </div>
             ${badge}
           </div>
           <div class="booking-row">庫存 ${i.quantity} ${i.unit || '瓶'}｜使用中 ${i.in_use || 0} ${i.unit || '瓶'}${i.capacity ? '｜容量 ' + i.capacity : ''}</div>
@@ -110,6 +151,7 @@
 
   function openForm(item){
     editingId = item ? item.id : null;
+    fPid.value = item ? (item.product_id || '') : '';
     fName.value = item ? item.oil_name : '';
     fQty.value = item ? item.quantity : '';
     fInUse.value = item ? item.in_use : '';
@@ -119,6 +161,21 @@
     fNote.value = item ? (item.note || '') : '';
     formWrap.style.display = 'flex';
   }
+
+  // TODO：換成你們真正的 Apple 捷徑名稱（在「捷徑」App 裡該捷徑的名字）
+  const APPLE_SHORTCUT_NAME = 'YOUR-SHORTCUT-NAME';
+
+  const scanBtn = document.getElementById('inv-scan-btn');
+  scanBtn.addEventListener('click', () => {
+    if (APPLE_SHORTCUT_NAME.startsWith('YOUR-')) {
+      adminMsg.textContent = '尚未設定 Apple 捷徑名稱，請在 inventory.js 填入 APPLE_SHORTCUT_NAME';
+      return;
+    }
+    // 捷徑掃描後會直接把資料寫回 Google 試算表，這裡只負責開啟捷徑；
+    // 掃描完成後回到這頁，按「同步試算表」把最新資料抓進來即可。
+    window.location.href = `shortcuts://run-shortcut?name=${encodeURIComponent(APPLE_SHORTCUT_NAME)}`;
+    adminMsg.textContent = '已開啟 Apple 捷徑，掃描完成後記得回來按「同步試算表」';
+  });
 
   addBtn.addEventListener('click', () => openForm(null));
   cancelBtn.addEventListener('click', () => { formWrap.style.display = 'none'; });
@@ -131,12 +188,19 @@
     adminMsg.textContent = '正在從 Google 試算表同步……';
     try {
       const res = await fetch(`${baseUrl}/functions/v1/sync-inventory`, { method: 'POST' });
-      const data = await res.json();
-      if (data.ok) {
-        adminMsg.textContent = `同步完成：新增 ${data.inserted} 筆、更新 ${data.updated} 筆`;
+      if (res.status === 404) {
+        adminMsg.textContent = '同步失敗：找不到 sync-inventory（這支 Edge Function 還沒部署，請執行 supabase functions deploy sync-inventory）';
+        syncBtn.disabled = false;
+        return;
+      }
+      const data = await res.json().catch(() => null);
+      if (!data) {
+        adminMsg.textContent = `同步失敗：伺服器回傳非預期格式（HTTP ${res.status}）`;
+      } else if (data.ok) {
+        adminMsg.textContent = `同步完成：共讀到 ${data.oilTypes} 種精油、新增 ${data.inserted} 筆、更新 ${data.updated} 筆`;
         await loadData();
       } else {
-        adminMsg.textContent = '同步失敗：' + data.error;
+        adminMsg.textContent = '同步失敗：' + (data.error || '未知錯誤');
       }
     } catch (e) {
       adminMsg.textContent = '同步失敗：' + e.message;
@@ -146,6 +210,7 @@
 
   saveBtn.addEventListener('click', async () => {
     const payload = {
+      product_id: fPid.value.trim() || null,
       oil_name: fName.value.trim(),
       quantity: Number(fQty.value) || 0,
       in_use: Number(fInUse.value) || 0,
