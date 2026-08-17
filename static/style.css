@@ -487,3 +487,16 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 16px
   background:var(--paper-deep); border-radius:12px; padding:14px 16px; margin:14px 0;
   white-space:pre-line;
 }
+
+/* ---------- 庫存分類卡片：可點擊篩選 ---------- */
+.admin-stat-filter{ cursor:pointer; font-family:inherit; transition:border-color .15s ease, box-shadow .15s ease; }
+.admin-stat-filter:active{ transform:scale(.98); }
+.admin-stat-filter.active{ border-color:var(--forest); box-shadow:0 0 0 2px rgba(75,99,80,.25); }
+.inv-active-filter{
+  display:flex; align-items:center; gap:10px; justify-content:center;
+  font-size:12px; color:var(--forest-deep); margin-bottom:12px;
+}
+.inv-active-filter button{
+  background:none; border:1px solid var(--forest); color:var(--forest); border-radius:14px;
+  font-size:11px; padding:3px 10px; cursor:pointer;
+}

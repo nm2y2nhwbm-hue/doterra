@@ -82,6 +82,8 @@
 
   let allItems = [];
   let editingId = null;
+  let activeCategoryFilter = null; // null | 'single' | 'blend' | 'coconut' | 'other'
+  const CATEGORY_LABELS = { single: '單方', blend: '複方', coconut: '椰子油', other: '其他' };
 
   function daysUntil(dateStr){
     if (!dateStr) return null;
@@ -130,7 +132,24 @@
 
   function renderList(){
     const kw = (searchInput.value || '').trim().toLowerCase();
-    const filtered = allItems.filter(i => !kw || (i.oil_name || '').toLowerCase().includes(kw) || (i.product_id || '').toLowerCase().includes(kw));
+    const filtered = allItems.filter(i => {
+      if (kw && !((i.oil_name || '').toLowerCase().includes(kw) || (i.product_id || '').toLowerCase().includes(kw))) return false;
+      if (activeCategoryFilter && classifyOil(i) !== activeCategoryFilter) return false;
+      return true;
+    });
+
+    const activeFilterEl = document.getElementById('inv-active-filter');
+    if (activeCategoryFilter) {
+      activeFilterEl.style.display = 'flex';
+      activeFilterEl.innerHTML = `目前篩選：${CATEGORY_LABELS[activeCategoryFilter]} <button type="button" id="inv-clear-filter">✕ 清除</button>`;
+      document.getElementById('inv-clear-filter').addEventListener('click', () => {
+        activeCategoryFilter = null;
+        document.querySelectorAll('.admin-stat-filter').forEach(el => el.classList.remove('active'));
+        renderList();
+      });
+    } else {
+      activeFilterEl.style.display = 'none';
+    }
 
     if (!filtered.length) {
       invList.innerHTML = '<div class="admin-msg">沒有符合條件的庫存品項</div>';
@@ -277,6 +296,15 @@
   });
 
   searchInput.addEventListener('input', renderList);
+
+  document.querySelectorAll('.admin-stat-filter').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.filter;
+      activeCategoryFilter = (activeCategoryFilter === key) ? null : key;
+      document.querySelectorAll('.admin-stat-filter').forEach(el => el.classList.toggle('active', el.dataset.filter === activeCategoryFilter));
+      renderList();
+    });
+  });
 
   (async () => {
     if (!client) return;

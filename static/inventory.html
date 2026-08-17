@@ -40,13 +40,13 @@
     </div>
 
     <div class="admin-stats-row">
-      <div class="admin-stat-card"><b id="stat-single">–</b><span>單方</span></div>
-      <div class="admin-stat-card"><b id="stat-blend">–</b><span>複方</span></div>
+      <button type="button" class="admin-stat-card admin-stat-filter" data-filter="single"><b id="stat-single">–</b><span>單方</span></button>
+      <button type="button" class="admin-stat-card admin-stat-filter" data-filter="blend"><b id="stat-blend">–</b><span>複方</span></button>
     </div>
 
     <div class="admin-stats-row">
-      <div class="admin-stat-card"><b id="stat-coconut">–</b><span>椰子油</span></div>
-      <div class="admin-stat-card"><b id="stat-other">–</b><span>其他</span></div>
+      <button type="button" class="admin-stat-card admin-stat-filter" data-filter="coconut"><b id="stat-coconut">–</b><span>椰子油</span></button>
+      <button type="button" class="admin-stat-card admin-stat-filter" data-filter="other"><b id="stat-other">–</b><span>其他</span></button>
     </div>
 
     <div class="admin-toolbar">
@@ -70,6 +70,7 @@
     </div>
 
     <div id="admin-msg" class="admin-msg"></div>
+    <div id="inv-active-filter" class="inv-active-filter" style="display:none;"></div>
     <div id="inventory-list" class="booking-list"></div>
   </div>
 </main>
