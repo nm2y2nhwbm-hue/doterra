@@ -47,7 +47,9 @@
           <div class="ep-label">預約已送出，妳的受付編號</div>
           <div class="ep-code">${receiptNo}</div>
           <div class="ep-desc">請保留此編號，我們將依約定時間與你聯繫。</div>
+          <div id="ai-confirm-msg" class="ai-confirm-msg">正在為你準備一段專屬的前導訊息……</div>
           <a class="home-cta primary" href="index.html">返回首頁</a>`;
+        fetchAiConfirmation(receiptNo);
       } else {
         confirmBox.innerHTML = `
           <div class="ep-label">預約尚未成功送出</div>
@@ -63,4 +65,29 @@
       }
     });
   });
+
+  // LOG4：呼叫 Supabase Edge Function，用 AI 生成客製化的預約前導訊息
+  async function fetchAiConfirmation(receiptNo){
+    const msgEl = document.getElementById('ai-confirm-msg');
+    if (!msgEl) return;
+    const baseUrl = window.OracleSupabase && window.OracleSupabase.SUPABASE_URL;
+    if (!baseUrl) { msgEl.style.display = 'none'; return; }
+
+    try {
+      const anonKey = window.OracleSupabase && window.OracleSupabase.SUPABASE_ANON_KEY;
+      const res = await fetch(`${baseUrl}/functions/v1/generate-booking-confirmation`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${anonKey}` },
+        body: JSON.stringify({ receiptNo }),
+      });
+      const data = await res.json();
+      if (data.ok && data.message) {
+        msgEl.textContent = data.message;
+      } else {
+        msgEl.style.display = 'none';
+      }
+    } catch (e) {
+      msgEl.style.display = 'none';
+    }
+  }
 })();

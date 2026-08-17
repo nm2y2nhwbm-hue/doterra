@@ -69,5 +69,5 @@
     }
   }
 
-  window.OracleSupabase = { SUPABASE_CONFIGURED, SUPABASE_URL, getClient, saveDrawAndGetCode, createBooking };
+  window.OracleSupabase = { SUPABASE_CONFIGURED, SUPABASE_URL, SUPABASE_ANON_KEY, getClient, saveDrawAndGetCode, createBooking };
 })();

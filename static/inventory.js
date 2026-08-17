@@ -210,7 +210,11 @@
     syncBtn.disabled = true;
     adminMsg.textContent = '正在從 Google 試算表同步……';
     try {
-      const res = await fetch(`${baseUrl}/functions/v1/sync-inventory`, { method: 'POST' });
+      const anonKey = window.OracleSupabase && window.OracleSupabase.SUPABASE_ANON_KEY;
+      const res = await fetch(`${baseUrl}/functions/v1/sync-inventory`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${anonKey}` },
+      });
       if (res.status === 404) {
         adminMsg.textContent = '同步失敗：找不到 sync-inventory（這支 Edge Function 還沒部署，請執行 supabase functions deploy sync-inventory）';
         syncBtn.disabled = false;
