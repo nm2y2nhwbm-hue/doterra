@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<title>管理後台｜現代精油心靈指引卡</title>
+<title>受付與抽牌紀錄｜現代精油心靈指引卡</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
 
-<a class="back-home-link" href="index.html">← 首頁</a>
-<div class="brand-title"><h1>管理後台</h1><p>ADMIN</p></div>
+<a class="back-home-link" href="admin.html">← 返回管理首頁</a>
+<div class="brand-title"><h1>受付與抽牌紀錄</h1><p>RECEPTION DESK</p></div>
 <div class="ornament-divider">❀</div>
 
 <main>
@@ -33,33 +33,24 @@
       <div class="admin-stat-card"><b id="stat-draws">–</b><span>抽牌總數</span></div>
     </div>
 
-    <div class="admin-module-row">
-      <div class="admin-module-card">
-        <div class="amc-eyebrow">RECEPTION DESK</div>
-        <div class="amc-title">受付與抽牌紀錄</div>
-        <div class="amc-desc">預約名單、受付編號、抽牌結果查詢</div>
-        <a href="reception.html" class="amc-link">進入管理 →</a>
-      </div>
-      <div class="admin-module-card" id="module-inventory">
-        <div class="amc-eyebrow">WAREHOUSE CONTROL</div>
-        <div class="amc-title">精油庫存管理</div>
-        <div class="amc-desc">庫存與使用中數量、容量、有效期限預警</div>
-        <a href="inventory.html" class="amc-link">進入管理 →</a>
-      </div>
-      <div class="admin-module-card" id="module-sites">
-        <div class="amc-eyebrow">SITES CONTROL</div>
-        <div class="amc-title">網站管理中心</div>
-        <div class="amc-desc">GitHub／LINE／Render／Vercel／Supabase 多站同步狀態</div>
-        <a href="sites.html" class="amc-link">進入管理 →</a>
-      </div>
+    <div class="admin-toolbar">
+      <input class="form-input" id="admin-search" type="text" placeholder="搜尋受付編號／姓名／LINE ID">
+      <select class="form-input admin-status-filter" id="admin-status-filter">
+        <option value="">全部狀態</option>
+        <option value="待處理">待處理</option>
+        <option value="已聯繫">已聯繫</option>
+        <option value="已完成">已完成</option>
+        <option value="取消">取消</option>
+      </select>
+      <button type="button" class="mode-btn admin-logout-btn" id="admin-logout-btn" style="flex:0 0 auto;">登出</button>
     </div>
 
     <div id="admin-msg" class="admin-msg"></div>
-    <button type="button" class="mode-btn admin-logout-btn" id="admin-logout-btn" style="margin-top:18px;">登出</button>
+    <div id="booking-list" class="booking-list"></div>
   </div>
 </main>
 
 <script src="supabase-client.js?v=1"></script>
-<script src="admin-home.js?v=1"></script>
+<script src="admin.js?v=1"></script>
 </body>
 </html>
