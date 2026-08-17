@@ -10,7 +10,7 @@
 <body>
 
 <a class="back-home-link" href="index.html">← 首頁</a>
-<div class="brand-title"><h1>受付與抽牌紀錄管理</h1><p>ADMIN</p></div>
+<div class="brand-title"><h1>管理後台</h1><p>ADMIN</p></div>
 <div class="ornament-divider">❀</div>
 
 <main>
@@ -38,7 +38,7 @@
         <div class="amc-eyebrow">RECEPTION DESK</div>
         <div class="amc-title">受付與抽牌紀錄</div>
         <div class="amc-desc">預約名單、受付編號、抽牌結果查詢</div>
-        <a href="#booking-list" class="amc-link">查看下方列表 →</a>
+        <a href="reception.html" class="amc-link">進入管理 →</a>
       </div>
       <div class="admin-module-card" id="module-inventory">
         <div class="amc-eyebrow">WAREHOUSE CONTROL</div>
@@ -54,24 +54,12 @@
       </div>
     </div>
 
-    <div class="admin-toolbar">
-      <input class="form-input" id="admin-search" type="text" placeholder="搜尋受付編號／姓名／LINE ID">
-      <select class="form-input admin-status-filter" id="admin-status-filter">
-        <option value="">全部狀態</option>
-        <option value="待處理">待處理</option>
-        <option value="已聯繫">已聯繫</option>
-        <option value="已完成">已完成</option>
-        <option value="取消">取消</option>
-      </select>
-      <button type="button" class="mode-btn admin-logout-btn" id="admin-logout-btn" style="flex:0 0 auto;">登出</button>
-    </div>
-
     <div id="admin-msg" class="admin-msg"></div>
-    <div id="booking-list" class="booking-list"></div>
+    <button type="button" class="mode-btn admin-logout-btn" id="admin-logout-btn" style="margin-top:18px;">登出</button>
   </div>
 </main>
 
 <script src="supabase-client.js?v=1"></script>
-<script src="admin.js?v=1"></script>
+<script src="admin-home.js?v=1"></script>
 </body>
 </html>
