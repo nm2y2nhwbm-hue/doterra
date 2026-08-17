@@ -5,16 +5,27 @@
 
 create table if not exists oil_inventory (
   id           uuid primary key default gen_random_uuid(),
-  oil_name     text not null,
-  quantity     numeric not null default 0,   -- 目前庫存數量
-  in_use       numeric not null default 0,   -- 使用中數量
+  product_id   text,                          -- 產品編號（每種精油固定一個，像 SKU）
+  oil_name     text not null unique,          -- 一列＝一種精油（彙總後的庫存），試算表裡同名的多瓶會合併成一列
+  quantity     numeric not null default 0,    -- 庫存數量（未開封/在庫的瓶數）
+  in_use       numeric not null default 0,    -- 使用中數量
   unit         text not null default '瓶',
   capacity     text,                          -- 容量，例如 15ml
-  expiry_date  date,                          -- 有效期限
+  expiry_date  date,                          -- 有效期限（取該精油所有瓶中最早到期的一筆，最需要留意的日期）
   note         text,
   updated_at   timestamptz not null default now(),
   created_at   timestamptz not null default now()
 );
+
+-- 如果 oil_inventory 表是用更早版本建的，補上新欄位
+alter table oil_inventory add column if not exists product_id text;
+
+-- 如果 oil_inventory 表是用更早版本建的，補上 unique 限制方便 upsert
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'oil_inventory_oil_name_key') then
+    alter table oil_inventory add constraint oil_inventory_oil_name_key unique (oil_name);
+  end if;
+end $$;
 
 -- 更新資料列時自動刷新 updated_at
 create or replace function touch_updated_at() returns trigger

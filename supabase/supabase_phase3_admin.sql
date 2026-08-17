@@ -23,6 +23,7 @@ create table if not exists admins (
 alter table admins enable row level security;
 
 -- 讓已登入使用者可以查詢「自己是不是 admin」（前端登入後會用這個判斷要不要放行進後台）
+drop policy if exists "self can check own admin row" on admins;
 create policy "self can check own admin row" on admins
   for select to authenticated
   using (user_id = auth.uid());
