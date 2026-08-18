@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>受付與抽牌紀錄｜現代精油心靈指引卡</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link rel="stylesheet" href="style.css?v=8">
+<link rel="stylesheet" href="style.css?v=9">
 </head>
 <body>
 
@@ -42,6 +42,7 @@
         <option value="已完成">已完成</option>
         <option value="取消">取消</option>
       </select>
+      <button type="button" class="danger-action-btn admin-reset-btn" id="admin-reset-btn">全部歸零</button>
       <button type="button" class="mode-btn admin-logout-btn" id="admin-logout-btn" style="flex:0 0 auto;">登出</button>
     </div>
 
@@ -51,6 +52,6 @@
 </main>
 
 <script src="supabase-client.js?v=1"></script>
-<script src="admin.js?v=1"></script>
+<script src="admin.js?v=2"></script>
 </body>
 </html>

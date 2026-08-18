@@ -14,12 +14,12 @@
   }
 
   // ---------------------------------------------------------
-  // TODO：換成你們實際的網址／GitHub 資訊
+  // Production URLs / GitHub repository
   // ---------------------------------------------------------
-  const SITE_URL = 'https://doterra-two.vercel.app';
+  const SITE_URL = 'https://doterra-two.vercel.app/booking.html';
   const BACKEND_PING_URL = 'https://doterra-73pv.onrender.com/api/oils';
-  const GITHUB_OWNER = 'YOUR-GITHUB-OWNER';
-  const GITHUB_REPO = 'YOUR-GITHUB-REPO';
+  const GITHUB_OWNER = 'nm2y2nhwbm-hue';
+  const GITHUB_REPO = 'doterra';
   const GITHUB_BRANCH = 'main';
 
   const VENDORS = [
@@ -27,7 +27,7 @@
     { key: 'vercel',   name: 'Vercel',   api: 'https://www.vercel-status.com/api/v2/status.json', page: 'https://www.vercel-status.com', note: '前端網頁託管／邊緣網路' },
     { key: 'render',   name: 'Render',   api: 'https://status.render.com/api/v2/status.json', page: 'https://status.render.com', note: '後端 Web 服務／排程執行器' },
     { key: 'supabase', name: 'Supabase', api: 'https://status.supabase.com/api/v2/status.json', page: 'https://status.supabase.com', note: 'PostgreSQL 資料庫／Auth 驗證機房' },
-    { key: 'line',     name: 'LINE Developers', api: null, page: 'https://developers.line.biz/en/status/', note: 'LINE Bot 訊息轉發伺服器（無公開狀態 API，僅提供連結）' },
+    { key: 'line',     name: 'LINE Developers', api: 'https://api.line-status.info/api/v2/status.json', page: 'https://api.line-status.info/', note: 'Messaging API／LINE Developers／LIFF／LINE Login' },
   ];
 
   function statusBadgeHtml(level, text){
@@ -150,7 +150,7 @@
     const [frontend, backend, dbHealth, github] = await Promise.all([
       checkFrontend(), checkBackend(), checkDbHealth(), checkGithub(),
     ]);
-    renderRow(projectList, '前端站點響應', '從後台發送請求至首頁', frontend);
+    renderRow(projectList, '前端站點響應', '從後台發送請求至正式預約頁', frontend);
     renderRow(projectList, '後端 API 存活', 'Render 服務探測', backend);
     renderRow(projectList, '資料庫容量', 'pg_database_size', dbHealth.size);
     renderRow(projectList, '資料庫連線數', 'pg_stat_activity', dbHealth.conn);

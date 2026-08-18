@@ -8,6 +8,7 @@
   const statDraws = document.getElementById('stat-draws');
   const searchInput = document.getElementById('admin-search');
   const statusFilter = document.getElementById('admin-status-filter');
+  const resetBtn = document.getElementById('admin-reset-btn');
 
   const client = (window.OracleSupabase && window.OracleSupabase.getClient) ? window.OracleSupabase.getClient() : null;
 
@@ -95,6 +96,7 @@
             <option value="取消" ${b.status === '取消' ? 'selected' : ''}>取消</option>
           </select>
           ${b.draw_code ? `<button type="button" class="draw-toggle-btn" data-code="${b.draw_code}">查看抽牌結果 ▾</button>` : ''}
+          <button type="button" class="danger-action-btn delete-booking-btn" data-delete-receipt="${b.receipt_no}">刪除預約</button>
         </div>
         <div class="draw-detail" id="draw-detail-${b.draw_code || ''}" style="display:none;"></div>
       </div>
@@ -105,6 +107,9 @@
     });
     bookingList.querySelectorAll('.draw-toggle-btn').forEach(btn => {
       btn.addEventListener('click', () => toggleDrawDetail(btn.dataset.code));
+    });
+    bookingList.querySelectorAll('[data-delete-receipt]').forEach(btn => {
+      btn.addEventListener('click', () => deleteBooking(btn.dataset.deleteReceipt, btn));
     });
   }
 
@@ -117,6 +122,63 @@
     }
     if (b) b.status = status;
     renderList();
+  }
+
+  async function deleteBooking(receiptNo, button){
+    const booking = allBookings.find(x => x.receipt_no === receiptNo);
+    const linkedNote = booking && booking.draw_code
+      ? '\n\n對應抽牌紀錄會保留；只有「全部歸零」才會一併清除抽牌紀錄。'
+      : '';
+    if (!confirm(`確定刪除受付編號 ${receiptNo} 的預約嗎？${linkedNote}`)) return;
+
+    button.disabled = true;
+    adminMsg.textContent = '刪除中……';
+    const { data, error } = await client
+      .from('bookings')
+      .delete()
+      .eq('receipt_no', receiptNo)
+      .select('receipt_no')
+      .maybeSingle();
+
+    if (error || !data) {
+      button.disabled = false;
+      adminMsg.textContent = '刪除失敗：' + (error ? error.message : '沒有刪除權限或紀錄已不存在');
+      return;
+    }
+
+    allBookings = allBookings.filter(x => x.receipt_no !== receiptNo);
+    statBookings.textContent = allBookings.length;
+    adminMsg.textContent = `已刪除 ${receiptNo}；對應抽牌紀錄仍保留。`;
+    renderList();
+  }
+
+  async function resetReception(){
+    const phrase = prompt('此操作會永久清除全部預約、抽牌紀錄與受付編號計數器。\n\n請輸入「全部歸零」繼續：');
+    if (phrase === null) return;
+    if (phrase.trim() !== '全部歸零') {
+      adminMsg.textContent = '確認文字不正確，沒有刪除任何資料。';
+      return;
+    }
+    if (!confirm('最後確認：全部預約、抽牌紀錄及受付編號計數器都會歸零，且無法復原。確定繼續？')) return;
+
+    resetBtn.disabled = true;
+    adminMsg.textContent = '全部歸零中……';
+    const { data, error } = await client.rpc('admin_reset_reception');
+    resetBtn.disabled = false;
+
+    if (error) {
+      adminMsg.textContent = '全部歸零失敗：' + error.message;
+      return;
+    }
+
+    allBookings = [];
+    Object.keys(drawCache).forEach(key => delete drawCache[key]);
+    statBookings.textContent = '0';
+    statDraws.textContent = '0';
+    renderList();
+    const removedBookings = data && Number.isFinite(Number(data.bookings)) ? Number(data.bookings) : 0;
+    const removedDraws = data && Number.isFinite(Number(data.draws)) ? Number(data.draws) : 0;
+    adminMsg.textContent = `歸零完成：刪除 ${removedBookings} 筆預約、${removedDraws} 筆抽牌紀錄。`;
   }
 
   async function toggleDrawDetail(code){
@@ -176,6 +238,7 @@
 
   searchInput.addEventListener('input', renderList);
   statusFilter.addEventListener('change', renderList);
+  resetBtn.addEventListener('click', resetReception);
 
   // 若已經有有效登入狀態（例如重新整理頁面），直接進後台
   (async () => {
