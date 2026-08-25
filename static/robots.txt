@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /reception.html
+Disallow: /inventory.html
+Disallow: /sites.html
+
+Sitemap: https://doterra-two.vercel.app/sitemap.xml

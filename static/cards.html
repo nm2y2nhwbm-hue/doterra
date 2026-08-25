@@ -4,9 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>現代精油心靈指引卡</title>
+<meta name="description" content="從鏡子、河流與岔路三類牌陣中選擇此刻的問題，抽一張精油心靈指引卡。內容為自我探索用途，非醫療建議。">
+<link rel="canonical" href="https://doterra-two.vercel.app/cards.html">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:site_name" content="現代精油心靈指引卡">
+<meta property="og:title" content="免費線上抽牌｜現代精油心靈指引卡">
+<meta property="og:description" content="用 3 分鐘停下來，讓精油心靈指引卡陪你整理此刻的感受。">
+<meta property="og:url" content="https://doterra-two.vercel.app/cards.html">
+<meta property="og:image" content="https://doterra-two.vercel.app/images/og-modern-oil-oracle.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="現代精油心靈指引卡品牌分享圖">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#355343">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link rel="stylesheet" href="style.css?v=10">
+<link rel="stylesheet" href="style.css?v=11">
 </head>
 <body>
 
@@ -18,19 +33,21 @@
 
   <div id="mode-select">
     <a href="#" id="guide-book-link" class="guide-book-link">📖 卡牌說明書</a>
+    <div class="card-data-state" id="card-data-state" role="status" aria-live="polite">正在載入牌卡資料…</div>
+    <button type="button" class="card-data-retry" id="card-data-retry" hidden>重新載入牌卡</button>
     <div class="category-question">今天，想怎麼問自己？</div>
     <div class="category-row" id="category-row">
-      <button type="button" class="category-card" data-cat="mirror">
+      <button type="button" class="category-card" data-cat="mirror" aria-pressed="false">
         <div class="cc-icon">鏡</div>
         <div class="cc-name">鏡子</div>
         <div class="cc-tagline">照看你的此時此刻</div>
       </button>
-      <button type="button" class="category-card" data-cat="river">
+      <button type="button" class="category-card" data-cat="river" aria-pressed="false">
         <div class="cc-icon">河</div>
         <div class="cc-name">河流</div>
         <div class="cc-tagline">陪伴你的時間流動</div>
       </button>
-      <button type="button" class="category-card" data-cat="crossroad">
+      <button type="button" class="category-card" data-cat="crossroad" aria-pressed="false">
         <div class="cc-icon">岔</div>
         <div class="cc-name">岔路</div>
         <div class="cc-tagline">站在十字路口的香氣陪伴</div>
@@ -74,7 +91,7 @@
 
 <script src="supabase-client.js?v=4"></script>
 <script src="mode-catalog.js?v=1"></script>
-<script src="script.js?v=13"></script>
-<script src="site-fixes.js?v=2"></script>
+<script src="guide-modal.js?v=1"></script>
+<script src="script.js?v=15"></script>
 </body>
 </html>

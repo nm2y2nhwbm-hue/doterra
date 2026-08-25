@@ -35,7 +35,8 @@
 
 - `static/index.html`、`static/home.js`：首頁、分類入口與簡易聯絡表單。
 - `static/cards.html`、`static/script.js`：抽卡主流程、LIFF 初始化、抽牌結果與體驗碼流程。
-- `static/site-fixes.js`：首頁說明 modal 的相容層。體驗碼 gate 應由 `static/script.js` 的單一流程負責，不要再加入 MutationObserver 或 query-parameter 解鎖補丁。
+- `static/guide-modal.js`：首頁與抽卡頁共用的卡牌說明內容、dialog 語意、鍵盤與焦點管理。
+- `static/site-fixes.js`：只負責在首頁初始化共用卡牌說明 modal。體驗碼 gate 應由 `static/script.js` 的單一流程負責，不要再加入 MutationObserver 或 query-parameter 解鎖補丁。
 - `static/mode-catalog.js`：首頁與抽卡頁共用的分類／模式資料。
 - `static/booking.html`、`static/booking.js`：正式預約表單。
 - `static/supabase-client.js`：瀏覽器端 Supabase client、Render 抽牌交接 API 與 `create_booking` RPC 包裝；抽牌不可再由瀏覽器直接呼叫匿名 `save_draw`。
@@ -94,8 +95,8 @@ git log --oneline --decorate -n 10
 
 以下是 2026-08-18 稽核結果，開始修復前應重新確認現況，完成後更新或移除本節：
 
-- 第 0 批本機止血修改已移除 `experience_code` query 解鎖、第三方 QR、localStorage 自我解鎖及本機假體驗碼；尚未發布前，production 仍是舊流程。
-- Supabase 已套用 `secure_draw_handoff` 與外鍵索引 migration；本次後端模組加入短效交接 token、LINE ID Token 驗證與唯讀就緒檢查。靜態前端仍未切換到新 API，需待後續模組發布與雙入口驗收後才算完成新交接路徑。
+- Production `main` 已移除 `experience_code` query 解鎖、第三方 QR、localStorage 自我解鎖及本機假體驗碼，並切換到安全抽卡交接 API。
+- Supabase 已套用 `secure_draw_handoff`、外鍵索引與 `set_draw_code` schema-qualified trigger migration；後端與前端已發布短效交接 token、LINE ID Token 驗證及唯讀就緒檢查。真實 LINE OA／LIFF 手機重測仍是完成交接路徑的必要條件。
 - 新流程正式驗證完成後，需另建 migration 撤銷 `anon`／`authenticated`／`public` 對舊 `save_draw` RPC 的執行權；不可在新後端上線前先撤銷，以免造成抽卡保存中斷。
 - Supabase 從 `20260818015900_admin_reception_delete_reset.sql` 開始建立 migration history；更早的 schema 仍以既有 SQL 腳本為基準，並非完整歷史。
 - Supabase 安全檢查仍有既有 SECURITY DEFINER、function search path 與 Auth 設定警告，未經授權不要擴大修正範圍。

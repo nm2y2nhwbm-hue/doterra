@@ -3,6 +3,16 @@
   const submitBtn = document.getElementById('booking-submit-btn');
   const confirmBox = document.getElementById('booking-confirm');
   const drawCodeNote = document.getElementById('draw-code-note');
+  const formMsg = document.getElementById('booking-form-msg');
+  const bookingDateInput = document.getElementById('f-date');
+
+  function localDateString(){
+    const now = new Date();
+    const offset = now.getTimezoneOffset() * 60000;
+    return new Date(now.getTime() - offset).toISOString().slice(0, 10);
+  }
+
+  bookingDateInput.min = localDateString();
 
   const params = new URLSearchParams(window.location.search);
   const drawCode = params.get('code');
@@ -13,8 +23,7 @@
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    submitBtn.disabled = true;
-    submitBtn.textContent = '送出中……';
+    formMsg.textContent = '';
 
     const fd = new FormData(form);
     const fields = {
@@ -30,10 +39,23 @@
     };
 
     if (!fields.name) {
-      submitBtn.disabled = false;
-      submitBtn.textContent = '送出預約';
+      formMsg.textContent = '請填寫姓名。';
+      document.getElementById('f-name').focus();
       return;
     }
+    if (!fields.email && !fields.lineId) {
+      formMsg.textContent = '請至少填寫 Email 或 LINE ID 其中一項。';
+      document.getElementById('f-email').focus();
+      return;
+    }
+    if (fields.bookingDate && fields.bookingDate < localDateString()) {
+      formMsg.textContent = '預約日期不能早於今天。';
+      bookingDateInput.focus();
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = '送出中……';
 
     const submit = (window.OracleSupabase && window.OracleSupabase.createBooking)
       ? window.OracleSupabase.createBooking(fields)

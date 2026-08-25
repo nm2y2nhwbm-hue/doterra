@@ -16,7 +16,22 @@
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>現代精油心靈指引卡｜MODERN OIL ORACLE</title>
-<link rel="stylesheet" href="style.css?v=10">
+<meta name="description" content="3 分鐘精油心靈指引卡，透過鏡子、河流與岔路三類牌陣，陪你整理此刻感受並預約專屬精油體驗。">
+<link rel="canonical" href="https://doterra-two.vercel.app/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:site_name" content="現代精油心靈指引卡">
+<meta property="og:title" content="現代精油心靈指引卡｜MODERN OIL ORACLE">
+<meta property="og:description" content="停下來，讓一張牌接住此刻的你。免費線上抽牌與貴賓精油體驗預約。">
+<meta property="og:url" content="https://doterra-two.vercel.app/">
+<meta property="og:image" content="https://doterra-two.vercel.app/images/og-modern-oil-oracle.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="現代精油心靈指引卡品牌分享圖">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#355343">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css?v=11">
 </head>
 <body class="has-fixed-nav">
 
@@ -56,13 +71,24 @@
   </section>
 
   <section class="home-section" id="quick-lead">
-    <div class="quick-lead-card">
+    <form class="quick-lead-card" id="quick-lead-form">
       <div class="ql-title">想讓芳療師為你調配這瓶專屬守護油、或進行一對一深度諮詢嗎？</div>
       <div class="ql-sub">請留下你的聯絡方式：</div>
       <div class="ql-fields">
-        <input class="form-input" id="ql-email" type="email" placeholder="E-mail（必填）">
-        <input class="form-input" id="ql-line" type="text" placeholder="LINE ID（任意）">
-        <select class="form-input" id="ql-concern">
+        <div class="form-field">
+          <label class="form-label" for="ql-name">姓名 <span class="req">必填</span></label>
+          <input class="form-input" id="ql-name" name="name" type="text" required maxlength="60" autocomplete="name">
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="ql-email">E-mail <span class="req">必填</span></label>
+          <input class="form-input" id="ql-email" name="email" type="email" required maxlength="120" autocomplete="email">
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="ql-line">LINE ID（選填）</label>
+          <input class="form-input" id="ql-line" name="lineId" type="text" maxlength="60" autocomplete="off">
+        </div>
+        <label class="form-label" for="ql-concern">主要困擾（選填）</label>
+        <select class="form-input" id="ql-concern" name="mainConcern">
           <option value="">主要困擾（請選擇）</option>
           <option>工作壓力</option>
           <option>睡眠品質</option>
@@ -71,9 +97,9 @@
           <option>其他</option>
         </select>
       </div>
-      <button type="button" class="home-cta primary" id="ql-submit-btn" style="width:100%;justify-content:center;">送出，留下這份心意</button>
-      <div id="ql-msg" class="admin-msg"></div>
-    </div>
+      <button type="submit" class="home-cta primary" id="ql-submit-btn" style="width:100%;justify-content:center;">送出，留下這份心意</button>
+      <div id="ql-msg" class="admin-msg" role="status" aria-live="polite"></div>
+    </form>
   </section>
 
   <section class="home-section" id="about">
@@ -91,12 +117,13 @@
 
 </main>
 
-<div class="home-footer">現代精油心靈指引卡 · MODERN OIL ORACLE　<a href="admin.html" class="admin-entry-link">後台管理</a></div>
+<div class="home-footer">現代精油心靈指引卡 · MODERN OIL ORACLE</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-client.js?v=1"></script>
 <script src="mode-catalog.js?v=1"></script>
-<script src="home.js?v=1"></script>
-<script src="site-fixes.js?v=1"></script>
+<script src="home.js?v=2"></script>
+<script src="guide-modal.js?v=1"></script>
+<script src="site-fixes.js?v=3"></script>
 </body>
 </html>

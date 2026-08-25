@@ -4,8 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>貴賓體驗預約｜現代精油心靈指引卡</title>
+<meta name="description" content="預約現代精油心靈指引卡貴賓體驗，留下聯絡方式與此刻心情，由專人確認精油體驗安排。">
+<link rel="canonical" href="https://doterra-two.vercel.app/booking.html">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:site_name" content="現代精油心靈指引卡">
+<meta property="og:title" content="貴賓體驗預約｜現代精油心靈指引卡">
+<meta property="og:description" content="預約一對一精油體驗與專屬指引，由專人與你確認後續安排。">
+<meta property="og:url" content="https://doterra-two.vercel.app/booking.html">
+<meta property="og:image" content="https://doterra-two.vercel.app/images/og-modern-oil-oracle.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="現代精油心靈指引卡品牌分享圖">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#355343">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link rel="stylesheet" href="style.css?v=10">
+<link rel="stylesheet" href="style.css?v=11">
 </head>
 <body>
 
@@ -20,15 +35,15 @@
     <form id="booking-form" class="booking-form">
       <div class="form-field">
         <label class="form-label" for="f-name">姓名 <span class="req">*</span></label>
-        <input class="form-input" id="f-name" name="name" type="text" required maxlength="60">
+        <input class="form-input" id="f-name" name="name" type="text" required maxlength="60" autocomplete="name">
       </div>
       <div class="form-field">
-        <label class="form-label" for="f-email">Email</label>
-        <input class="form-input" id="f-email" name="email" type="email" maxlength="120">
+        <label class="form-label" for="f-email">Email（與 LINE ID 至少填一項）</label>
+        <input class="form-input" id="f-email" name="email" type="email" maxlength="120" autocomplete="email">
       </div>
       <div class="form-field">
-        <label class="form-label" for="f-line">LINE ID</label>
-        <input class="form-input" id="f-line" name="lineId" type="text" maxlength="60">
+        <label class="form-label" for="f-line">LINE ID（與 Email 至少填一項）</label>
+        <input class="form-input" id="f-line" name="lineId" type="text" maxlength="60" autocomplete="off">
       </div>
       <div class="form-field">
         <label class="form-label" for="f-date">預約日期</label>
@@ -51,17 +66,18 @@
         <textarea class="form-input form-textarea" id="f-note" name="note" maxlength="500" rows="3"></textarea>
       </div>
 
-      <div id="draw-code-note" class="draw-code-note" style="display:none;"></div>
+      <div id="draw-code-note" class="draw-code-note" style="display:none;" role="status" aria-live="polite"></div>
 
+      <div id="booking-form-msg" class="admin-msg" role="alert" aria-live="assertive"></div>
       <button type="submit" class="form-submit-btn" id="booking-submit-btn">送出預約</button>
       <p class="booking-disclaimer">送出即表示同意我們以上述聯絡方式與你確認預約內容。此服務不做醫療、心理或投資專業建議。</p>
     </form>
 
-    <div id="booking-confirm" class="booking-confirm" style="display:none;"></div>
+    <div id="booking-confirm" class="booking-confirm" style="display:none;" role="status" aria-live="polite"></div>
   </div>
 </main>
 
 <script src="supabase-client.js?v=1"></script>
-<script src="booking.js?v=1"></script>
+<script src="booking.js?v=2"></script>
 </body>
 </html>

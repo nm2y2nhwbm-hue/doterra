@@ -17,19 +17,23 @@
   renderCategoryCards();
 
   // ---------- LOG4 輕量版留資料表單 ----------
+  const qlForm = document.getElementById('quick-lead-form');
+  const qlName = document.getElementById('ql-name');
   const qlEmail = document.getElementById('ql-email');
   const qlLine = document.getElementById('ql-line');
   const qlConcern = document.getElementById('ql-concern');
   const qlBtn = document.getElementById('ql-submit-btn');
   const qlMsg = document.getElementById('ql-msg');
 
-  qlBtn.addEventListener('click', async () => {
+  qlForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const name = qlName.value.trim();
     const email = qlEmail.value.trim();
     const lineId = qlLine.value.trim();
     const concern = qlConcern.value;
 
-    if (!email) {
-      qlMsg.textContent = '請留下 E-mail，方便我們與你確認。';
+    if (!name || !email) {
+      qlMsg.textContent = '請填寫姓名與 E-mail，方便我們與你確認。';
       return;
     }
 
@@ -37,7 +41,7 @@
     qlMsg.textContent = '送出中……';
 
     const fields = {
-      name: email, // 輕量版沒有收姓名，先用 email 頂著，滿足資料表 not null
+      name,
       email,
       lineId,
       mainConcern: concern,
@@ -52,7 +56,7 @@
 
     if (persisted && receiptNo) {
       qlMsg.textContent = `已收到，受付編號 ${receiptNo}。想現在就抽卡，或想留下更完整的預約資訊，都可以點下方「立即預約」。`;
-      qlEmail.value = ''; qlLine.value = ''; qlConcern.value = '';
+      qlForm.reset();
     } else {
       qlMsg.textContent = `尚未成功送出${error ? '（' + error + '）' : ''}，請改用下方「立即預約」填寫完整表單。`;
     }
