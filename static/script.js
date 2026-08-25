@@ -3,8 +3,7 @@
 
   const API_BASE = "https://doterra-73pv.onrender.com";
   const LIFF_ID = "2010916161-HrIOEAda";
-  const LINE_OA_URL = "https://lin.ee/wubPzzI";
-  const LINE_FOLLOW_KEY = "oc_line_follow_confirmed";
+  const LINE_APP_URL = `https://miniapp.line.me/${LIFF_ID}`;
 
   const modeSelect = document.getElementById('mode-select');
   const categoryRow = document.getElementById('category-row');
@@ -32,6 +31,9 @@
   let INDICATORS = [];
   let liffReady = false;
   let liffProfile = null;
+  let currentDrawLineVerified = false;
+  let entryParams = null;
+  let pendingHandoffToken = null;
 
   // 分類資料改由 mode-catalog.js 提供（首頁與這裡共用同一份，避免文字各改各的）
   const CATEGORY_CONFIG = window.CATEGORY_CATALOG;
@@ -147,6 +149,7 @@
     selectedIndicatorName = null;
     isMode5 = false;
     collectedResults = [];
+    currentDrawLineVerified = false;
   }
 
   function showModeSelect(){
@@ -260,6 +263,12 @@
     const insertPos = Math.floor(Math.random() * (oilsSubset.length + 1));
     oilsSubset.splice(insertPos, 0, {card: ind, isIndicator:true});
     const finalDeck = shuffle(oilsSubset);
+    const shuffledIndicatorIndex = finalDeck.findIndex(item => item.isIndicator);
+    if (finalDeck.length >= 3 && (shuffledIndicatorIndex === 0 || shuffledIndicatorIndex === finalDeck.length - 1)) {
+      const [indicatorItem] = finalDeck.splice(shuffledIndicatorIndex, 1);
+      const safeIndex = 1 + Math.floor(Math.random() * (finalDeck.length - 1));
+      finalDeck.splice(safeIndex, 0, indicatorItem);
+    }
 
     startShuffleThenFan(finalDeck, true);
   }
@@ -521,9 +530,9 @@
     btn.type = 'button';
     btn.className = 'drawn-card';
     btn.innerHTML = `
-      <div class="slot-label">${label}</div>
-      <img src="${card.image_url}" alt="${card.name}">
-      <div class="cap"><b>${card.name}</b><span>${card.name_en || ''}</span></div>
+      <div class="slot-label">${escapeHtml(label)}</div>
+      <img src="${escapeHtml(safeImageUrl(card.image_url))}" alt="${escapeHtml(card.name)}">
+      <div class="cap"><b>${escapeHtml(card.name)}</b><span>${escapeHtml(card.name_en || '')}</span></div>
       <div class="read-link">閱讀訊息 →</div>`;
     btn.addEventListener('click', () => openInsightModal(label, card));
     slot.appendChild(btn);
@@ -533,6 +542,21 @@
   function splitKeywords(keywords){
     if (!keywords) return [];
     return keywords.split(/[,，、\s]+/).map(s => s.trim()).filter(Boolean);
+  }
+
+  function escapeHtml(value){
+    return String(value == null ? '' : value).replace(/[&<>"']/g, char => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    })[char]);
+  }
+
+  function safeImageUrl(value){
+    try {
+      const url = new URL(String(value || ''), window.location.href);
+      return (url.protocol === 'https:' || url.protocol === 'http:') ? url.href : '';
+    } catch(e) {
+      return '';
+    }
   }
 
   let insightModalEl = null;
@@ -552,12 +576,11 @@
           <div id="im-locked-content">
             <div class="im-gate">
               <div class="gate-eyebrow">SAVE YOUR INSIGHT</div>
-              <div class="gate-title">保存這次的洞悉</div>
-              <div class="gate-desc">加入 LINE 官方帳號，即可查看完整訊息，並接收本次抽卡紀錄與後續說明。</div>
-              <div class="gate-note">是否加入由您自由選擇；不加入仍可查看本次簡要訊息。</div>
-              <div class="gate-qr"><img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(LINE_OA_URL)}" alt="LINE 官方帳號 QR Code"></div>
-              <button type="button" class="gate-confirm-btn" id="im-gate-confirm">我已完成加入，查看完整訊息</button>
-              <button type="button" class="gate-skip-btn" id="im-gate-skip">暫時略過，查看簡要訊息</button>
+              <div class="gate-title">使用 LINE 查看完整訊息</div>
+              <div class="gate-desc">為保護抽卡內容，完整訊息只在已登入的 LINE LIFF 頁面顯示。</div>
+              <div class="gate-note">上方牌名與關鍵詞仍可直接查看；本頁不以按鈕或瀏覽器儲存狀態判定 LINE 身分。</div>
+              <button type="button" class="gate-confirm-btn" id="im-line-open">用 LINE 開啟抽卡</button>
+              <button type="button" class="gate-skip-btn" id="im-gate-close">關閉視窗</button>
             </div>
           </div>
           <div id="im-unlocked-content" style="display:none;">
@@ -569,11 +592,10 @@
     document.body.appendChild(el);
     el.querySelector('.insight-modal-close').addEventListener('click', closeInsightModal);
     el.addEventListener('click', (e) => { if (e.target === el) closeInsightModal(); });
-    el.querySelector('#im-gate-confirm').addEventListener('click', () => {
-      try { localStorage.setItem(LINE_FOLLOW_KEY, '1'); } catch(e){}
-      showUnlockedContent(el);
+    el.querySelector('#im-line-open').addEventListener('click', () => {
+      window.location.href = LINE_APP_URL;
     });
-    el.querySelector('#im-gate-skip').addEventListener('click', closeInsightModal);
+    el.querySelector('#im-gate-close').addEventListener('click', closeInsightModal);
     insightModalEl = el;
     return el;
   }
@@ -583,8 +605,30 @@
     el.querySelector('#im-unlocked-content').style.display = 'block';
   }
 
-  function isLineFollowConfirmed(){
-    try { return localStorage.getItem(LINE_FOLLOW_KEY) === '1'; } catch(e){ return false; }
+  function isVerifiedLineSession(){
+    try {
+      return Boolean(
+        liffReady &&
+        liffProfile &&
+        liffProfile.userId &&
+        window.liff &&
+        liff.isInClient &&
+        liff.isInClient() &&
+        liff.isLoggedIn &&
+        liff.isLoggedIn()
+      );
+    } catch(e) {
+      return false;
+    }
+  }
+
+  function getLineIdToken(){
+    if (!isVerifiedLineSession() || !liff.getIDToken) return null;
+    try {
+      return liff.getIDToken() || null;
+    } catch(e) {
+      return null;
+    }
   }
 
   function openInsightModal(label, card){
@@ -595,13 +639,16 @@
     el.querySelector('#im-name').textContent = card.name;
     el.querySelector('#im-name-en').textContent = card.name_en || '';
     el.querySelector('#im-pills').innerHTML = splitKeywords(card.keywords)
-      .map(k => `<span class="im-pill">${k}</span>`).join('');
-    el.querySelector('#im-guidance').textContent = card.guidance || '';
-    el.querySelector('#im-chakra').textContent = card.chakra ? `脈輪：${card.chakra}` : '';
-
+      .map(k => `<span class="im-pill">${escapeHtml(k)}</span>`).join('');
     el.querySelector('#im-locked-content').style.display = 'block';
     el.querySelector('#im-unlocked-content').style.display = 'none';
-    if (isLineFollowConfirmed()) showUnlockedContent(el);
+    el.querySelector('#im-guidance').textContent = '';
+    el.querySelector('#im-chakra').textContent = '';
+    if (isVerifiedLineSession()) {
+      el.querySelector('#im-guidance').textContent = card.guidance || '';
+      el.querySelector('#im-chakra').textContent = card.chakra ? `脈輪：${card.chakra}` : '';
+      showUnlockedContent(el);
+    }
 
     el.classList.add('open');
   }
@@ -676,15 +723,22 @@
     const resultsPayload = collectedResults.map(r => ({
       label: r.label, card_name: r.card.name, card_name_en: r.card.name_en || '', image_url: r.card.image_url,
     }));
-    const lineUserId = liffProfile ? liffProfile.userId : null;
-    const lineDisplayName = liffProfile ? liffProfile.displayName : null;
+    const lineIdToken = getLineIdToken();
+
+    if (isVerifiedLineSession() && !lineIdToken) {
+      renderExperiencePanel({
+        persisted: false,
+        error: 'LINE LIFF 尚未開啟 openid 權限，無法安全驗證本次抽卡',
+      }, modeTitle);
+      return;
+    }
 
     const getCode = (window.OracleSupabase && window.OracleSupabase.saveDrawAndGetCode)
-      ? window.OracleSupabase.saveDrawAndGetCode(currentMode, resultsPayload, lineUserId, lineDisplayName)
-      : Promise.resolve({ code: null, persisted: false });
+      ? window.OracleSupabase.saveDrawAndGetCode(currentMode, resultsPayload, lineIdToken)
+      : Promise.resolve({ code: null, persisted: false, error: '抽牌保存服務尚未載入' });
 
-    getCode.then(({ code, persisted }) => {
-      renderExperiencePanel(code, persisted, modeTitle);
+    getCode.then((result) => {
+      renderExperiencePanel(result, modeTitle);
     });
   }
 
@@ -714,22 +768,65 @@
       <div class="o2o-title">🌿 實體精油處方箋</div>
       ${targets.map(t => `
         <div class="o2o-item">
-          <div class="o2o-label">${t.label}</div>
-          <div class="o2o-card-name">${t.card.name}</div>
-          <div class="o2o-text">${buildO2OSuggestion(t.card)}</div>
+          <div class="o2o-label">${escapeHtml(t.label)}</div>
+          <div class="o2o-card-name">${escapeHtml(t.card.name)}</div>
+          <div class="o2o-text">${escapeHtml(buildO2OSuggestion(t.card))}</div>
         </div>`).join('')}
       <div class="o2o-note">以上為一般芳療稀釋比例參考，並非醫療劑量指示；孕期、嬰幼兒或特殊體質請先諮詢專業人員。</div>`;
     drawnRow.insertAdjacentElement('afterend', el);
   }
 
-  function renderExperiencePanel(code, persisted, modeTitle){
+  function renderExperiencePanel(result, modeTitle){
+    const safeResult = result || {};
+    const code = safeResult.code;
+    const persisted = safeResult.persisted === true;
+    const lineVerified = safeResult.lineVerified === true;
+    const handoffToken = safeResult.handoffToken;
+    const error = safeResult.error;
     experiencePanel.style.display = 'block';
+    currentDrawLineVerified = false;
+
+    if (!persisted) {
+      experiencePanel.innerHTML = `
+        <div class="ep-label">抽牌紀錄尚未保存</div>
+        <div class="ep-desc" id="ep-error-desc"></div>
+        <a class="ep-book-link" href="booking.html">仍可前往一般預約 →</a>`;
+      experiencePanel.querySelector('#ep-error-desc').textContent =
+        `${error || '保存服務暫時無法使用'}，因此沒有建立體驗碼，也不會顯示臨時假碼。請稍後重新抽牌。`;
+      sendStatus.textContent = '保存失敗：未產生體驗碼';
+      return;
+    }
+
+    if (handoffToken && /^[A-Za-z0-9_-]{40,80}$/.test(handoffToken)) {
+      const handoffUrl = `${LINE_APP_URL}?handoff=${encodeURIComponent(handoffToken)}`;
+      const minutes = Math.max(1, Math.round((safeResult.expiresIn || 600) / 60));
+      experiencePanel.innerHTML = `
+        <div class="ep-label">抽牌紀錄已安全保存</div>
+        <div class="ep-desc">體驗碼不會在一般瀏覽器顯示。請於 ${minutes} 分鐘內使用 LINE 開啟，即可取回同一次抽卡結果。桌面裝置點擊後會顯示 LINE 官方行動條碼；手機會直接交由 LINE 開啟。</div>
+        <button type="button" class="ep-send-btn" id="ep-open-line-btn">用 LINE 查看這次抽卡</button>
+        <a class="ep-book-link" href="booking.html">或直接預約貴賓體驗 →</a>`;
+      experiencePanel.querySelector('#ep-open-line-btn').addEventListener('click', () => {
+        window.location.href = handoffUrl;
+      });
+      sendStatus.textContent = '短效交接已建立；網址中不含體驗碼';
+      return;
+    }
+
+    if (!lineVerified || !code || !/^INSIGHT-[A-Z0-9]+$/i.test(code)) {
+      experiencePanel.innerHTML = `
+        <div class="ep-label">LINE 驗證尚未完成</div>
+        <div class="ep-desc">本頁沒有收到經後端驗證的體驗碼，請由 LINE OA 重新開啟抽卡頁。</div>`;
+      sendStatus.textContent = '未顯示未經後端驗證的體驗碼';
+      return;
+    }
+
+    currentDrawLineVerified = true;
     experiencePanel.innerHTML = `
       <div class="ep-label">妳的專屬貴賓體驗碼</div>
-      <div class="ep-code">${code || '（產生中，請稍候）'}</div>
-      <div class="ep-desc">將此碼傳給 LINE 顧問，可詢問本次牌卡與禮盒體驗。${persisted ? '' : '<br>（尚未連接雲端保存，此碼僅供本次顯示）'}</div>
+      <div class="ep-code">${code}</div>
+      <div class="ep-desc">此碼已保存，並只在目前已登入的 LINE LIFF 頁面顯示。</div>
       <button type="button" class="ep-send-btn" id="ep-send-btn">傳送體驗碼，了解禮盒</button>
-      <a class="ep-book-link" href="booking.html${code ? '?code=' + encodeURIComponent(code) : ''}">或直接預約貴賓體驗 →</a>`;
+      <a class="ep-book-link" href="booking.html?code=${encodeURIComponent(code)}">或直接預約貴賓體驗 →</a>`;
     const btn = experiencePanel.querySelector('#ep-send-btn');
     btn.addEventListener('click', () => sendExperienceCode(code, modeTitle));
   }
@@ -738,7 +835,7 @@
     const btn = experiencePanel.querySelector('#ep-send-btn');
     if (btn) btn.disabled = true;
 
-    if (liffReady && window.liff && liff.isInClient()) {
+    if (currentDrawLineVerified && isVerifiedLineSession()) {
       const bubbles = collectedResults.map(r => buildBubble(r.label, r.card));
       const altText = `${modeTitle}牌陣結果：` + collectedResults.map(r => r.card.name).join('、');
       const flexMessage = {
@@ -759,13 +856,7 @@
         if (btn) btn.disabled = false;
       });
     } else {
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(code).catch(() => {});
-      }
-      sendStatus.textContent = '體驗碼已複製，加入 LINE 官方帳號後貼給顧問即可';
-      if (LINE_OA_URL && !LINE_OA_URL.includes('YOUR-OA-LINK')) {
-        window.open(LINE_OA_URL, '_blank');
-      }
+      sendStatus.textContent = '請由已登入的 LINE LIFF 頁面傳送體驗碼';
       if (btn) btn.disabled = false;
     }
   }
@@ -899,8 +990,32 @@
     guideBookLink.addEventListener('click', (e) => { e.preventDefault(); openGuideModal(); });
   }
 
-  function initFromQuery(){
+  function collectEntryParams(){
     const params = new URLSearchParams(window.location.search);
+    const liffState = params.get('liff.state');
+    if (liffState) {
+      try {
+        const stateUrl = new URL(liffState, window.location.origin);
+        stateUrl.searchParams.forEach((value, key) => {
+          if (!params.has(key)) params.set(key, value);
+        });
+      } catch(e) {}
+    }
+    return params;
+  }
+
+  function stripSensitiveEntryParams(){
+    const params = new URLSearchParams(window.location.search);
+    const sensitiveKeys = ['experience_code', 'handoff', 'liff.state'];
+    if (!sensitiveKeys.some(key => params.has(key))) return;
+    sensitiveKeys.forEach(key => params.delete(key));
+    const query = params.toString();
+    const cleanUrl = `${window.location.pathname}${query ? '?' + query : ''}${window.location.hash}`;
+    window.history.replaceState(window.history.state, '', cleanUrl);
+  }
+
+  function initFromQuery(){
+    const params = entryParams || new URLSearchParams(window.location.search);
     const m = Number(params.get('mode'));
     if (m >= 1 && m <= 12) enterStage(m);
     if (params.get('guide') === '1') openGuideModal();
@@ -920,9 +1035,90 @@
       .catch((e) => console.error('[liff.init error]', e));
   }
 
-  Promise.all([loadData(), initLiff()]).then(() => {
+  function showHandoffError(message){
+    modeSelect.style.display = 'none';
+    stage.classList.add('active');
+    stageTitle.textContent = 'LINE 抽卡紀錄';
     instruction.textContent = '';
-    initFromQuery();
+    renderExperiencePanel({ persisted: false, error: message }, 'LINE 抽卡紀錄');
+  }
+
+  function restoreRedeemedDraw(result){
+    const mode = Number(result.mode);
+    const cfg = MODE_CONFIG[mode];
+    if (!cfg || !Array.isArray(result.results) || !result.results.length) {
+      showHandoffError('抽牌交接資料不完整');
+      return;
+    }
+
+    resetStageDom();
+    currentMode = mode;
+    modeSelect.style.display = 'none';
+    stage.classList.add('active');
+    stageTitle.textContent = cfg.title;
+    instruction.textContent = '已從瀏覽器安全取回同一次抽卡結果';
+    fanWrap.style.display = 'block';
+    fanStage.style.display = 'none';
+
+    const catalog = OILS.concat(INDICATORS);
+    const restoredResults = [];
+    for (const stored of result.results) {
+      const catalogCard = catalog.find(card => card.name === stored.card_name);
+      if (!catalogCard) {
+        showHandoffError('抽牌交接包含無法辨識的牌卡');
+        return;
+      }
+      restoredResults.push({
+        label: stored.label || '抽卡結果',
+        card: catalogCard,
+      });
+    }
+    collectedResults = restoredResults;
+
+    collectedResults.forEach(item => renderDrawnCard(item.label, item.card));
+    renderO2OPrescription();
+    showAgainButton();
+    renderExperiencePanel(result, cfg.title);
+  }
+
+  async function redeemPendingHandoff(){
+    if (!pendingHandoffToken) return false;
+    if (!isVerifiedLineSession()) {
+      showHandoffError('請從 LINE OA 或 LINE App 開啟這個交接連結');
+      return true;
+    }
+    const idToken = getLineIdToken();
+    if (!idToken) {
+      showHandoffError('LINE LIFF 尚未開啟 openid 權限，無法驗證交接');
+      return true;
+    }
+    if (!window.OracleSupabase || !window.OracleSupabase.redeemDrawHandoff) {
+      showHandoffError('抽牌交接服務尚未載入');
+      return true;
+    }
+    const result = await window.OracleSupabase.redeemDrawHandoff(pendingHandoffToken, idToken);
+    if (
+      !result.persisted
+      || result.lineVerified !== true
+      || !/^INSIGHT-[A-Z0-9]+$/i.test(result.code || '')
+    ) {
+      showHandoffError(result.error || '抽牌交接失敗');
+      return true;
+    }
+    restoreRedeemedDraw(result);
+    return true;
+  }
+
+  const liffInitialization = initLiff().then(() => {
+    entryParams = collectEntryParams();
+    pendingHandoffToken = (entryParams.get('handoff') || '').trim();
+    stripSensitiveEntryParams();
+  });
+
+  Promise.all([loadData(), liffInitialization]).then(async () => {
+    instruction.textContent = '';
+    const restored = await redeemPendingHandoff();
+    if (!restored) initFromQuery();
     // LINE 使用者沒有「回首頁」的意義（首頁對 LINE 入口會直接轉回這裡），故隱藏該連結
     if (liffReady && window.liff && liff.isInClient && liff.isInClient()) {
       const backHomeLink = document.querySelector('.back-home-link');

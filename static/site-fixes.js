@@ -1,71 +1,6 @@
 (function(){
   "use strict";
 
-  const LIFF_ID = "2010916161-HrIOEAda";
-  const LINE_OA_URL = "https://lin.ee/wubPzzI";
-
-  function isLineContext(){
-    try {
-      if (window.liff && window.liff.isInClient && window.liff.isInClient()) return true;
-    } catch (e) {}
-    return /\bLine\//i.test(navigator.userAgent || '');
-  }
-
-  function setupExperienceGate(){
-    const panel = document.getElementById('experience-panel');
-    if (!panel) return;
-
-    const params = new URLSearchParams(window.location.search);
-    const incomingCode = (params.get('experience_code') || '').trim();
-
-    // 從 LINE / LIFF QR 入口回來時，才顯示這次的專屬體驗碼。
-    if (incomingCode && /^INSIGHT-[A-Z0-9]+$/i.test(incomingCode)) {
-      panel.dataset.experienceUnlocked = '1';
-      panel.style.display = 'block';
-      panel.innerHTML = `
-        <div class="ep-label">妳的專屬貴賓體驗碼</div>
-        <div class="ep-code">${incomingCode}</div>
-        <div class="ep-desc">已透過 LINE 入口解鎖。可將此碼提供給 LINE 顧問，或直接帶入貴賓體驗預約。</div>
-        <button type="button" class="ep-send-btn" id="ep-open-oa-btn">開啟 LINE 官方帳號</button>
-        <a class="ep-book-link" href="booking.html?code=${encodeURIComponent(incomingCode)}">或直接預約貴賓體驗 →</a>`;
-      const openOaBtn = panel.querySelector('#ep-open-oa-btn');
-      if (openOaBtn) {
-        openOaBtn.addEventListener('click', () => {
-          window.location.href = LINE_OA_URL;
-        });
-      }
-      const status = document.getElementById('send-status');
-      if (status) status.textContent = '體驗碼已在 LINE 入口解鎖 ✓';
-      return;
-    }
-
-    function gateRenderedCode(){
-      if (isLineContext() || panel.dataset.experienceUnlocked === '1' || panel.dataset.experienceGated === '1') return;
-      const codeEl = panel.querySelector('.ep-code');
-      if (!codeEl) return;
-      const code = (codeEl.textContent || '').trim();
-      if (!/^INSIGHT-[A-Z0-9]+$/i.test(code)) return;
-
-      const liffUrl = `https://liff.line.me/${LIFF_ID}?experience_code=${encodeURIComponent(code)}`;
-      const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(liffUrl)}`;
-
-      panel.dataset.experienceGated = '1';
-      panel.innerHTML = `
-        <div class="ep-label">LINE 貴賓體驗入口</div>
-        <div class="ep-desc">請先用 LINE 掃描下方 QR Code。進入 LINE 後，才會顯示本次專屬體驗碼。</div>
-        <div class="gate-qr"><img src="${qrSrc}" alt="LINE 體驗碼入口 QR Code"></div>
-        <a class="ep-send-btn" href="${liffUrl}">手機請用 LINE 開啟</a>
-        <div class="ep-desc">體驗碼不會在一般瀏覽器直接公開。</div>`;
-
-      const status = document.getElementById('send-status');
-      if (status) status.textContent = '';
-    }
-
-    gateRenderedCode();
-    const observer = new MutationObserver(gateRenderedCode);
-    observer.observe(panel, { childList: true, subtree: true });
-  }
-
   const GUIDE_CONTENT = [
     {
       num: '01', title: '單張心靈小語',
@@ -187,6 +122,5 @@
     if (new URLSearchParams(window.location.search).get('guide') === '1') open();
   }
 
-  setupExperienceGate();
   setupHomeGuide();
 })();

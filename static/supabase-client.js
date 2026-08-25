@@ -1,14 +1,17 @@
 (function(){
   "use strict";
 
-  // ---------------------------------------------------------
-  // TODO：Supabase 專案建好後，換成 Project Settings → API 裡的值
-  // ---------------------------------------------------------
+  // 公開瀏覽器設定。publishable key 僅具有 anon 權限，可安全放在前端；
+  // service-role / secret key 僅能存在 Render。
   const SUPABASE_URL = "https://qkcelwfjmahjjtfoiwlr.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrY2Vsd2ZqbWFoamp0Zm9pd2xyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1MDg4MDksImV4cCI6MjEwMjA4NDgwOX0.vRVO6lzSTyn0znPDF6RI1s37tJuMEIvB-OUaZdJ-zr0";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_GjwIhE4HLg8LPCmOXn1ukA_2bL2w8lP";
+  // 保留既有名稱，避免 booking.js / inventory.js 的相容介面中斷。
+  const SUPABASE_ANON_KEY = SUPABASE_PUBLISHABLE_KEY;
+  const DRAW_API_BASE = "https://doterra-73pv.onrender.com/api/draws";
 
   const SUPABASE_CONFIGURED =
-    !SUPABASE_URL.includes("YOUR-PROJECT") && !SUPABASE_ANON_KEY.includes("YOUR-ANON");
+    !SUPABASE_URL.includes("YOUR-PROJECT") &&
+    !SUPABASE_PUBLISHABLE_KEY.includes("YOUR-PUBLISHABLE");
 
   let _client = null;
   function getClient(){
@@ -17,31 +20,72 @@
     return _client;
   }
 
-  // 尚未設定 Supabase 時的本機備援碼（僅顯示用，不會真的保存到雲端）
-  function localFallbackCode(){
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let code = '';
-    for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
-    return 'INSIGHT-' + code;
+  async function callDrawApi(path, payload){
+    const response = await fetch(DRAW_API_BASE + path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || '抽牌保存服務暫時無法使用');
+    return data;
   }
 
-  // 儲存本次抽牌並取得專屬體驗碼
-  // results: [{label, card_name, card_name_en, image_url}, ...]
-  async function saveDrawAndGetCode(mode, results, lineUserId, lineDisplayName){
-    const client = getClient();
-    if (!client) return { code: localFallbackCode(), persisted: false };
+  async function getDrawApiReadiness(){
     try {
-      const { data, error } = await client.rpc('save_draw', {
-        p_mode: mode,
-        p_results: results,
-        p_line_user_id: lineUserId || null,
-        p_line_display_name: lineDisplayName || null,
+      const response = await fetch(DRAW_API_BASE + '/health', {
+        method: 'GET',
+        cache: 'no-store',
       });
-      if (error) throw error;
-      return { code: data, persisted: true };
+      const data = await response.json().catch(() => ({}));
+      return {
+        ready: response.ok && data.status === 'ready',
+        status: data.status || 'unavailable',
+      };
+    } catch (e) {
+      return { ready: false, status: 'unavailable' };
+    }
+  }
+
+  function normalizeDrawResponse(data){
+    return {
+      persisted: data.persisted === true,
+      lineVerified: data.line_verified === true,
+      code: typeof data.code === 'string' ? data.code : null,
+      handoffToken: typeof data.handoff_token === 'string' ? data.handoff_token : null,
+      expiresIn: Number(data.expires_in) || 0,
+      mode: Number(data.mode) || null,
+      results: Array.isArray(data.results) ? data.results : null,
+    };
+  }
+
+  // 抽牌保存改由 Render 後端執行；瀏覽器不再直接呼叫匿名 save_draw RPC。
+  // results: [{label, card_name, card_name_en, image_url}, ...]
+  async function saveDrawAndGetCode(mode, results, lineIdToken){
+    try {
+      const data = await callDrawApi('', {
+        mode,
+        results,
+        id_token: lineIdToken || null,
+      });
+      return normalizeDrawResponse(data);
     } catch (e) {
       console.error('[saveDrawAndGetCode error]', e);
-      return { code: localFallbackCode(), persisted: false };
+      return { code: null, persisted: false, error: e.message || '抽牌結果尚未保存' };
+    }
+  }
+
+  async function redeemDrawHandoff(handoffToken, lineIdToken){
+    try {
+      const data = await callDrawApi('/redeem', {
+        handoff_token: handoffToken,
+        id_token: lineIdToken,
+      });
+      return normalizeDrawResponse(data);
+    } catch (e) {
+      console.error('[redeemDrawHandoff error]', e);
+      return { code: null, persisted: false, error: e.message || '抽牌交接失敗' };
     }
   }
 
@@ -69,5 +113,9 @@
     }
   }
 
-  window.OracleSupabase = { SUPABASE_CONFIGURED, SUPABASE_URL, SUPABASE_ANON_KEY, getClient, saveDrawAndGetCode, createBooking };
+  window.OracleSupabase = {
+    SUPABASE_CONFIGURED, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY,
+    SUPABASE_ANON_KEY, getClient, getDrawApiReadiness,
+    saveDrawAndGetCode, redeemDrawHandoff, createBooking,
+  };
 })();
