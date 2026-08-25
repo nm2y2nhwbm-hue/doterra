@@ -36,15 +36,17 @@ $$;
 
 -- 新增 draws 資料列時，若沒帶 code 就自動產生（並確保不重複）
 create or replace function set_draw_code() returns trigger
-language plpgsql as $$
+language plpgsql
+set search_path = ''
+as $$
 declare
   candidate text;
   tries     int := 0;
 begin
   if new.code is null then
     loop
-      candidate := generate_draw_code();
-      exit when not exists (select 1 from draws where code = candidate) or tries > 10;
+      candidate := public.generate_draw_code();
+      exit when not exists (select 1 from public.draws where code = candidate) or tries > 10;
       tries := tries + 1;
     end loop;
     new.code := candidate;
