@@ -11,6 +11,7 @@ from router import route_message
 from adapters.line_adapter import to_line_message
 from core import database_manager as db
 from core import draw_logger
+from core import experience_handoff
 
 if os.path.exists(".env"):
     try:
@@ -29,6 +30,7 @@ if not CHANNEL_ACCESS_TOKEN or not CHANNEL_SECRET:
     sys.exit(1)
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
+app.config['MAX_CONTENT_LENGTH'] = 128 * 1024
 
 # CORS：同時允許 Render 本身與 Vercel 網域呼叫 API，
 # 避免因為之後測試網址在兩邊之間切換而被擋。
@@ -104,6 +106,60 @@ def api_log_draw():
         card_names=data.get('cards', []),
     )
     return jsonify({"success": ok})
+
+
+def _no_store_json(payload, status=200):
+    response = jsonify(payload)
+    response.status_code = status
+    response.headers['Cache-Control'] = 'no-store'
+    response.headers['Pragma'] = 'no-cache'
+    return response
+
+
+def _handoff_error_response(error):
+    return _no_store_json({
+        "persisted": False,
+        "error": error.public_message,
+    }, error.status_code)
+
+
+def _request_client_ip():
+    forwarded_for = request.headers.get('X-Forwarded-For', '')
+    if forwarded_for:
+        client_ip = forwarded_for.split(',', 1)[0].strip()
+        if client_ip:
+            return client_ip[:64]
+    return (request.remote_addr or '')[:64]
+
+
+@app.route("/api/draws/health", methods=['GET'])
+def api_draws_health():
+    payload, status = experience_handoff.get_readiness()
+    return _no_store_json(payload, status)
+
+
+@app.route("/api/draws", methods=['POST'])
+def api_create_draw():
+    data = request.get_json(silent=True) or {}
+    try:
+        fingerprint = experience_handoff.build_request_fingerprint(
+            _request_client_ip(),
+            request.headers.get('User-Agent', ''),
+        )
+        result = experience_handoff.create_draw(data, fingerprint)
+        return _no_store_json(result)
+    except experience_handoff.HandoffError as error:
+        return _handoff_error_response(error)
+
+
+@app.route("/api/draws/redeem", methods=['POST'])
+def api_redeem_draw():
+    data = request.get_json(silent=True) or {}
+    try:
+        result = experience_handoff.redeem_draw(data)
+        return _no_store_json(result)
+    except experience_handoff.HandoffError as error:
+        return _handoff_error_response(error)
 
 
 if __name__ == "__main__":

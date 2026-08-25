@@ -20,22 +20,25 @@
 
 1. 所有主要頁面維持「現代精油心靈指引卡」品牌名稱，並保留 `MODERN OIL ORACLE`。
 2. 首頁「卡牌說明」必須直接在首頁開啟 modal，不可先導向 `cards.html`。
-3. 一般瀏覽器完成抽卡後，不可直接顯示 `INSIGHT-...` 體驗碼；應先顯示 LINE / LIFF 入口，只有在 LINE / LIFF 驗證後才能顯示該次體驗碼。
-4. `booking.html` 完整預約表單與首頁簡易聯絡表單都必須透過 `OracleSupabase.createBooking()` → Supabase `create_booking` → `bookings` 儲存。
-5. `admin.html` 是管理功能入口首頁，可顯示統計與模組入口，但不可重新放入詳細預約列表。
-6. `reception.html` 專門呈現受付編號、預約名單、搜尋、狀態與抽牌結果。
-7. `admin-home.js` 負責後台首頁登入、管理員權限檢查與統計；`admin.js` 負責 reception 詳細列表與狀態操作。
-8. 抽卡分類「鏡子／河流／岔路」保持同一層並排；切換分類只更新下方子選單。
-9. Reception 的單筆刪除只刪除預約並保留對應抽牌；「全部歸零」必須經確認文字與第二次確認，並清除 `bookings`、`draws`、`booking_counters`。
+3. 網站有兩條正式抽卡入口，兩者都必須保留並分開驗證：
+   - 瀏覽器介面入口：由 Vercel 首頁／一般瀏覽器進入 `cards.html`。
+   - LINE OA 直達入口：由 LINE OA 的訊息或選單經 LIFF／LINE MINI App 直接進入 `cards.html` 與指定牌陣。
+4. 一般瀏覽器完成抽卡後，不可直接顯示 `INSIGHT-...` 體驗碼；應先顯示 LINE / LIFF 入口，只有在 LINE / LIFF 驗證後才能顯示該次體驗碼。瀏覽器轉入 LINE 時必須維持同一次抽卡結果，不可默默要求重新抽卡，也不可把體驗碼直接放進 query parameter。
+5. `booking.html` 完整預約表單與首頁簡易聯絡表單都必須透過 `OracleSupabase.createBooking()` → Supabase `create_booking` → `bookings` 儲存。
+6. `admin.html` 是管理功能入口首頁，可顯示統計與模組入口，但不可重新放入詳細預約列表。
+7. `reception.html` 專門呈現受付編號、預約名單、搜尋、狀態與抽牌結果。
+8. `admin-home.js` 負責後台首頁登入、管理員權限檢查與統計；`admin.js` 負責 reception 詳細列表與狀態操作。
+9. 抽卡分類「鏡子／河流／岔路」保持同一層並排；切換分類只更新下方子選單。
+10. Reception 的單筆刪除只刪除預約並保留對應抽牌；「全部歸零」必須經確認文字與第二次確認，並清除 `bookings`、`draws`、`booking_counters`。
 
 ## 主要程式邊界
 
 - `static/index.html`、`static/home.js`：首頁、分類入口與簡易聯絡表單。
 - `static/cards.html`、`static/script.js`：抽卡主流程、LIFF 初始化、抽牌結果與體驗碼流程。
-- `static/site-fixes.js`：目前包含首頁說明 modal 與體驗碼 gate 補丁。修改相關流程時應優先消除重複與競態，不要繼續堆疊臨時 patch。
+- `static/site-fixes.js`：首頁說明 modal 的相容層。體驗碼 gate 應由 `static/script.js` 的單一流程負責，不要再加入 MutationObserver 或 query-parameter 解鎖補丁。
 - `static/mode-catalog.js`：首頁與抽卡頁共用的分類／模式資料。
 - `static/booking.html`、`static/booking.js`：正式預約表單。
-- `static/supabase-client.js`：瀏覽器端 Supabase client、`save_draw` 與 `create_booking` RPC 包裝。
+- `static/supabase-client.js`：瀏覽器端 Supabase client、Render 抽牌交接 API 與 `create_booking` RPC 包裝；抽牌不可再由瀏覽器直接呼叫匿名 `save_draw`。
 - `static/admin.html`、`static/admin-home.js`：管理入口、登入、權限與統計。
 - `static/reception.html`、`static/admin.js`：受付與抽牌紀錄管理。
 - `static/inventory.html`、`static/inventory.js`：庫存管理。
@@ -91,9 +94,9 @@ git log --oneline --decorate -n 10
 
 以下是 2026-08-18 稽核結果，開始修復前應重新確認現況，完成後更新或移除本節：
 
-- `site-fixes.js` 只以 `experience_code` 格式判斷解鎖，普通瀏覽器可直接帶 query parameter 顯示體驗碼。
-- 體驗碼 QR 使用第三方 `api.qrserver.com`，會把含體驗碼的 LIFF URL 傳給外部服務。
-- `script.js` 與 `site-fixes.js` 重複定義 LIFF / LINE 常數及卡牌說明資料，體驗碼流程依賴 MutationObserver 事後補丁。
+- 第 0 批本機止血修改已移除 `experience_code` query 解鎖、第三方 QR、localStorage 自我解鎖及本機假體驗碼；尚未發布前，production 仍是舊流程。
+- Supabase 已套用 `secure_draw_handoff` 與外鍵索引 migration；本次後端模組加入短效交接 token、LINE ID Token 驗證與唯讀就緒檢查。靜態前端仍未切換到新 API，需待後續模組發布與雙入口驗收後才算完成新交接路徑。
+- 新流程正式驗證完成後，需另建 migration 撤銷 `anon`／`authenticated`／`public` 對舊 `save_draw` RPC 的執行權；不可在新後端上線前先撤銷，以免造成抽卡保存中斷。
 - Supabase 從 `20260818015900_admin_reception_delete_reset.sql` 開始建立 migration history；更早的 schema 仍以既有 SQL 腳本為基準，並非完整歷史。
 - Supabase 安全檢查仍有既有 SECURITY DEFINER、function search path 與 Auth 設定警告，未經授權不要擴大修正範圍。
 - GitHub `main` 尚未啟用 branch protection 或 required status checks。
