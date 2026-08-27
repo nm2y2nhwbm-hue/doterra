@@ -1,4 +1,4 @@
-(function(){
+﻿(function(){
   "use strict";
 
   const API_BASE = "https://doterra-73pv.onrender.com";
@@ -125,6 +125,26 @@
       const [oils, indicators] = await Promise.all([oilsRes.json(), indRes.json()]);
       if (!Array.isArray(oils) || !oils.length || !Array.isArray(indicators) || !indicators.length) {
         throw new Error('牌卡資料不完整');
+      }
+      try {
+        const catRes = await fetch('oils-catalog.json?v=2');
+        if (catRes.ok) {
+          const catalog = await catRes.json();
+          const catMap = new Map();
+          catalog.forEach(c => { if (c.name) catMap.set(c.name, c); });
+          oils.forEach(o => {
+            const matched = catMap.get(o.name);
+            if (matched) {
+              o.sku = matched.sku || '';
+              o.pillar = matched.pillar || '';
+              o.usage_tags = matched.usage_tags || '';
+              o.dilution_guide = matched.dilution_guide || '';
+              o.doctor_advice = matched.doctor_advice || '';
+            }
+          });
+        }
+      } catch(catErr) {
+        console.warn('oils-catalog load warning:', catErr);
       }
       OILS = oils;
       INDICATORS = indicators;
@@ -598,8 +618,10 @@
         <div class="insight-modal-img"><img id="im-img" src="" alt=""></div>
         <div class="insight-modal-body">
           <div class="im-eyebrow" id="im-label"></div>
+          <div class="im-sku-tag" id="im-sku"></div>
           <div class="im-name" id="im-name"></div>
           <div class="im-name-en" id="im-name-en"></div>
+          <div class="seal-row" id="im-seals"></div>
           <div class="im-pills" id="im-pills"></div>
           <div id="im-locked-content">
             <div class="im-gate">
@@ -612,6 +634,15 @@
             </div>
           </div>
           <div id="im-unlocked-content" style="display:none;">
+            <div class="doctor-prescription-box" id="im-doc-box">
+              <div class="prescription-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2v20M2 12h20"/>
+                </svg>
+                自然醫學建議 · 性味調息指引
+              </div>
+              <div id="im-doctor" class="prescription-content"></div>
+            </div>
             <div class="im-guidance" id="im-guidance"></div>
             <div class="im-chakra" id="im-chakra"></div>
           </div>
@@ -686,15 +717,42 @@
     el.querySelector('#im-label').textContent = label;
     el.querySelector('#im-name').textContent = card.name;
     el.querySelector('#im-name-en').textContent = card.name_en || '';
+    
+    // SKU 與位格印章
+    const skuEl = el.querySelector('#im-sku');
+    if (skuEl) skuEl.textContent = card.sku ? `OFFICIAL SKU: ${card.sku}` : '';
+    
+    let pClass = 'tag-balance';
+    if (card.pillar && card.pillar.includes('右柱')) pClass = 'tag-mercy';
+    if (card.pillar && card.pillar.includes('左柱')) pClass = 'tag-severity';
+
+    let sClass = 'safety-direct';
+    let sLabel = '🌿 溫和可直塗';
+    if (card.dilution_guide === '敏感') { sClass = 'safety-sensitive'; sLabel = '⚠️ 敏感膚質需稀釋'; }
+    if (card.dilution_guide === '稀釋') { sClass = 'safety-dilute'; sLabel = '💧 強效必須稀釋'; }
+
+    const sealsEl = el.querySelector('#im-seals');
+    if (sealsEl) {
+      sealsEl.innerHTML = `
+        ${card.pillar ? `<span class="seal-pill ${pClass}">${escapeHtml(card.pillar)}</span>` : ''}
+        ${card.usage_tags ? `<span class="seal-pill seal-usage">${escapeHtml(card.usage_tags)}</span>` : ''}
+        ${card.dilution_guide ? `<span class="seal-safety ${sClass}">${escapeHtml(sLabel)}</span>` : ''}
+      `;
+    }
+
     el.querySelector('#im-pills').innerHTML = splitKeywords(card.keywords)
       .map(k => `<span class="im-pill">${escapeHtml(k)}</span>`).join('');
     el.querySelector('#im-locked-content').style.display = 'block';
     el.querySelector('#im-unlocked-content').style.display = 'none';
     el.querySelector('#im-guidance').textContent = '';
     el.querySelector('#im-chakra').textContent = '';
+    const docEl = el.querySelector('#im-doctor');
+    if (docEl) docEl.textContent = '';
+
     if (isVerifiedLineSession()) {
       el.querySelector('#im-guidance').textContent = card.guidance || '';
       el.querySelector('#im-chakra').textContent = card.chakra ? `脈輪：${card.chakra}` : '';
+      if (docEl) docEl.textContent = card.doctor_advice || '主調和身心、平衡能量。';
       showUnlockedContent(el);
     }
 

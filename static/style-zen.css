@@ -1,5 +1,5 @@
 ﻿/* ==========================================================================
-   現代精油心靈指引卡 · 日式美學與 LINE Seed TW 旗艦樣式表 (style.css v12)
+   現代精油心靈指引卡 · 日式美學與 LINE Seed TW 旗艦樣式表 (style-zen.css)
    ========================================================================== */
 
 @font-face {
@@ -775,132 +775,52 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 var(
   letter-spacing: 0.05em;
 }
 
-/* ========== 品牌官方識別 Logo（雫之洞悉 · 返魂堂）大氣升級樣式 ========== */
-.site-nav-logo {
-  display: inline-flex !important;
-  align-items: center;
-  gap: 12px;
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--forest-deep);
-  text-decoration: none;
-  letter-spacing: 0.08em;
-  transition: opacity 0.3s ease;
-}
-.site-nav-logo:hover {
-  opacity: 0.85;
-}
-.site-nav-logo-img {
-  width: 44px;
-  height: 44px;
-  object-fit: contain;
-  display: block;
-  flex-shrink: 0;
-}
-.brand-title-emblem {
-  width: 84px;
-  height: 84px;
-  object-fit: contain;
-  margin: 0 auto 14px;
-  display: block;
-  opacity: 0.96;
-}
-.card-mock-emblem {
-  width: 52px;
-  height: 52px;
-  object-fit: contain;
-  display: block;
-  margin: 0 auto;
-}
-.hero-brand-header {
+/* 頂部全站預覽切換控制導航條 */
+.preview-nav-bar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 48px;
+  background: #253328;
+  color: #fff;
+  z-index: 1000;
   display: flex;
   align-items: center;
-  margin-bottom: 16px;
-}
-.hero-brand-logo {
-  width: clamp(160px, 24vw, 220px);
-  height: auto;
-  display: block;
-  opacity: 0.95;
-}
-.home-footer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 36px 20px 28px;
-}
-.footer-logo {
-  width: 140px;
-  height: auto;
-  display: block;
-  margin-bottom: 12px;
-  opacity: 0.92;
-}
-
-@media (max-width: 840px) {
-  .site-nav-logo { font-size: 15.5px; gap: 10px; }
-  .site-nav-logo-img { width: 38px; height: 38px; }
-  .brand-title-emblem { width: 72px; height: 72px; }
-  .footer-logo { width: 120px; }
-}
-@media (max-width: 480px) {
-  .site-nav-logo { font-size: 14px; gap: 8px; }
-  .site-nav-logo-img { width: 34px; height: 34px; }
-  .hero-brand-logo { width: 140px; }
-}
-
-/* ========== 頁尾後台入口（Logo 與專屬微標籤雙入口） ========== */
-.footer-logo-link {
-  display: inline-block;
-  transition: transform 0.35s ease, opacity 0.35s ease;
-  cursor: pointer;
-  text-decoration: none;
-}
-.footer-logo-link:hover {
-  transform: translateY(-2px);
-  opacity: 0.82;
-}
-
-
-
-/* ========== 日式自然醫學調息箋 (Insight Modal) 樣式 ========== */
-.seal-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 12px; }
-.seal-pill {
-  font-size: 11.5px; font-weight: 600; padding: 4px 10px; border-radius: 12px;
-  display: inline-flex; align-items: center; gap: 5px;
-}
-.seal-usage {
-  background: rgba(184,145,46,0.1); color: var(--forest-deep); border: 1px solid var(--gold-hairline);
-}
-.seal-safety {
-  font-size: 11px; padding: 3px 9px; border-radius: 10px; font-weight: 600;
-}
-.safety-direct { background: #E8F2EA; color: #2B5738; border: 1px solid #94C4A0; }
-.safety-sensitive { background: #FFF4E5; color: #8F5500; border: 1px solid #ECC48B; }
-.safety-dilute { background: #FDE8E8; color: #9B1C1C; border: 1px solid #F8B4B4; }
-.tag-balance { background: rgba(75,99,80,0.12); color: #2D4232; border: 1px solid rgba(75,99,80,0.3); }
-.tag-mercy { background: rgba(184,145,46,0.14); color: #785A12; border: 1px solid rgba(184,145,46,0.35); }
-.tag-severity { background: rgba(60,80,100,0.12); color: #243545; border: 1px solid rgba(60,80,100,0.3); }
-
-.doctor-prescription-box {
-  background: #FFFDF9;
-  border: 1px solid rgba(184,145,46,0.4);
-  border-left: 4px solid var(--gold);
-  border-radius: 10px;
-  padding: 12px 14px;
-  margin: 12px 0 14px;
-  text-align: left;
-}
-.prescription-title {
-  font-size: 12px; font-weight: 700; color: var(--forest-deep);
-  margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
+  justify-content: space-between;
+  padding: 0 20px;
+  font-size: 12.5px;
   letter-spacing: 0.05em;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.25);
 }
-.prescription-content {
-  font-size: 13px; line-height: 1.85; color: var(--ink);
-  letter-spacing: 0.03em;
+.preview-nav-links {
+  display: flex;
+  gap: 12px;
 }
-.im-sku-tag {
-  font-size: 11px; color: var(--sage); letter-spacing: 0.06em; margin-bottom: 2px;
+.pnl-link {
+  color: #d1ded5;
+  text-decoration: none;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.08);
+  transition: all 0.25s ease;
+}
+.pnl-link:hover, .pnl-link.active {
+  color: #fff;
+  background: var(--gold);
+}
+.theme-toggle-btn {
+  background: #fff;
+  color: var(--forest-deep);
+  border: none;
+  padding: 4px 12px;
+  border-radius: 14px;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+body.has-preview-bar {
+  padding-top: calc(var(--nav-h) + 48px) !important;
+}
+body.has-preview-bar .site-nav {
+  top: 48px !important;
 }

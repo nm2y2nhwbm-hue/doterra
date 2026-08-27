@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
@@ -18,14 +18,15 @@
 <meta property="og:image:alt" content="現代精油心靈指引卡品牌分享圖">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#355343">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.png?v=3" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link rel="stylesheet" href="style.css?v=11">
+<link rel="stylesheet" href="style.css?v=20">
 </head>
 <body>
 
 <a class="back-home-link" href="index.html">← 首頁</a>
-<div class="brand-title"><h1>貴賓體驗預約</h1><p>MODERN OIL ORACLE</p></div>
+<div class="brand-title"><img src="images/logo-emblem.png?v=3" alt="雫之洞悉 · 返魂堂" class="brand-title-emblem"><h1>貴賓體驗預約</h1><p>雫之洞悉 · 返魂堂 · MODERN OIL ORACLE</p></div>
 <div class="ornament-divider">❀</div>
 
 <main>
@@ -70,6 +71,21 @@
 
       <div id="booking-form-msg" class="admin-msg" role="alert" aria-live="assertive"></div>
       <button type="submit" class="form-submit-btn" id="booking-submit-btn">送出預約</button>
+      <!-- 日式款待安心標籤 -->
+      <div class="trust-badges">
+        <div class="trust-badge-item">
+          <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>所要時間約 2 分鐘</span>
+        </div>
+        <div class="trust-badge-item">
+          <svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span>個人資訊嚴密保護</span>
+        </div>
+        <div class="trust-badge-item">
+          <svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>絕無強行推銷負擔</span>
+        </div>
+      </div>
       <p class="booking-disclaimer">送出即表示同意我們以上述聯絡方式與你確認預約內容。此服務不做醫療、心理或投資專業建議。</p>
     </form>
 

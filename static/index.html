@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
@@ -30,16 +30,18 @@
 <meta property="og:image:alt" content="現代精油心靈指引卡品牌分享圖">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#355343">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="style.css?v=11">
+<link rel="icon" href="favicon.png?v=3" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="style.css?v=20">
 </head>
 <body class="has-fixed-nav">
 
 <header class="site-nav">
   <div class="site-nav-inner">
-    <span class="site-nav-logo">現代精油心靈指引卡</span>
+    <a href="index.html" class="site-nav-logo"><img src="images/logo-emblem.png?v=3" alt="雫之洞悉 · 返魂堂" class="site-nav-logo-img"><span>雫之洞悉 · 返魂堂</span></a>
     <nav class="site-nav-links">
       <a href="cards.html">線上抽牌</a>
+      <a href="oils.html">精油圖鑑</a>
       <a href="#gift" id="nav-gift-link">貴賓禮盒</a>
       <a href="#" id="home-guide-link">卡牌說明</a>
     </nav>
@@ -51,18 +53,36 @@
 
   <section class="home-hero">
     <div class="home-hero-text">
-      <div class="home-kicker">MODERN OIL ORACLE</div>
+            <div class="hero-brand-header">
+        <img src="images/brand-logo-transparent.png?v=3" alt="雫之洞悉 · 返魂堂" class="hero-brand-logo">
+      </div>
+<div class="home-kicker">雫之洞悉 · 返魂堂 · MODERN OIL ORACLE</div>
       <h1>停下來，<br>讓一張牌接住此刻的你</h1>
       <p class="home-sub">結合多特瑞精油與塔羅直覺，為忙碌的現代人打造的 3 分鐘身心校準儀式——不需要懂占卜，只需要深呼吸，讓直覺帶你抽出屬於此刻的訊息。</p>
       <div class="home-cta-row">
         <a class="home-cta primary" href="cards.html">🔮 免費線上抽卡</a>
         <a class="home-cta secondary" href="booking.html">💎 預約貴賓體驗禮盒</a>
       </div>
+    <!-- 日式「おもてなし（款待）」三步驟心理預期導引 -->
+    <div class="omotenashi-steps">
+      <div class="omotenashi-step">
+        <div class="step-num">一</div>
+        <div class="step-text">深呼吸 · 直覺抽卡</div>
+      </div>
+      <div class="omotenashi-step">
+        <div class="step-num">二</div>
+        <div class="step-text">照見當下 · 香氣解讀</div>
+      </div>
+      <div class="omotenashi-step">
+        <div class="step-num">三</div>
+        <div class="step-text">一對一專屬體驗調配</div>
+      </div>
+    </div>
       <p class="home-disclaimer">此服務為身心靈探索工具，不做醫療、心理或投資專業建議</p>
     </div>
     <div class="home-hero-visual">
       <div class="home-card-mock">
-        <div class="spark">✦</div>
+        <div class="spark"><img src="images/logo-emblem.png?v=3" alt="雫" class="card-mock-emblem"></div>
         <div class="eyebrow">INSIGHT</div>
         <div class="title">洞悉</div>
         <div class="line">精油的氣息<br>照見此刻的訊息</div>
@@ -98,7 +118,22 @@
         </select>
       </div>
       <button type="submit" class="home-cta primary" id="ql-submit-btn" style="width:100%;justify-content:center;">送出，留下這份心意</button>
-      <div id="ql-msg" class="admin-msg" role="status" aria-live="polite"></div>
+            <!-- 日式款待安心標籤 -->
+      <div class="trust-badges">
+        <div class="trust-badge-item">
+          <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>所要時間約 2 分鐘</span>
+        </div>
+        <div class="trust-badge-item">
+          <svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span>個人資訊嚴密保護</span>
+        </div>
+        <div class="trust-badge-item">
+          <svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>絕無強行推銷負擔</span>
+        </div>
+      </div>
+<div id="ql-msg" class="admin-msg" role="status" aria-live="polite"></div>
     </form>
   </section>
 
@@ -117,7 +152,13 @@
 
 </main>
 
-<div class="home-footer">現代精油心靈指引卡 · MODERN OIL ORACLE</div>
+<footer class="home-footer">
+  <a href="admin.html" class="footer-logo-link" title="雫之洞悉 · 返魂堂" aria-label="雫之洞悉 · 返魂堂">
+    <img src="images/brand-logo-transparent.png?v=3" alt="雫之洞悉 · 返魂堂" class="footer-logo">
+  </a>
+  <p>雫之洞悉 · 返魂堂 · 現代精油心靈指引卡</p>
+  <p style="font-size:11px;opacity:0.75;margin:0;">MODERN OIL ORACLE</p>
+</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-client.js?v=1"></script>

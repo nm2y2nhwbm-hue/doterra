@@ -1,0 +1,431 @@
+﻿<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>精油圖鑑 · 自然醫學調息與位格全書 · 雫之洞悉 · 返魂堂</title>
+  <meta name="description" content="雫之洞悉 · 返魂堂 精油圖鑑與自然醫學調息全書，結合生命之樹三大位格與中醫性味歸經。">
+  <link rel="icon" href="favicon.png?v=3" type="image/png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
+  <link rel="stylesheet" href="style.css?v=20">
+  <style>
+    .catalog-header {
+      text-align: center;
+      padding: 40px 16px 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .catalog-title {
+      font-size: clamp(24px, 5vw, 32px);
+      font-weight: 700;
+      color: var(--forest-deep);
+      margin: 0 0 10px;
+      letter-spacing: 0.08em;
+    }
+    .catalog-desc {
+      font-size: 14px;
+      color: var(--ink-soft);
+      line-height: 1.85;
+      margin: 0 auto 24px;
+    }
+    .catalog-tabs {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+    .catalog-tab-btn {
+      background: var(--paper-warm);
+      border: 1px solid var(--gold-hairline);
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--ink-soft);
+      cursor: pointer;
+      transition: all 0.3s var(--ease-zen);
+      font-family: inherit;
+    }
+    .catalog-tab-btn.active, .catalog-tab-btn:hover {
+      background: var(--forest);
+      color: #FAF6EC;
+      border-color: var(--forest);
+      box-shadow: 0 4px 14px rgba(45,66,50,0.18);
+      transform: translateY(-1px);
+    }
+
+    /* 圖鑑卡牌網格 */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 24px;
+      max-width: 1140px;
+      margin: 0 auto 48px;
+      padding: 0 16px;
+    }
+    .card-preview-item {
+      background: var(--paper-warm);
+      border: 1px solid var(--gold-hairline);
+      border-radius: 16px;
+      padding: 16px 14px 18px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.45s var(--ease-zen), box-shadow 0.45s var(--ease-zen), border-color 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .card-preview-item:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-card);
+      border-color: var(--gold);
+      background: #FFFDF9;
+    }
+    .card-preview-img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+    .card-preview-name {
+      font-size: 16.5px;
+      font-weight: 700;
+      color: var(--forest-deep);
+      margin-bottom: 4px;
+      letter-spacing: 0.04em;
+    }
+    .card-preview-en {
+      font-size: 12px;
+      color: var(--sage);
+      margin-bottom: 10px;
+    }
+    .card-pillar-tag {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+    .tag-balance { background: rgba(75,99,80,0.12); color: #2D4232; border: 1px solid rgba(75,99,80,0.3); }
+    .tag-mercy { background: rgba(184,145,46,0.14); color: #785A12; border: 1px solid rgba(184,145,46,0.35); }
+    .tag-severity { background: rgba(60,80,100,0.12); color: #243545; border: 1px solid rgba(60,80,100,0.3); }
+
+    /* 131 筆全覽表 */
+    .database-table-wrap {
+      max-width: 1140px;
+      margin: 0 auto 56px;
+      padding: 0 16px;
+      overflow-x: auto;
+    }
+    .database-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #FFFDF9;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 14px rgba(0,0,0,0.05);
+      font-size: 13px;
+      border: 1px solid var(--gold-hairline);
+    }
+    .database-table th, .database-table td {
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 1px solid rgba(184,145,46,0.15);
+    }
+    .database-table th {
+      background: #F4EEDF;
+      color: var(--forest-deep);
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .database-table tr:hover {
+      background: rgba(184,145,46,0.04);
+    }
+
+    /* 彈窗樣式 */
+    .insight-modal-overlay {
+      position: fixed; inset: 0; background: rgba(27,36,29,0.72); backdrop-filter: blur(4px);
+      z-index: 2000; display: flex; align-items: center; justify-content: center;
+      padding: 16px; opacity: 0; pointer-events: none; transition: opacity 0.35s ease;
+    }
+    .insight-modal-overlay.active { opacity: 1; pointer-events: auto; }
+    .insight-card-container {
+      background: #FAF6EC; border: 1px solid var(--gold);
+      border-radius: 20px; max-width: 580px; width: 100%; max-height: 90vh;
+      overflow-y: auto; box-shadow: 0 18px 52px rgba(0,0,0,0.32);
+      position: relative; padding: 30px 24px; font-family: inherit;
+    }
+    .insight-close-btn {
+      position: absolute; top: 14px; right: 16px; background: none; border: none;
+      font-size: 26px; color: var(--ink-soft); cursor: pointer; padding: 4px; line-height: 1;
+    }
+    .insight-header {
+      display: flex; gap: 18px; margin-bottom: 20px; align-items: flex-start;
+    }
+    .insight-art {
+      width: 110px; height: 150px; object-fit: cover; border-radius: 10px;
+      border: 1px solid var(--gold-hairline); flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .insight-title-block { flex: 1; }
+    .insight-sku { font-size: 11px; color: var(--sage); letter-spacing: 0.08em; margin-bottom: 4px; font-family: monospace; }
+    .insight-main-title { font-size: 22px; font-weight: 700; color: var(--forest-deep); margin: 0 0 2px; }
+    .insight-en-title { font-size: 13px; color: var(--sage); margin-bottom: 10px; }
+
+    .modal-book-cta {
+      display: block; width: 100%; text-align: center; background: var(--forest-deep);
+      color: #FAF6EC; padding: 12px 0; border-radius: 24px; text-decoration: none;
+      font-size: 14px; font-weight: 700; letter-spacing: 0.08em; transition: all 0.35s ease;
+      box-shadow: 0 4px 14px rgba(45,66,50,0.25); margin-top: 14px;
+    }
+    .modal-book-cta:hover {
+      background: var(--forest); transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 正式導航列 -->
+  <header class="site-nav">
+    <div class="site-nav-inner">
+      <a href="index.html" class="site-nav-logo">
+        <img src="images/logo-emblem.png?v=3" alt="雫之洞悉 · 返魂堂" class="site-nav-logo-img">
+        <span>雫之洞悉 · 返魂堂</span>
+      </a>
+      <nav class="site-nav-links">
+        <a href="cards.html">線上抽牌</a>
+        <a href="oils.html" style="color:var(--forest-deep); font-weight:700;">精油圖鑑</a>
+        <a href="booking.html" class="site-nav-cta">立即預約</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 標題與引言 -->
+  <div class="catalog-header">
+    <img src="images/logo-emblem.png?v=3" alt="雫之洞悉" class="brand-title-emblem" style="width:72px; height:72px;">
+    <h1 class="catalog-title">精油圖鑑 · 自然醫學調息全書</h1>
+    <p class="catalog-desc">
+      融合<b>「生命之樹三大位格」</b>與<b>「自然醫學性味歸經」</b>。每款精油皆為對應身心靈當下氣血流轉的清涼甘露。<br>
+      點選任一張卡牌即可調閱其自然醫學調息指引、用法與安全塗抹指南。
+    </p>
+
+    <!-- 切換標籤列 -->
+    <div class="catalog-tabs">
+      <button class="catalog-tab-btn active" onclick="filterPillar('ALL')">全部牌卡 (69 張)</button>
+      <button class="catalog-tab-btn" onclick="filterPillar('中柱')">☯️ 中柱 · 平衡調和 (Balance)</button>
+      <button class="catalog-tab-btn" onclick="filterPillar('右柱')">☀️ 右柱 · 陽氣升發 (Mercy)</button>
+      <button class="catalog-tab-btn" onclick="filterPillar('左柱')">🌙 左柱 · 陰柔收斂 (Severity)</button>
+      <button class="catalog-tab-btn" onclick="toggleDatabaseView()">📋 131 款完整精油資料庫檢索</button>
+    </div>
+  </div>
+
+  <!-- 牌卡展示網格 -->
+  <main id="cards-container" class="cards-grid"></main>
+
+  <!-- 131 款全覽搜尋表 -->
+  <section id="database-container" class="database-table-wrap" style="display:none;">
+    <div style="margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+      <h3 style="margin:0; color:var(--forest-deep); font-size:16px;">dōTERRA 官方 131 款精油自然醫學理論庫</h3>
+      <input type="text" id="search-input" placeholder="輸入精油名稱、編號或效益搜尋..." oninput="searchDatabase()" 
+             style="padding:8px 14px; border-radius:16px; border:1px solid var(--gold-hairline); font-size:13px; width:260px; outline:none; background:#fff;">
+    </div>
+    <table class="database-table">
+      <thead>
+        <tr>
+          <th>商品編號 (SKU)</th>
+          <th>產品名稱</th>
+          <th>位格歸屬</th>
+          <th>用法標籤</th>
+          <th>塗抹建議</th>
+          <th>自然醫學建議 (性味歸經 + 核心效益)</th>
+        </tr>
+      </thead>
+      <tbody id="database-tbody"></tbody>
+    </table>
+  </section>
+
+  <!-- 日式自然醫學專家調息 Insight Modal 彈窗 -->
+  <div id="insight-modal" class="insight-modal-overlay" onclick="closeModal(event)">
+    <div class="insight-card-container" onclick="event.stopPropagation()">
+      <button class="insight-close-btn" onclick="closeModal()">&times;</button>
+      
+      <div class="insight-header">
+        <img id="m-art" class="insight-art" src="" alt="">
+        <div class="insight-title-block">
+          <div id="m-sku" class="insight-sku">SKU: --</div>
+          <h2 id="m-name" class="insight-main-title">--</h2>
+          <div id="m-en" class="insight-en-title">--</div>
+          
+          <div class="seal-row">
+            <span id="m-pillar" class="seal-pill">--</span>
+            <span id="m-usage" class="seal-pill seal-usage">--</span>
+            <span id="m-safety" class="seal-safety">--</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 自然醫學調息箋 -->
+      <div class="doctor-prescription-box">
+        <div class="prescription-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2v20M2 12h20"/>
+          </svg>
+          自然醫學建議 · 性味調息指引
+        </div>
+        <div id="m-doctor" class="prescription-content">--</div>
+      </div>
+
+      <!-- 心靈指引與脈輪 -->
+      <div style="background:rgba(75,99,80,0.06); border-radius:10px; padding:12px 14px; margin-bottom:14px; font-size:13px; line-height:1.8; color:var(--ink-soft);">
+        <div style="margin-bottom:6px;"><b style="color:var(--forest-deep);">🌿 心靈指引：</b><span id="m-guidance">--</span></div>
+        <div><b style="color:var(--forest-deep);">🧘 脈輪對應：</b><span id="m-chakra">--</span></div>
+      </div>
+
+      <a href="booking.html" class="modal-book-cta">預約一對一調配 · 體驗此守護油處方 →</a>
+    </div>
+  </div>
+
+  <!-- 正式頁尾（含日式落款印章） -->
+  <footer class="home-footer">
+    <a href="admin.html" class="footer-logo-link" title="雫之洞悉 · 返魂堂" aria-label="雫之洞悉 · 返魂堂">
+      <img src="images/brand-logo-transparent.png?v=3" alt="雫之洞悉 · 返魂堂" class="footer-logo">
+    </a>
+    <p>雫之洞悉 · 返魂堂 · 現代精油心靈指引卡</p>
+    <p style="font-size:11px;opacity:0.75;margin:0;">MODERN OIL ORACLE</p>
+  </footer>
+
+  <script>
+    let cardsData = [];
+    let allKnowledge = [];
+    let currentFilter = 'ALL';
+
+    Promise.all([
+      fetch('oils-catalog.json?v=2').then(r => r.json()),
+      fetch('oils-knowledge.json').then(r => r.json())
+    ]).then(([cards, knowledge]) => {
+      cardsData = cards;
+      allKnowledge = knowledge;
+      renderCards();
+      renderDatabase(allKnowledge);
+    }).catch(err => {
+      console.error('資料載入異常:', err);
+    });
+
+    function renderCards() {
+      const container = document.getElementById('cards-container');
+      container.innerHTML = '';
+      
+      const filtered = cardsData.filter(c => {
+        if (currentFilter === 'ALL') return true;
+        return c.pillar && c.pillar.includes(currentFilter);
+      });
+
+      filtered.forEach(c => {
+        const item = document.createElement('div');
+        item.className = 'card-preview-item';
+        item.onclick = () => openModal(c);
+
+        let pillarClass = 'tag-balance';
+        if (c.pillar.includes('右柱')) pillarClass = 'tag-mercy';
+        if (c.pillar.includes('左柱')) pillarClass = 'tag-severity';
+
+        let safetyText = '🌿 直塗可';
+        if (c.dilution_guide === '敏感') safetyText = '⚠️ 敏感需稀釋';
+        if (c.dilution_guide === '稀釋') safetyText = '💧 必須稀釋';
+
+        item.innerHTML = `
+          <img src="images/${c.image_filename}" class="card-preview-img" onerror="this.src='images/logo-emblem.png'">
+          <span class="card-pillar-tag ${pillarClass}">${c.pillar.split(' ')[0]}</span>
+          <div class="card-preview-name">${c.name}</div>
+          <div class="card-preview-en">${c.name_en}</div>
+          <div style="font-size:11.5px; color:var(--ink-soft); font-weight:500;">${safetyText}</div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function filterPillar(pillar) {
+      currentFilter = pillar;
+      document.querySelectorAll('.catalog-tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.includes(pillar === 'ALL' ? '全部' : pillar));
+      });
+      document.getElementById('cards-container').style.display = 'grid';
+      document.getElementById('database-container').style.display = 'none';
+      renderCards();
+    }
+
+    function toggleDatabaseView() {
+      const dbView = document.getElementById('database-container');
+      const cardsView = document.getElementById('cards-container');
+      const isVisible = dbView.style.display === 'block';
+      dbView.style.display = isVisible ? 'none' : 'block';
+      cardsView.style.display = isVisible ? 'grid' : 'none';
+      
+      document.querySelectorAll('.catalog-tab-btn').forEach(b => b.classList.remove('active'));
+      if (!isVisible) {
+        event.target.classList.add('active');
+      } else {
+        filterPillar('ALL');
+      }
+    }
+
+    function renderDatabase(items) {
+      const tbody = document.getElementById('database-tbody');
+      tbody.innerHTML = '';
+      items.forEach(it => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="font-family:monospace; color:var(--sage);">${it.sku}</td>
+          <td><b>${it.name}</b></td>
+          <td><span class="card-pillar-tag ${it.pillar.includes('右柱') ? 'tag-mercy' : it.pillar.includes('左柱') ? 'tag-severity' : 'tag-balance'}">${it.pillar.split(' ')[0]}</span></td>
+          <td>${it.usage_tags}</td>
+          <td>${it.dilution_guide}</td>
+          <td style="font-size:12.5px; color:var(--ink); line-height:1.6;">${it.doctor_advice}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function searchDatabase() {
+      const q = document.getElementById('search-input').value.trim().toLowerCase();
+      const filtered = allKnowledge.filter(it => 
+        it.name.toLowerCase().includes(q) ||
+        (it.sku && it.sku.includes(q)) ||
+        (it.doctor_advice && it.doctor_advice.toLowerCase().includes(q)) ||
+        (it.pillar && it.pillar.toLowerCase().includes(q))
+      );
+      renderDatabase(filtered);
+    }
+
+    function openModal(c) {
+      document.getElementById('m-art').src = `images/${c.image_filename}`;
+      document.getElementById('m-sku').textContent = `OFFICIAL SKU: ${c.sku}`;
+      document.getElementById('m-name').textContent = c.name;
+      document.getElementById('m-en').textContent = c.name_en;
+
+      const pEl = document.getElementById('m-pillar');
+      pEl.textContent = c.pillar;
+      pEl.className = 'seal-pill ' + (c.pillar.includes('右柱') ? 'tag-mercy' : c.pillar.includes('左柱') ? 'tag-severity' : 'tag-balance');
+
+      document.getElementById('m-usage').textContent = c.usage_tags;
+
+      const sEl = document.getElementById('m-safety');
+      sEl.textContent = c.dilution_guide === '直塗' ? '🌿 溫和可直塗' : c.dilution_guide === '敏感' ? '⚠️ 敏感膚質稀釋' : '💧 強效必須稀釋';
+      sEl.className = 'seal-safety ' + (c.dilution_guide === '直塗' ? 'safety-direct' : c.dilution_guide === '敏感' ? 'safety-sensitive' : 'safety-dilute');
+
+      document.getElementById('m-doctor').textContent = c.doctor_advice || '主調和身心、平衡能量。';
+      document.getElementById('m-guidance').textContent = c.guidance || c.description;
+      document.getElementById('m-chakra').textContent = c.chakra ? c.chakra : '心輪';
+
+      document.getElementById('insight-modal').classList.add('active');
+    }
+
+    function closeModal(e) {
+      document.getElementById('insight-modal').classList.remove('active');
+    }
+  </script>
+</body>
+</html>

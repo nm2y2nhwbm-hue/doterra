@@ -1,9 +1,17 @@
-(() => {
+﻿(() => {
   const loginWrap = document.getElementById('admin-login-wrap');
   const dashboard = document.getElementById('inventory-dashboard');
   const loginMsg = document.getElementById('admin-login-msg');
   const adminMsg = document.getElementById('admin-msg');
   const invList = document.getElementById('inventory-list');
+  let knowledgeMap = new Map();
+  fetch('oils-knowledge.json').then(r => r.json()).then(arr => {
+    arr.forEach(k => {
+      if (k.name) knowledgeMap.set(k.name, k);
+      if (k.sku) knowledgeMap.set(k.sku, k);
+    });
+    if (typeof items !== 'undefined' && items && items.length) renderList();
+  }).catch(() => {});
   // 來源：dōTERRA 官方「單方精油速查表」產品編號（最新版價目表）
   const SINGLE_OIL_IDS = new Set([
     '49360302','60227966','30790302','60226389','60228183','60210282','60204088','49350302',
@@ -164,17 +172,37 @@
         else if (d <= 60) badge = `<span class="status-badge status-pending">${d} 天後到期</span>`;
         else badge = '<span class="status-badge status-done">效期正常</span>';
       }
+
+      const kInfo = knowledgeMap.get(i.oil_name) || (i.product_id ? knowledgeMap.get(i.product_id) : null);
+      let pillarBadge = '';
+      let adviceHtml = '';
+      if (kInfo) {
+        let pClass = 'tag-balance';
+        if (kInfo.pillar && kInfo.pillar.includes('右柱')) pClass = 'tag-mercy';
+        if (kInfo.pillar && kInfo.pillar.includes('左柱')) pClass = 'tag-severity';
+        pillarBadge = `<span class="seal-pill ${pClass}" style="font-size:10px; padding:2px 6px; margin-left:6px;">${kInfo.pillar.split(' ')[0]}</span>`;
+        if (kInfo.dilution_guide) {
+          let sClass = kInfo.dilution_guide === '直塗' ? 'safety-direct' : kInfo.dilution_guide === '敏感' ? 'safety-sensitive' : 'safety-dilute';
+          let sLabel = kInfo.dilution_guide === '直塗' ? '直塗' : kInfo.dilution_guide === '敏感' ? '敏感稀釋' : '必稀釋';
+          pillarBadge += `<span class="seal-safety ${sClass}" style="font-size:10px; padding:2px 6px; margin-left:4px;">${sLabel}</span>`;
+        }
+        if (kInfo.doctor_advice) {
+          adviceHtml = `<div style="font-size:11.5px; color:var(--forest-deep); margin-top:5px; line-height:1.6; background:rgba(184,145,46,0.06); padding:4px 8px; border-radius:6px;">🌿 ${kInfo.doctor_advice}</div>`;
+        }
+      }
+
       return `
         <div class="booking-card">
           <div class="booking-card-head">
             <div>
-              <div class="booking-receipt">${i.oil_name}</div>
+              <div class="booking-receipt" style="display:flex; align-items:center; flex-wrap:wrap;">${i.oil_name}${pillarBadge}</div>
               ${i.product_id ? `<div class="booking-created">產品編號：${i.product_id}</div>` : ''}
             </div>
             ${badge}
           </div>
           <div class="booking-row">庫存 ${i.quantity} ${i.unit || '瓶'}｜使用中 ${i.in_use || 0} ${i.unit || '瓶'}${i.capacity ? '｜容量 ' + i.capacity : ''}</div>
           ${i.expiry_date ? `<div class="booking-row">有效期限：${i.expiry_date}</div>` : ''}
+          ${adviceHtml}
           ${i.note ? `<div class="booking-row">備註：${i.note}</div>` : ''}
           <div class="booking-actions">
             <button type="button" class="draw-toggle-btn" data-edit="${i.id}">編輯</button>
