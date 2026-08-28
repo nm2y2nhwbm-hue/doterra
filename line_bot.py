@@ -32,9 +32,9 @@ if not CHANNEL_ACCESS_TOKEN or not CHANNEL_SECRET:
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 app.config['MAX_CONTENT_LENGTH'] = 128 * 1024
 
-# CORS：同時允許 Render 本身與 Vercel 網域呼叫 API，
+# CORS：同時允許 Render 本身與 Vercel 網域呼叫 API 與 Health 探測端點，
 # 避免因為之後測試網址在兩邊之間切換而被擋。
-CORS(app, resources={r"/api/*": {"origins": [
+CORS(app, resources={r"/*": {"origins": [
     "https://doterra-two.vercel.app",
     "https://doterra-73pv.onrender.com",
 ]}})

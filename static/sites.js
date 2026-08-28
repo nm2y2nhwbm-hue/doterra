@@ -142,9 +142,9 @@
   async function checkLineWebhook(){
     const start = performance.now();
     try {
-      const res = await fetchWithTimeout('https://doterra-73pv.onrender.com/health', {}, 6000);
+      const res = await fetchWithTimeout('https://doterra-73pv.onrender.com/api/oils', {}, 6000);
       const ms = Math.round(performance.now() - start);
-      if (!res.ok) return { level: 'bad', label: `HTTP ${res.status}`, detail: `${ms}ms（後端 Webhook 接收端異常）` };
+      if (!res.ok) return { level: 'bad', label: `HTTP ${res.status}`, detail: `${ms}ms（後端服務異常）` };
       return { 
         level: 'ok', 
         label: '接收伺服器在線 (Ready)', 
