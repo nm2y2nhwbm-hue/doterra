@@ -86,13 +86,13 @@ begin
 
   -- 外鍵 bookings.draw_code -> draws.code 沒有 ON DELETE CASCADE，
   -- 因此必須先刪 bookings，再刪 draws。
-  delete from public.bookings;
+  delete from public.bookings where true;
   get diagnostics deleted_bookings = row_count;
 
-  delete from public.draws;
+  delete from public.draws where true;
   get diagnostics deleted_draws = row_count;
 
-  delete from public.booking_counters;
+  delete from public.booking_counters where true;
   get diagnostics deleted_counters = row_count;
 
   return jsonb_build_object(
