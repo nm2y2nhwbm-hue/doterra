@@ -1,4 +1,4 @@
-﻿(() => {
+(() => {
   const loginWrap = document.getElementById('admin-login-wrap');
   const dashboard = document.getElementById('inventory-dashboard');
   const loginMsg = document.getElementById('admin-login-msg');
@@ -257,11 +257,27 @@
     syncBtn.disabled = true;
     adminMsg.textContent = '正在從 Google 試算表同步……';
     try {
+      const { data: sessionData } = await client.auth.getSession();
+      const token = sessionData && sessionData.session ? sessionData.session.access_token : null;
+      if (!token) {
+        adminMsg.textContent = '同步失敗：尚未登入或管理員工作階段已過期，請重新登入。';
+        syncBtn.disabled = false;
+        return;
+      }
       const anonKey = window.OracleSupabase && window.OracleSupabase.SUPABASE_ANON_KEY;
       const res = await fetch(`${baseUrl}/functions/v1/sync-inventory`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${anonKey}` },
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'apikey': anonKey,
+          'Content-Type': 'application/json'
+        },
       });
+      if (res.status === 401 || res.status === 403) {
+        adminMsg.textContent = '同步失敗：權限不足，僅限管理員帳號執行此功能。';
+        syncBtn.disabled = false;
+        return;
+      }
       if (res.status === 404) {
         adminMsg.textContent = '同步失敗：找不到 sync-inventory（這支 Edge Function 還沒部署，請執行 supabase functions deploy sync-inventory）';
         syncBtn.disabled = false;
@@ -274,7 +290,7 @@
         adminMsg.textContent = `同步完成：共讀到 ${data.oilTypes} 種精油、新增 ${data.inserted} 筆、更新 ${data.updated} 筆`;
         await loadData();
       } else {
-        adminMsg.textContent = '同步失敗：' + (data.error || '未知錯誤');
+        adminMsg.textContent = `同步失敗：${data.error || '未知錯誤'}`;
       }
     } catch (e) {
       adminMsg.textContent = '同步失敗：' + e.message;

@@ -62,20 +62,25 @@
       : Promise.resolve({ receiptNo: null, persisted: false, error: 'Supabase 尚未載入' });
 
     submit.then(({ receiptNo, persisted, error }) => {
+      function escapeHtml(s) {
+        return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      }
+
       form.style.display = 'none';
       confirmBox.style.display = 'block';
       if (persisted && receiptNo) {
         confirmBox.innerHTML = `
           <div class="ep-label">預約已送出，妳的受付編號</div>
-          <div class="ep-code">${receiptNo}</div>
+          <div class="ep-code">${escapeHtml(receiptNo)}</div>
           <div class="ep-desc">請保留此編號，我們將依約定時間與你聯繫。</div>
           <div id="ai-confirm-msg" class="ai-confirm-msg">正在為你準備一段專屬的前導訊息……</div>
           <a class="home-cta primary" href="index.html">返回首頁</a>`;
         fetchAiConfirmation(receiptNo);
       } else {
+        const safeError = escapeHtml(error || '');
         confirmBox.innerHTML = `
           <div class="ep-label">預約尚未成功送出</div>
-          <div class="ep-desc">後端保存服務尚未完成設定${error ? '（' + error + '）' : ''}，請直接透過 LINE 官方帳號與我們聯繫，或稍後再試一次。</div>
+          <div class="ep-desc">後端保存服務尚未完成設定${safeError ? '（' + safeError + '）' : ''}，請直接透過 LINE 官方帳號與我們聯繫，或稍後再試一次。</div>
           <button type="button" class="home-cta secondary" id="booking-retry-btn">重新填寫</button>`;
         const retryBtn = document.getElementById('booking-retry-btn');
         if (retryBtn) retryBtn.addEventListener('click', () => {

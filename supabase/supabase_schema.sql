@@ -123,56 +123,112 @@ alter table booking_counters enable row level security;
 -- 刻意不建立任何 policy = anon 對資料表完全無存取權限
 
 -- ---------------------------------------------------------
--- 4. RPC：前端只會呼叫這兩支函式
+-- 4. 表格資料完整性條件約束（Check Constraints）
 -- ---------------------------------------------------------
-create or replace function save_draw(
-  p_mode int,
-  p_results jsonb,
-  p_line_user_id text default null,
-  p_line_display_name text default null
+alter table bookings
+  add constraint chk_bookings_name_not_empty
+  check (length(trim(name)) > 0 and length(name) <= 60);
+
+alter table bookings
+  add constraint chk_bookings_contact_required
+  check (
+    (email is not null and length(trim(email)) > 0)
+    or
+    (line_id is not null and length(trim(line_id)) > 0)
+  );
+
+alter table bookings
+  add constraint chk_bookings_text_lengths
+  check (
+    length(coalesce(question, '')) <= 500
+    and length(coalesce(note, '')) <= 500
+  );
+
+-- ---------------------------------------------------------
+-- 5. RPC：線上預約建立函式（具備伺服器端嚴格校驗與防禦）
+--    注意：舊版 save_draw 已廢棄（全面由 draw_handoffs 安全交接取代）
+-- ---------------------------------------------------------
+create or replace function public.create_booking(
+  p_draw_code text default null,
+  p_name text default null,
+  p_email text default null,
+  p_line_id text default null,
+  p_booking_date date default null,
+  p_main_concern text default null,
+  p_mood text default null,
+  p_question text default null,
+  p_note text default null
 ) returns text
 language plpgsql
 security definer
 set search_path = public
 as $$
 declare
-  v_code text;
+  v_name         text := trim(coalesce(p_name, ''));
+  v_email        text := nullif(trim(coalesce(p_email, '')), '');
+  v_line_id      text := nullif(trim(coalesce(p_line_id, '')), '');
+  v_main_concern text := nullif(trim(coalesce(p_main_concern, '')), '');
+  v_mood         text := nullif(trim(coalesce(p_mood, '')), '');
+  v_question     text := nullif(trim(coalesce(p_question, '')), '');
+  v_note         text := nullif(trim(coalesce(p_note, '')), '');
+  v_draw_code    text := nullif(trim(coalesce(p_draw_code, '')), '');
+  v_receipt      text;
 begin
-  insert into draws(mode, results, line_user_id, line_display_name)
-  values (p_mode, p_results, p_line_user_id, p_line_display_name)
-  returning code into v_code;
-  return v_code;
-end;
-$$;
+  -- 伺服器端輸入校驗
+  if v_name = '' then
+    raise exception '請填寫姓名';
+  end if;
 
-grant execute on function save_draw to anon;
+  if length(v_name) > 60 then
+    raise exception '姓名長度不可超過 60 個字元';
+  end if;
 
-create or replace function create_booking(
-  p_draw_code text,
-  p_name text,
-  p_email text,
-  p_line_id text,
-  p_booking_date date,
-  p_main_concern text,
-  p_mood text,
-  p_question text,
-  p_note text
-) returns text
-language plpgsql
-security definer
-set search_path = public
-as $$
-declare
-  v_receipt text;
-begin
-  insert into bookings(draw_code, name, email, line_id, booking_date, main_concern, current_mood, question, note)
-  values (p_draw_code, p_name, p_email, p_line_id, p_booking_date, p_main_concern, p_mood, p_question, p_note)
+  if v_email is null and v_line_id is null then
+    raise exception '請至少填寫 Email 或 LINE ID 其中一項';
+  end if;
+
+  if v_email is not null and v_email !~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$' then
+    raise exception '請輸入正確格式的 Email 電子郵件信箱';
+  end if;
+
+  if p_booking_date is not null and p_booking_date < current_date then
+    raise exception '預約日期不能早於今天';
+  end if;
+
+  if v_draw_code is not null and not exists (select 1 from public.draws where code = v_draw_code) then
+    v_draw_code := null;
+  end if;
+
+  insert into public.bookings (
+    draw_code,
+    name,
+    email,
+    line_id,
+    booking_date,
+    main_concern,
+    current_mood,
+    question,
+    note,
+    status
+  ) values (
+    v_draw_code,
+    v_name,
+    v_email,
+    v_line_id,
+    p_booking_date,
+    v_main_concern,
+    v_mood,
+    v_question,
+    v_note,
+    '待處理'
+  )
   returning receipt_no into v_receipt;
+
   return v_receipt;
 end;
 $$;
 
-grant execute on function create_booking to anon;
+grant execute on function public.create_booking to anon, authenticated, service_role;
 
 -- ---------------------------------------------------------
 -- 5. Phase 3（管理後台）要用的查詢權限，先留著不用管：

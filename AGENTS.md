@@ -96,8 +96,9 @@ git log --oneline --decorate -n 10
 以下是 2026-08-18 稽核結果，開始修復前應重新確認現況，完成後更新或移除本節：
 
 - Production `main` 已移除 `experience_code` query 解鎖、第三方 QR、localStorage 自我解鎖及本機假體驗碼，並切換到安全抽卡交接 API。
-- Supabase 已套用 `secure_draw_handoff`、外鍵索引與 `set_draw_code` schema-qualified trigger migration；後端與前端已發布短效交接 token、LINE ID Token 驗證及唯讀就緒檢查。真實 LINE OA／LIFF 手機重測仍是完成交接路徑的必要條件。
-- 新流程正式驗證完成後，需另建 migration 撤銷 `anon`／`authenticated`／`public` 對舊 `save_draw` RPC 的執行權；不可在新後端上線前先撤銷，以免造成抽卡保存中斷。
-- Supabase 從 `20260818015900_admin_reception_delete_reset.sql` 開始建立 migration history；更早的 schema 仍以既有 SQL 腳本為基準，並非完整歷史。
-- Supabase 安全檢查仍有既有 SECURITY DEFINER、function search path 與 Auth 設定警告，未經授權不要擴大修正範圍。
-- GitHub `main` 尚未啟用 branch protection 或 required status checks。
+- Supabase 已套用 `secure_draw_handoff`、外鍵索引與 `set_draw_code` schema-qualified trigger migration；後端與前端已發布短效交接 token、LINE ID Token 驗證及唯讀就緒檢查。
+- 已建立 `20260827010025_retire_legacy_save_draw_rpc.sql` 正式撤銷 `anon`／`authenticated`／`public` 對舊 `save_draw` RPC 之權限並 drop 該函式；`supabase_schema.sql` 已同步移除舊 `save_draw`。
+- `create_booking` RPC 已完成伺服器端資料校驗（姓名長度限制、Email 格式、聯絡方式必填一項、禁止過去預約日期、字數限制）與資料表 Check Constraints。
+- Reception 後台（`static/admin.js`）已全面導入 `escapeHtml` 與 `sanitizeUrl`，杜絕 Stored XSS 漏洞。
+- 庫存同步 Edge Function（`sync-inventory`）已加入管理員 JWT 與 `admins` 白名單驗證，前端 `inventory.js` 同步改傳管理員 access token。
+- Supabase 從 `20260818015900_admin_reception_delete_reset.sql` 開始建立 migration history。

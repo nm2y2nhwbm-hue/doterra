@@ -59,6 +59,25 @@
     renderList();
   }
 
+  function escapeHtml(str){
+    if (str == null) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function sanitizeUrl(url){
+    if (!url) return '';
+    const clean = String(url).trim();
+    if (/^(https?:\/\/|\/|images\/)/i.test(clean)) {
+      return clean.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    return '';
+  }
+
   function renderList(){
     const kw = (searchInput.value || '').trim().toLowerCase();
     const statusWanted = statusFilter.value;
@@ -73,34 +92,49 @@
       return;
     }
 
-    bookingList.innerHTML = filtered.map(b => `
-      <div class="booking-card" data-receipt="${b.receipt_no}">
+    bookingList.innerHTML = filtered.map(b => {
+      const receipt = escapeHtml(b.receipt_no);
+      const name = escapeHtml(b.name || '');
+      const email = escapeHtml(b.email || '');
+      const lineId = escapeHtml(b.line_id || '');
+      const status = escapeHtml(b.status || '');
+      const mainConcern = escapeHtml(b.main_concern || '');
+      const currentMood = escapeHtml(b.current_mood || '');
+      const bookingDate = escapeHtml(b.booking_date || '');
+      const question = escapeHtml(b.question || '');
+      const note = escapeHtml(b.note || '');
+      const drawCode = escapeHtml(b.draw_code || '');
+      const createdAt = escapeHtml(new Date(b.created_at).toLocaleString('zh-TW'));
+
+      return `
+      <div class="booking-card" data-receipt="${receipt}">
         <div class="booking-card-head">
           <div>
-            <div class="booking-receipt">${b.receipt_no}</div>
-            <div class="booking-created">${new Date(b.created_at).toLocaleString('zh-TW')}</div>
+            <div class="booking-receipt">${receipt}</div>
+            <div class="booking-created">${createdAt}</div>
           </div>
-          <span class="status-badge ${statusClass(b.status)}">${b.status}</span>
+          <span class="status-badge ${statusClass(b.status)}">${status}</span>
         </div>
-        <div class="booking-row"><b>${b.name || ''}</b>${b.email ? ' · ' + b.email : ''}${b.line_id ? ' · LINE: ' + b.line_id : ''}</div>
-        ${b.main_concern ? `<div class="booking-row">主要困擾：${b.main_concern}</div>` : ''}
-        ${b.current_mood ? `<div class="booking-row">當下心情：${b.current_mood}</div>` : ''}
-        ${b.booking_date ? `<div class="booking-row">預約日期：${b.booking_date}</div>` : ''}
-        ${b.question ? `<div class="booking-row">諮詢問題：${b.question}</div>` : ''}
-        ${b.note ? `<div class="booking-row">補充說明：${b.note}</div>` : ''}
+        <div class="booking-row"><b>${name}</b>${email ? ' · ' + email : ''}${lineId ? ' · LINE: ' + lineId : ''}</div>
+        ${mainConcern ? `<div class="booking-row">主要困擾：${mainConcern}</div>` : ''}
+        ${currentMood ? `<div class="booking-row">當下心情：${currentMood}</div>` : ''}
+        ${bookingDate ? `<div class="booking-row">預約日期：${bookingDate}</div>` : ''}
+        ${question ? `<div class="booking-row">諮詢問題：${question}</div>` : ''}
+        ${note ? `<div class="booking-row">補充說明：${note}</div>` : ''}
         <div class="booking-actions">
-          <select class="form-input booking-status-select" data-receipt="${b.receipt_no}">
+          <select class="form-input booking-status-select" data-receipt="${receipt}">
             <option value="待處理" ${b.status === '待處理' ? 'selected' : ''}>待處理</option>
             <option value="已聯繫" ${b.status === '已聯繫' ? 'selected' : ''}>已聯繫</option>
             <option value="已完成" ${b.status === '已完成' ? 'selected' : ''}>已完成</option>
             <option value="取消" ${b.status === '取消' ? 'selected' : ''}>取消</option>
           </select>
-          ${b.draw_code ? `<button type="button" class="draw-toggle-btn" data-code="${b.draw_code}">查看抽牌結果 ▾</button>` : ''}
-          <button type="button" class="danger-action-btn delete-booking-btn" data-delete-receipt="${b.receipt_no}">刪除預約</button>
+          ${drawCode ? `<button type="button" class="draw-toggle-btn" data-code="${drawCode}">查看抽牌結果 ▾</button>` : ''}
+          <button type="button" class="danger-action-btn delete-booking-btn" data-delete-receipt="${receipt}">刪除預約</button>
         </div>
-        <div class="draw-detail" id="draw-detail-${b.draw_code || ''}" style="display:none;"></div>
+        <div class="draw-detail" id="draw-detail-${drawCode}" style="display:none;"></div>
       </div>
-    `).join('');
+    `;
+    }).join('');
 
     bookingList.querySelectorAll('.booking-status-select').forEach(sel => {
       sel.addEventListener('change', () => updateStatus(sel.dataset.receipt, sel.value));
@@ -201,14 +235,16 @@
     const draw = drawCache[code];
     const results = Array.isArray(draw.results) ? draw.results : [];
     el.style.display = 'block';
+    const mode = escapeHtml(draw.mode || '');
+    const createdAt = escapeHtml(new Date(draw.created_at).toLocaleString('zh-TW'));
     el.innerHTML = `
-      <div class="draw-detail-meta">模式 ${draw.mode}．${new Date(draw.created_at).toLocaleString('zh-TW')}</div>
+      <div class="draw-detail-meta">模式 ${mode}．${createdAt}</div>
       <div class="draw-detail-cards">
         ${results.map(r => `
           <div class="draw-detail-card">
-            <img src="${r.image_url}" alt="${r.card_name}">
-            <div class="ddc-label">${r.label}</div>
-            <div class="ddc-name">${r.card_name}</div>
+            <img src="${sanitizeUrl(r.image_url)}" alt="${escapeHtml(r.card_name)}">
+            <div class="ddc-label">${escapeHtml(r.label)}</div>
+            <div class="ddc-name">${escapeHtml(r.card_name)}</div>
           </div>`).join('')}
       </div>`;
   }
