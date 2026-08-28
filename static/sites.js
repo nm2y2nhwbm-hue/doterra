@@ -139,6 +139,22 @@
     container.appendChild(el);
   }
 
+  async function checkLineWebhook(){
+    const start = performance.now();
+    try {
+      const res = await fetchWithTimeout('https://doterra-73pv.onrender.com/health', {}, 6000);
+      const ms = Math.round(performance.now() - start);
+      if (!res.ok) return { level: 'bad', label: `HTTP ${res.status}`, detail: `${ms}ms（後端 Webhook 接收端異常）` };
+      return { 
+        level: 'ok', 
+        label: '接收伺服器在線 (Ready)', 
+        detail: `回應速度 ${ms}ms · 官方詳細統計與成功率請至 LINE Developers 後台查看` 
+      };
+    } catch (e) {
+      return { level: 'bad', label: '接收端點連線異常', detail: String(e.message || e) };
+    }
+  }
+
   async function runAllChecks(){
     sitesMsg.textContent = '檢查中……';
     vendorList.innerHTML = '';
@@ -147,14 +163,14 @@
     const vendorResults = await Promise.all(VENDORS.map(checkVendor));
     vendorResults.forEach(v => renderRow(vendorList, v.name, v.note, v, v.page));
 
-    const [frontend, backend, dbHealth, github] = await Promise.all([
-      checkFrontend(), checkBackend(), checkDbHealth(), checkGithub(),
+    const [frontend, backend, dbHealth, github, lineWebhook] = await Promise.all([
+      checkFrontend(), checkBackend(), checkDbHealth(), checkGithub(), checkLineWebhook(),
     ]);
     renderRow(projectList, '前端站點響應', '從後台發送請求至正式預約頁', frontend);
     renderRow(projectList, '後端 API 存活', 'Render 服務探測', backend);
     renderRow(projectList, '資料庫容量', 'pg_database_size', dbHealth.size);
     renderRow(projectList, '資料庫連線數', 'pg_stat_activity', dbHealth.conn);
-    renderRow(projectList, 'LINE Webhook 成功率', '尚未接上（需要後端記錄 log 才能統計）', { level: 'unknown', label: '尚無資料' });
+    renderRow(projectList, 'LINE Webhook 接收狀態', 'Render /callback 接收端點探測', lineWebhook, 'https://developers.line.biz/console/');
     renderRow(projectList, '當前生產版本', 'GitHub 最新 Commit', github);
 
     sitesMsg.textContent = '';
