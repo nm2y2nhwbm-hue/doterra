@@ -1,35 +1,7 @@
-﻿/* ==========================================================================
-   現代精油心靈指引卡 · 日式美學與 LINE Seed TW 旗艦樣式表 (style.css v12)
+/* ==========================================================================
+   現代精油心靈指引卡 · 日式美學與 LINE Seed TW 旗艦樣式表 (style.css v13)
+   字型已拆分為 fonts.css 非同步載入，實現秒開零阻斷
    ========================================================================== */
-
-@font-face {
-  font-family: 'LINESeedTW';
-  src: url('fonts/LINESeedTW_OTF_Th.woff2') format('woff2');
-  font-weight: 100 200;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'LINESeedTW';
-  src: url('fonts/LINESeedTW_OTF_Rg.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'LINESeedTW';
-  src: url('fonts/LINESeedTW_OTF_Bd.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'LINESeedTW';
-  src: url('fonts/LINESeedTW_OTF_Eb.woff2') format('woff2');
-  font-weight: 800;
-  font-style: normal;
-  font-display: swap;
-}
 
 :root {
   --paper: #F8F4EC;

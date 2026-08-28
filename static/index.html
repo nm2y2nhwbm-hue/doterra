@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
 <!-- Google tag (gtag.js) -->
@@ -41,18 +41,20 @@
 <meta name="theme-color" content="#355343">
 <link rel="icon" href="favicon.png?v=3" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="stylesheet" href="style.css?v=20">
+<link rel="stylesheet" href="style.css?v=21">
+<link rel="stylesheet" href="fonts.css?v=1" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="fonts.css?v=1"></noscript>
 </head>
 <body class="has-fixed-nav">
 
 <header class="site-nav">
   <div class="site-nav-inner">
-    <a href="index.html" class="site-nav-logo"><img src="images/logo-emblem.png?v=3" alt="雫之洞悉 · 返魂堂" class="site-nav-logo-img"><span>雫之洞悉 · 返魂堂</span></a>
+    <a href="index.html" class="site-nav-logo"><img src="images/logo-emblem.png?v=3" alt="雫之洞悉 · 返魂堂" class="site-nav-logo-img" width="28" height="28"><span>雫之洞悉 · 返魂堂</span></a>
     <nav class="site-nav-links">
       <a href="cards.html">線上抽牌</a>
       <a href="oils.html">精油圖鑑</a>
       <a href="#gift" id="nav-gift-link">貴賓禮盒</a>
-      <a href="#" id="home-guide-link">卡牌說明</a>
+      <a href="#about" id="home-guide-link" role="button" aria-label="卡牌說明">卡牌說明</a>
     </nav>
     <button class="site-nav-cta" id="nav-book-btn" type="button" onclick="location.href='booking.html'">立即預約</button>
   </div>
@@ -63,7 +65,7 @@
   <section class="home-hero">
     <div class="home-hero-text">
             <div class="hero-brand-header">
-        <img src="images/brand-logo-transparent.png?v=3" alt="雫之洞悉 · 返魂堂" class="hero-brand-logo">
+        <img src="images/brand-logo-transparent.png?v=3" alt="雫之洞悉 · 返魂堂" class="hero-brand-logo" width="220" height="74" fetchpriority="high">
       </div>
 <div class="home-kicker">雫之洞悉 · 返魂堂 · MODERN OIL ORACLE</div>
       <h1>停下來，<br>讓一張牌接住此刻的你</h1>
@@ -91,7 +93,7 @@
     </div>
     <div class="home-hero-visual">
       <div class="home-card-mock">
-        <div class="spark"><img src="images/logo-emblem.png?v=3" alt="雫" class="card-mock-emblem"></div>
+        <div class="spark"><img src="images/logo-emblem.png?v=3" alt="雫" class="card-mock-emblem" width="24" height="24" loading="lazy" decoding="async"></div>
         <div class="eyebrow">INSIGHT</div>
         <div class="title">洞悉</div>
         <div class="line">精油的氣息<br>照見此刻的訊息</div>
@@ -163,17 +165,17 @@
 
 <footer class="home-footer">
   <a href="admin.html" class="footer-logo-link" title="雫之洞悉 · 返魂堂" aria-label="雫之洞悉 · 返魂堂">
-    <img src="images/brand-logo-transparent.png?v=3" alt="雫之洞悉 · 返魂堂" class="footer-logo">
+    <img src="images/brand-logo-transparent.png?v=3" alt="雫之洞悉 · 返魂堂" class="footer-logo" width="180" height="60" loading="lazy" decoding="async">
   </a>
   <p>雫之洞悉 · 返魂堂 · 現代精油心靈指引卡</p>
   <p style="font-size:11px;opacity:0.75;margin:0;">MODERN OIL ORACLE</p>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase-client.js?v=1"></script>
-<script src="mode-catalog.js?v=1"></script>
-<script src="home.js?v=2"></script>
-<script src="guide-modal.js?v=1"></script>
-<script src="site-fixes.js?v=3"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script defer src="supabase-client.js?v=1"></script>
+<script defer src="mode-catalog.js?v=1"></script>
+<script defer src="home.js?v=2"></script>
+<script defer src="guide-modal.js?v=1"></script>
+<script defer src="site-fixes.js?v=3"></script>
 </body>
 </html>
