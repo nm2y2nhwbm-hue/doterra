@@ -85,6 +85,22 @@ def _parse_csv_with_encoding(csv_path: Path, encoding: str):
                 continue
             name_en = (row.get('name_en') or '').strip()
             image_filename = (row.get('image_filename') or '').strip()
+            # 安全解析價格數值（優先使用建議零售價）
+            price_val = 0
+            raw_price = (row.get('price') or row.get('price_retail') or '').strip()
+            if raw_price.isdigit():
+                price_val = int(raw_price)
+
+            retail_val = 0
+            raw_retail = (row.get('price_retail') or '').strip()
+            if raw_retail.isdigit():
+                retail_val = int(raw_retail)
+
+            member_val = 0
+            raw_member = (row.get('price_member') or '').strip()
+            if raw_member.isdigit():
+                member_val = int(raw_member)
+
             oils.append({
                 "id": (row.get('id') or '').strip(),
                 "name": name,
@@ -94,6 +110,15 @@ def _parse_csv_with_encoding(csv_path: Path, encoding: str):
                 "chakra": (row.get('chakra') or '').strip(),
                 "description": (row.get('description') or '').strip(),
                 "image_url": _build_image_url(name, name_en, image_filename),
+                "sku": (row.get('sku') or '').strip(),
+                "capacity": (row.get('capacity') or '').strip(),
+                "price": price_val,
+                "price_retail": retail_val or price_val,
+                "price_member": member_val,
+                "pillar": (row.get('pillar') or '').strip(),
+                "usage_tags": (row.get('usage_tags') or '').strip(),
+                "dilution_guide": (row.get('dilution_guide') or '').strip(),
+                "doctor_advice": (row.get('doctor_advice') or '').strip(),
             })
     return oils
 

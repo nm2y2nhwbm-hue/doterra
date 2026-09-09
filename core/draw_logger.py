@@ -4,7 +4,7 @@
 這是輕量級紀錄，非長期資料庫，如需長期保存建議之後接外部試算表或資料庫。
 """
 import csv
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 _THIS_FILE = Path(__file__).resolve()
@@ -24,14 +24,19 @@ def _ensure_header():
 def log_draw(user_id: str, display_name: str, mode: str, card_names: list):
     try:
         _ensure_header()
+        if isinstance(card_names, (list, tuple)):
+            clean_cards = '、'.join(str(c).strip() for c in card_names if c)
+        else:
+            clean_cards = str(card_names or '').strip()
+
         with open(_LOG_CSV, mode='a', encoding='utf-8-sig', newline='') as f:
             writer = csv.writer(f)
             writer.writerow([
-                datetime.utcnow().isoformat(),
-                user_id or '',
-                display_name or '',
-                mode or '',
-                '、'.join(card_names),
+                datetime.now(timezone.utc).isoformat(),
+                str(user_id or '')[:64],
+                str(display_name or '')[:64],
+                str(mode or '')[:32],
+                clean_cards[:500],
             ])
         return True
     except Exception as e:

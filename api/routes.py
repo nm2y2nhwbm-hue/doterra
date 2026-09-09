@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 Agent 1 負責範圍：後端 API 路由藍圖 (api/routes.py)
 包含健康檢查、精油與指示卡資料查詢、抽卡紀錄、體驗碼交接等核心端點。
@@ -27,18 +27,29 @@ def _handoff_error_response(error):
 
 
 def _request_client_ip():
-    forwarded_for = request.headers.get('X-Forwarded-For', '')
-    if forwarded_for:
-        client_ip = forwarded_for.split(',', 1)[0].strip()
-        if client_ip:
-            return client_ip[:64]
+    # 支援 Cloudflare、反向代理與 Render 轉發標頭
+    for header in ('CF-Connecting-IP', 'X-Real-IP', 'X-Forwarded-For'):
+        forwarded = request.headers.get(header, '')
+        if forwarded:
+            client_ip = forwarded.split(',', 1)[0].strip()
+            if client_ip:
+                return client_ip[:64]
     return (request.remote_addr or '')[:64]
 
 
 @api_bp.route("/health", methods=['GET'])
 def health():
     """後端伺服器存活與健康檢查端點。"""
-    return jsonify({"status": "ok", "service": "modern-oil-oracle-api"})
+    try:
+        oils_count = len(db.fetch_oils_data())
+    except Exception:
+        oils_count = 0
+    return jsonify({
+        "status": "ok",
+        "service": "modern-oil-oracle-api",
+        "version": "2.1.0",
+        "catalog_items": oils_count,
+    })
 
 
 @api_bp.route("/api/oils", methods=['GET'])

@@ -9,9 +9,6 @@ from linebot.models import MessageEvent, TextMessage
 
 from router import route_message
 from adapters.line_adapter import to_line_message
-from core import database_manager as db
-from core import draw_logger
-from core import experience_handoff
 
 if os.path.exists(".env"):
     try:
