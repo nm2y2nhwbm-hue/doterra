@@ -1,0 +1,66 @@
+name: Agent 3 Automated Quality & CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  python-tests:
+    name: 🐍 Python Backend & Catalog Integrity Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run Python Unit & Security & Catalog Tests
+        env:
+          CHANNEL_ACCESS_TOKEN: 'ci-token'
+          CHANNEL_SECRET: 'ci-secret'
+        run: |
+          python -m unittest tests/test_api_endpoints.py
+          python -m unittest tests/test_experience_handoff.py
+          python -m unittest tests/test_catalog_integrity.py
+
+      - name: Run Live Endpoint Smoke Probes (Production)
+        continue-on-error: true
+        run: |
+          python -m unittest tests/test_live_endpoints.py
+
+  node-tests:
+    name: ⬢ Node.js Frontend Components & Client Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Verify JavaScript Syntax (node --check)
+        run: |
+          node --check components/cart/cart.js
+          node --check static/supabase-client.js
+
+      - name: Run Supabase Client RPC Mock Tests
+        run: |
+          node tests/test_supabase_client.js
+
+      - name: Run Shopping Cart Logic & LocalStorage Unit Tests
+        run: |
+          node tests/test_cart_logic.js

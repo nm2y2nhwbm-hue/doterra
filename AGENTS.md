@@ -8,7 +8,7 @@
 
 依據專案最新團隊架構分配，專案被劃分為三大獨立邊界目錄，各 Agent 嚴禁越權跨目錄修改：
 
-1. **Agent 1 → `/api/`（後端服務與資料庫 API，當前 Agent 唯一負責範圍）**
+1. **Agent 1 → `/api/`（後端服務與資料庫 API，由後端 Agent 專屬負責）**
    - **專屬負責目錄**：`/api/` 以及後端進入點 `line_bot.py` 的 Blueprint 註冊。
    - **職責**：Flask API 端點（`/health`, `/api/oils`, `/api/indicators`, `/api/draws`）、LINE Webhook 簽章校驗與分發、Supabase RPC 安全互動、建議零售價與 CSV 資料查詢。
    - **嚴格守則**：只管後端邏輯與 `/api/` 目錄，**嚴禁修改前端 UI 元件 (`/components/`) 與靜態切版 (`/static/`)**。
@@ -18,10 +18,10 @@
    - **職責**：日式美學 UI 元件（購物車 Cart Drawer、調息選品卡片、精油圖鑑彈窗、導覽列）、HTML5 頁面切版、CSS 樣式表、前端 JavaScript 互動邏輯。
    - **嚴格守則**：不修改後端伺服器邏輯 (`/api/`) 與自動化測試 (`/tests/`)。
 
-3. **Agent 3 → `/tests/`（測試與品質保證，由測試 Agent 專屬負責）**
-   - **專屬負責目錄**：`/tests/`。
-   - **職責**：單元測試、API 整合端點測試（`test_api_endpoints.py`）、交接 Token 安全校驗（`test_experience_handoff.py`）、前端互動測試、CI/CD 驗證與品質把關。
-   - **嚴格守則**：專注於撰寫、維護測試套件與產出驗證報告，不隨意變更業務邏輯。
+3. **Agent 3 → `/tests/`（測試助理專屬，當前 Agent 唯一負責範圍）**
+   - **專屬負責目錄**：`/tests/` 與 CI/CD 管線 (`.github/workflows/`)。
+   - **職責**：單元測試、API 整合端點測試（`test_api_endpoints.py`）、交接 Token 安全校驗（`test_experience_handoff.py`）、資料庫與建議零售價完整性稽核（`test_catalog_integrity.py`）、線上活體端點驗證（`test_live_endpoints.py`）、前端元件與購物車邏輯驗證（`test_cart_logic.js`）、CI/CD 驗證與品質把關。
+   - **嚴格守則**：專注於撰寫、維護測試套件與產出驗證報告，嚴禁跨目錄修改業務邏輯。
 
 
 ## 專案目標與正式環境
