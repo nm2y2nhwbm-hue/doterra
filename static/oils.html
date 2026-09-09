@@ -250,7 +250,7 @@
           <th>商品編號 (SKU)</th>
           <th>產品名稱</th>
           <th>容量規格</th>
-          <th>多特瑞官方定價</th>
+          <th>建議零售價</th>
           <th>位格歸屬</th>
           <th>用法標籤</th>
           <th>塗抹建議</th>
@@ -400,7 +400,7 @@
           <td style="font-family:monospace; color:var(--sage);">${it.sku}</td>
           <td><b>${it.name}</b></td>
           <td><span style="font-size:11.5px;color:var(--forest-deep);background:var(--paper-deep);padding:3px 7px;border-radius:4px;font-weight:600;">${it.capacity || '15ml'}</span></td>
-          <td><b style="color:var(--forest-deep);font-size:13px;">NT$ ${(it.price || 980).toLocaleString()}</b><br><span style="font-size:10.5px;color:#8E867E;">零售 NT$ ${(it.price_retail || 1310).toLocaleString()}</span></td>
+          <td><b style="color:var(--forest-deep);font-size:13.5px;">NT$ ${(it.price || 1310).toLocaleString()}</b></td>
           <td><span class="card-pillar-tag ${it.pillar.includes('右柱') ? 'tag-mercy' : it.pillar.includes('左柱') ? 'tag-severity' : 'tag-balance'}">${it.pillar.split(' ')[0]}</span></td>
           <td>${it.usage_tags}</td>
           <td>${it.dilution_guide}</td>
@@ -432,10 +432,10 @@
       pEl.className = 'seal-pill ' + (c.pillar.includes('右柱') ? 'tag-mercy' : c.pillar.includes('左柱') ? 'tag-severity' : 'tag-balance');
 
       const capEl = document.getElementById('m-capacity');
-      if (capEl) capEl.textContent = `容量：${c.capacity || '15ml'}`;
+      if (capEl) capEl.textContent = `規格：${c.capacity || '15ml'}`;
 
       const priceEl = document.getElementById('m-price');
-      if (priceEl) priceEl.textContent = `會員價 NT$ ${(c.price || 980).toLocaleString()}`;
+      if (priceEl) priceEl.textContent = `建議售價 NT$ ${(c.price || 1310).toLocaleString()}`;
 
       document.getElementById('m-usage').textContent = c.usage_tags;
 
@@ -449,13 +449,13 @@
 
       const addBtn = document.getElementById('m-add-cart-btn');
       if (addBtn) {
-        addBtn.textContent = `＋ 加入調息清單 (NT$ ${(c.price || 980).toLocaleString()})`;
+        addBtn.textContent = `＋ 加入調息清單 (NT$ ${(c.price || 1310).toLocaleString()})`;
         addBtn.onclick = () => {
           if (window.ModernOilCart) {
             window.ModernOilCart.add({
               id: c.sku || c.name,
               name: c.name + (c.name_en ? ' (' + c.name_en + ')' : ''),
-              price: c.price || 980,
+              price: c.price || 1310,
               capacity: c.capacity || '15ml',
               pillar: c.pillar || '現代精油',
               image: c.image_filename ? `images/${c.image_filename}` : 'images/logo-emblem.png'
