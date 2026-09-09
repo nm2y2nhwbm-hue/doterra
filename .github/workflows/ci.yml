@@ -34,6 +34,7 @@ jobs:
           python -m unittest tests/test_api_endpoints.py
           python -m unittest tests/test_experience_handoff.py
           python -m unittest tests/test_catalog_integrity.py
+          python -m unittest tests/test_asset_integrity.py
 
       - name: Run Live Endpoint Smoke Probes (Production)
         continue-on-error: true
@@ -52,10 +53,9 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Verify JavaScript Syntax (node --check)
+      - name: Run Full JavaScript Syntax & Compilation Security Tests
         run: |
-          node --check components/cart/cart.js
-          node --check static/supabase-client.js
+          node tests/test_js_syntax.js
 
       - name: Run Supabase Client RPC Mock Tests
         run: |

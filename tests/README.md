@@ -14,6 +14,8 @@
 ### 2. 前端元件與狀態邏輯測試 (針對 Agent 2)
 * **`tests/test_cart_logic.js`**：檢驗 Agent 2 購物車模組（`components/cart/cart.js`）加入商品、數量增減（增至上限／減至 0 自動移除）、單筆移除、全單清空、LocalStorage 持久化存取與總金額精準加乘計算。
 * **`tests/test_supabase_client.js`**：檢驗前端與 Supabase RPC 串接、匿名防護與預約建立呼叫。
+* **`tests/test_asset_integrity.py`**：檢驗全站靜態資源完整性、69 款精油與 12 款指示卡實體圖檔 100% 存在、HTML 資源參照零 404 破圖、購物車元件與靜態發布目錄同步率、以及全站 8 大核心頁面 SEO 與 GA4 標籤。
+* **`tests/test_js_syntax.js`**：以 Node.js 執行全站 13 個 JavaScript 模組的靜態編譯與語法安全性檢測。
 
 ### 3. 線上正式環境端點活體探測與品質監測
 * **`tests/test_live_endpoints.py`**：
@@ -22,28 +24,26 @@
 
 ### 4. CI/CD 自動化管線 (`.github/workflows/ci.yml`)
 * 每次推送（`push`）或發起合併請求（`pull_request`）至 `main` 時，自動於 GitHub Actions 虛擬機啟動：
-  * **Python 3.12 測試作業**：安裝依賴並全量執行單元測試、資料庫合規測試與正式端點探測。
-  * **Node.js 20 測試作業**：執行語法靜態檢查（`node --check`）、Supabase 客戶端測試與購物車邏輯測試。
+  * **Python 3.12 測試作業**：安裝依賴並全量執行單元測試、資料庫合規測試、資產破圖檢測與正式端點探測。
+  * **Node.js 20 測試作業**：執行全量 JavaScript 靜態編譯檢驗、Supabase 客戶端測試與購物車邏輯測試。
 
 ---
 
 ## 🚀 本地測試執行指令
 
 ```bash
-# 1. 執行全量 Python 測試套件 (含 API、交接 Token、資料完整性、正式端點)
+# 1. 執行全量 Python 測試套件 (含 API、交接 Token、資料完整性、零破圖、正式端點)
 python -m unittest discover tests
 
 # 2. 執行個別 Python 測試模組
 python -m unittest tests/test_api_endpoints.py
 python -m unittest tests/test_experience_handoff.py
 python -m unittest tests/test_catalog_integrity.py
+python -m unittest tests/test_asset_integrity.py
 python -m unittest tests/test_live_endpoints.py
 
-# 3. 執行 Node.js 前端元件測試
+# 3. 執行 Node.js 前端元件與語法測試
 node tests/test_supabase_client.js
 node tests/test_cart_logic.js
-
-# 4. 執行前端 JavaScript 靜態語法檢查
-node --check components/cart/cart.js
-node --check static/supabase-client.js
+node tests/test_js_syntax.js
 ```
