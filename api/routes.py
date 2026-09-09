@@ -1,0 +1,99 @@
+﻿# -*- coding: utf-8 -*-
+"""
+Agent 1 負責範圍：後端 API 路由藍圖 (api/routes.py)
+包含健康檢查、精油與指示卡資料查詢、抽卡紀錄、體驗碼交接等核心端點。
+"""
+from flask import Blueprint, request, jsonify
+from core import database_manager as db
+from core import draw_logger
+from core import experience_handoff
+
+api_bp = Blueprint('api', __name__)
+
+
+def _no_store_json(payload, status=200):
+    response = jsonify(payload)
+    response.status_code = status
+    response.headers['Cache-Control'] = 'no-store'
+    response.headers['Pragma'] = 'no-cache'
+    return response
+
+
+def _handoff_error_response(error):
+    return _no_store_json({
+        "persisted": False,
+        "error": error.public_message,
+    }, error.status_code)
+
+
+def _request_client_ip():
+    forwarded_for = request.headers.get('X-Forwarded-For', '')
+    if forwarded_for:
+        client_ip = forwarded_for.split(',', 1)[0].strip()
+        if client_ip:
+            return client_ip[:64]
+    return (request.remote_addr or '')[:64]
+
+
+@api_bp.route("/health", methods=['GET'])
+def health():
+    """後端伺服器存活與健康檢查端點。"""
+    return jsonify({"status": "ok", "service": "modern-oil-oracle-api"})
+
+
+@api_bp.route("/api/oils", methods=['GET'])
+def api_oils():
+    """回傳 131 款精油自然醫學資料庫（含容量與建議零售價）。"""
+    return jsonify(db.fetch_oils_data())
+
+
+@api_bp.route("/api/indicators", methods=['GET'])
+def api_indicators():
+    """回傳 12 款指示卡資料庫。"""
+    return jsonify(db.fetch_indicator_cards())
+
+
+@api_bp.route("/api/log-draw", methods=['POST'])
+def api_log_draw():
+    """記錄抽卡事件（模式、抽中卡片與使用者資訊）。"""
+    data = request.get_json(silent=True) or {}
+    ok = draw_logger.log_draw(
+        user_id=data.get('user_id', ''),
+        display_name=data.get('display_name', ''),
+        mode=data.get('mode', ''),
+        card_names=data.get('cards', []),
+    )
+    return jsonify({"success": ok})
+
+
+@api_bp.route("/api/draws/health", methods=['GET'])
+def api_draws_health():
+    """抽卡交接服務健康探測。"""
+    payload, status = experience_handoff.get_readiness()
+    return _no_store_json(payload, status)
+
+
+@api_bp.route("/api/draws", methods=['POST'])
+def api_create_draw():
+    """建立抽卡紀錄並派發短效 Opaque Handoff Token。"""
+    data = request.get_json(silent=True) or {}
+    try:
+        fingerprint = experience_handoff.build_request_fingerprint(
+            _request_client_ip(),
+            request.headers.get('User-Agent', ''),
+        )
+        result = experience_handoff.create_draw(data, fingerprint)
+        return _no_store_json(result)
+    except experience_handoff.HandoffError as error:
+        return _handoff_error_response(error)
+
+
+@api_bp.route("/api/draws/redeem", methods=['POST'])
+def api_redeem_draw():
+    """LINE 用戶兌換並解鎖體驗碼。"""
+    data = request.get_json(silent=True) or {}
+    try:
+        result = experience_handoff.redeem_draw(data)
+        return _no_store_json(result)
+    except experience_handoff.HandoffError as error:
+        return _handoff_error_response(error)

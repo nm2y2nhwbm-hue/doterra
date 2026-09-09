@@ -75,91 +75,9 @@ def handle_message(event):
     line_bot_api.reply_message(event.reply_token, reply)
 
 
-@app.route("/health", methods=['GET'])
-def health():
-    return {"status": "ok"}
-
-
-@app.route("/api/oils", methods=['GET'])
-def api_oils():
-    """回傳 69 張精油卡的完整 JSON，供一頁式前端讀取。"""
-    return jsonify(db.fetch_oils_data())
-
-
-@app.route("/api/indicators", methods=['GET'])
-def api_indicators():
-    """回傳 12 張指示卡的完整 JSON，供模式 5 前端讀取。"""
-    return jsonify(db.fetch_indicator_cards())
-
-
-@app.route("/api/log-draw", methods=['POST'])
-def api_log_draw():
-    """
-    前端抽卡完成後呼叫，記錄「誰、何時、抽了哪個牌陣、抽到哪些卡」。
-    請求格式：{ "user_id": "...", "display_name": "...", "mode": "mode_1", "cards": ["檸檬", "玫瑰"] }
-    """
-    data = request.get_json(silent=True) or {}
-    ok = draw_logger.log_draw(
-        user_id=data.get('user_id', ''),
-        display_name=data.get('display_name', ''),
-        mode=data.get('mode', ''),
-        card_names=data.get('cards', []),
-    )
-    return jsonify({"success": ok})
-
-
-def _no_store_json(payload, status=200):
-    response = jsonify(payload)
-    response.status_code = status
-    response.headers['Cache-Control'] = 'no-store'
-    response.headers['Pragma'] = 'no-cache'
-    return response
-
-
-def _handoff_error_response(error):
-    return _no_store_json({
-        "persisted": False,
-        "error": error.public_message,
-    }, error.status_code)
-
-
-def _request_client_ip():
-    forwarded_for = request.headers.get('X-Forwarded-For', '')
-    if forwarded_for:
-        client_ip = forwarded_for.split(',', 1)[0].strip()
-        if client_ip:
-            return client_ip[:64]
-    return (request.remote_addr or '')[:64]
-
-
-@app.route("/api/draws/health", methods=['GET'])
-def api_draws_health():
-    payload, status = experience_handoff.get_readiness()
-    return _no_store_json(payload, status)
-
-
-@app.route("/api/draws", methods=['POST'])
-def api_create_draw():
-    data = request.get_json(silent=True) or {}
-    try:
-        fingerprint = experience_handoff.build_request_fingerprint(
-            _request_client_ip(),
-            request.headers.get('User-Agent', ''),
-        )
-        result = experience_handoff.create_draw(data, fingerprint)
-        return _no_store_json(result)
-    except experience_handoff.HandoffError as error:
-        return _handoff_error_response(error)
-
-
-@app.route("/api/draws/redeem", methods=['POST'])
-def api_redeem_draw():
-    data = request.get_json(silent=True) or {}
-    try:
-        result = experience_handoff.redeem_draw(data)
-        return _no_store_json(result)
-    except experience_handoff.HandoffError as error:
-        return _handoff_error_response(error)
+# 註冊 Agent 1 的後端 API 藍圖模組
+from api import api_bp
+app.register_blueprint(api_bp)
 
 
 if __name__ == "__main__":
