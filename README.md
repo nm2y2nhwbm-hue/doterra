@@ -1,17 +1,18 @@
-﻿# 現代精油心靈指引卡 · 雫之洞悉 · 返魂堂
-> **MODERN OIL ORACLE** —— 結合多特瑞純粹植物精油與日系塔羅直覺的 3 分鐘身心校準與自然醫學調息全書平台。
+# 現代精油心靈指引卡 · 雫之洞悉 · 返魂堂
+> **MODERN OIL ORACLE** —— 結合多特瑞純粹植物精油與日系塔羅直覺的 3 分鐘身心校準、自然醫學調息全書與五星 Agent 專業分工電商平台。
 
 [![Vercel Deployment](https://img.shields.io/badge/Vercel-READY-355343?logo=vercel&logoColor=white)](https://doterra-two.vercel.app/)
 [![Render Backend](https://img.shields.io/badge/Render-Online-22c55e?logo=render&logoColor=white)](https://doterra-73pv.onrender.com/health)
 [![Supabase Database](https://img.shields.io/badge/Supabase-Healthy-3ecf8e?logo=supabase&logoColor=white)](https://supabase.com/)
-[![PageSpeed Desktop](https://img.shields.io/badge/PageSpeed-95%2F100-brightgreen?logo=googlechrome&logoColor=white)](https://pagespeed.web.dev/analysis/https-doterra-two-vercel-app/)
+[![GitHub Actions CI](https://img.shields.io/badge/CI-Passing-brightgreen?logo=githubactions&logoColor=white)](https://github.com/nm2y2nhwbm-hue/doterra/actions)
+[![Agent Architecture](https://img.shields.io/badge/Architecture-5--Agent%20System-blueviolet)](AGENTS.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ---
 
 ## 📖 1. 專案名稱與一句話介紹
 
-**雫之洞悉 · 返魂堂（MODERN OIL ORACLE）** 是一套以日式款待美學（おもてなし）為核心打造的現代精油心靈互動系統。為繁忙的高壓現代人提供 3 分鐘身心自我校準儀式，無縫串聯 **LINE 官方帳號**、**LIFF 全螢幕抽卡**、**131 款自然醫學精油圖鑑**、**線上預約接待後台** 與 **雲端庫存儀表板**。
+**雫之洞悉 · 返魂堂（MODERN OIL ORACLE）** 是一套以日式款待美學（おもてなし）為核心打造的現代精油心靈互動系統。為繁忙的高壓現代人提供 3 分鐘身心自我校準儀式，無縫串聯 **LINE 官方帳號**、**LIFF 全螢幕抽卡**、**131 款自然醫學精油圖鑑**、**全站日式側滑購物車**、**線上預約接待後台**、**雲端庫存儀表板** 與 **五大 Agent 專業分工體系**。
 
 * **正式線上展示站**：[https://doterra-two.vercel.app/](https://doterra-two.vercel.app/)
 * **LINE 官方應用入口**：[https://miniapp.line.me/2010916161-HrIOEAda](https://miniapp.line.me/2010916161-HrIOEAda)
@@ -25,154 +26,199 @@
   * **🪞 鏡子（模式 1~5）**：照看當下·今日能量、生活導引、三牌陣（身心靈深度解析）、探索自我與單一指示牌。
   * **🌊 河流（模式 6~10）**：時間流動·月運勢、二選一決策與年度生命軌跡梳理。
   * **⛩️ 岔路（模式 11~12）**：十字路口·重大人生決策與深度心靈香氣解方。
+* 🛒 **全站日式側滑購物車 (Cart Drawer) 與選品商城**
+  * 日式極簡側滑抽屜體驗，支援數量增減、購物袋清空、商品移除與即時建議零售價總計。
+  * 採用 `localStorage` 本地狀態持久化管理，關閉網頁或跨頁切換不遺失選品。
+  * 一鍵將所選精油與禮盒資訊帶入貴賓預約表單進行結帳諮詢。
+* 🏷️ **多特瑞官方單一「建議零售價」與容量規格透明機制**
+  * 徹底去除雙軌定價疑惑，全站 131 款精油與 4 大禮盒全面採用台灣多特瑞官方單一「建議零售價」。
+  * 規格嚴格落實多特瑞官方標準（15ml / 5ml / 10ml 滾珠 / 115ml 基底油）。
+  * 首頁 4 大禮盒（鏡子組 NT$1,845、河流組 NT$1,965、岔路組 NT$4,895、客製滾珠油 NT$1,040）容量與價值精準對等。
 * 🌿 **131 款「精油圖鑑 · 自然醫學調息全書」**
-  * 完整收錄 131 款純粹單方與複方精油，依「臣、使、佐」三大身心位格、性味歸經與調息處方箋速查。
+  * 完整收錄 131 款純粹單方與複方精油，依「中柱、右柱、左柱」三大身心位格、性味歸經與調息處方箋速查。
   * 嚴格落實法規合規，以「自然醫學調息」取代宣稱療效的醫療診斷語彙。
 * 📲 **LINE 官方帳號與 LIFF 原生無縫整合**
   * 圖文選單點選文字即時辨識，後台回傳帶直跳按鈕之 Flex Message 卡片。
   * 支援短效 Opaque Handoff 憑證，防止體驗碼於 URL 或前台被篡改偽造。
-* 💎 **貴賓一對一調息禮盒預約系統**
-  * 整合線上預約表單，自動生成專屬流水受付編號（如 REC-20260901-0001）。
-  * 伺服器端嚴格校驗防重複提交、防惡意連點，保障名單安全。
 * 🛡️ **頂級資安防禦與權限架構**
-  * **Stored XSS 防禦**：管理後台對預約人姓名、Email、LINE ID、備註等輸入欄位全面採用純文字實體編碼跳脫。
-  * **Edge Function 白名單驗證**：庫存同步函式嚴格校驗管理員 JWT 與資料表白名單，防止非授權竄改。
+  * **反向代理真實 IP 辨識**：支援 Cloudflare 與 Render 多層代理標頭防偽。
+  * **Stored XSS 防禦**：管理後台對預約人欄位全面採用純文字實體編碼跳脫。
+  * **Edge Function 白名單驗證**：庫存同步函式嚴格校驗管理員 JWT 與資料表白名單。
 * 📊 **行動友善日式管理後台**
-  * **受付處（eception.html）**：預約清單、受付編號檢索、抽牌明細展開與處理狀態管理。
+  * **受付處（reception.html）**：預約清單、受付編號檢索、抽牌明細展開與處理狀態管理。
   * **庫存儀表板（inventory.html）**：瓶數即時統計、60 天效期預警、相機掃描條碼與 Google 試算表雙向同步。
   * **站點監控中心（sites.html）**：GitHub、Render、Vercel、Supabase 與 LINE Webhook 全站健康探測。
-* ⚡ **PageSpeed 95+ 極速效能體驗**
-  * 日系旗艦字型（LINESeedTW）零阻斷非同步載入架構。
-  * 高解析圖片 85% 深度壓縮、尺寸嚴格標註，達成 0.000 累積版面位移（CLS）。
 
 ---
 
-## 🛠️ 3. 技術架構
+## 🏛️ 3. 五大 Agent 專業分工體系 (Five-Agent Architecture)
+
+專案全面落實目錄級三權分立與五星專業分工，嚴禁越權跨目錄修改：
+
+| 代理人角色 | 專屬目錄 | 職責與管轄範圍 |
+| :--- | :--- | :--- |
+| 🛡️ **Agent 1（後端工程師）** | [`/api/`](api/) | API 路由藍圖（`/health`, `/api/oils`, `/api/draws`）、LINE Webhook 簽章驗證、Supabase RPC 安全互動 |
+| 🎨 **Agent 2（前端切版工程師）** | [`/components/`](components/) | 日式 UI 元件庫（側滑購物車 Drawer、首頁選品、圖鑑彈窗）、CSS 樣式表、發布目錄 [`/static/`](static/) |
+| 🧪 **Agent 3（品管與測試工程師）** | [`/tests/`](tests/) | 34+ 自動化測試套件、CI/CD 管線（`.github/workflows/`）、活體端點監控、零破圖與語法檢驗 |
+| 📦 **Agent 4（商品與文案主編）** | [`/catalog/`](catalog/) | 131 款精油資料庫母體（`doterra.csv`）、單一建議零售價審查、自然醫學文案合規、同步工具（`sync_catalog.py`） |
+| 💳 **Agent 5（維運與金流工程師）** | [`/infra/`](infra/) | 自訂獨立頂級網域 DNS 解析配置、Vercel / Render 規格、綠界 ECPay / LINE Pay 第三方線上金流架構 |
+
+---
+
+## 🛠️ 4. 技術架構
 
 | 層級 | 使用技術 | 說明 |
 | :--- | :--- | :--- |
-| **前端 (Frontend)** | HTML5, Vanilla JavaScript (ES6+), CSS3 | 日式和紙侘寂風客製化樣式、CSS Variables、非同步字型載入、無第三方肥大框架負擔 |
-| **後端 (Backend)** | Python 3.8+, Flask, LineBotSDK, Gunicorn | 處理 LINE Webhook、事件路由、安全 Hand-off 抽卡交接與公開唯讀資料 API |
-| **邊緣運算 (Edge)** | Deno, Supabase Edge Functions | sync-inventory 實現 Google 試算表自動彙總與庫存同步 |
+| **前端 (Frontend)** | HTML5, Vanilla JavaScript (ES6+), CSS3 | 日式和紙侘寂風客製化樣式、LINESeedTW 官方字型、0.000 CLS 累積版面位移 |
+| **後端 (Backend)** | Python 3.8+, Flask, Blueprint, LineBotSDK, Gunicorn | 模組化 API 藍圖、LINE Webhook 路由分發、短效 Opaque Token 防刷加密 |
+| **商品母體 (Catalog)** | CSV, JSON 雙向同步 | `doterra.csv` 建議零售價與容量規範，自動編譯為前端高速 JSON |
+| **維運金流 (Infra)** | DNS CNAME, ECPay, LINE Pay, SSL | 自訂網域解析指南、第三方金流閘道器架構與多雲配置 |
+| **測試品質 (QA/CI)** | Python unittest, GitHub Actions, Node.js | 34 項自動化測試套件、持續整合 CI/CD 工作流、線上活體探測 |
 | **資料庫 (Database)** | Supabase (PostgreSQL 15+) | RLS（Row Level Security）、SECURITY DEFINER 安全 RPC 函式、Check Constraints 約束 |
-| **部署託管 (Cloud)** | Vercel, Render | Vercel 託管靜態前端與邊緣快取；Render 託管 Python 後端 Web 服務 |
-| **整合協定 (Protocols)** | LINE Messaging API, LIFF (LINE Front-end Framework), GA4 | LINE 雙向通訊、全螢幕抽卡容器、Google Analytics 4 流量數據分析 |
+| **雲端部署 (Cloud)** | Vercel, Render | Vercel 託管靜態前端與邊緣快取；Render 託管 Python 後端 Web 服務 |
 
 ---
 
-## 🚀 4. 安裝與本地啟動
+## 🚀 5. 安裝、測試與本地啟動
 
 ### 步驟 1：複製專案
-`ash
+```bash
 git clone https://github.com/nm2y2nhwbm-hue/doterra.git
 cd doterra
-`
+```
 
-### 步驟 2：安裝後端依賴套件
-建議使用虛擬環境（env 或 conda）：
-`ash
+### 步驟 2：安裝依賴套件
+```bash
 python -m venv venv
-# Windows 啟動虛擬環境:
+# Windows:
 venv\Scripts\activate
-# macOS / Linux 啟動虛擬環境:
+# macOS / Linux:
 source venv/bin/activate
 
 pip install -r requirements.txt
-`
+```
 
 ### 步驟 3：設定環境變數
-在專案根目錄建立 .env 檔案（請勿將包含金鑰的檔案提交至 Git）：
-`env
+在專案根目錄建立 `.env` 檔案：
+```env
 CHANNEL_ACCESS_TOKEN="你的_LINE_CHANNEL_ACCESS_TOKEN"
 CHANNEL_SECRET="你的_LINE_CHANNEL_SECRET"
 SUPABASE_URL="https://your-project.supabase.co"
 SUPABASE_SERVICE_ROLE_KEY="your-supabase-service-role-key"
-`
+```
 
-### 步驟 4：啟動本機伺服器
-* **啟動 Python 後端 Webhook 服務**：
-  `ash
+### 步驟 4：執行完整自動化測試（Agent 3）
+```bash
+# 執行全套 34 項單元與整合測試
+python -m unittest discover tests
+```
+
+### 步驟 5：商品資料庫同步（Agent 4）
+```bash
+# 每次修改 doterra.csv 後，編譯同步至前端 JSON
+python catalog/sync_catalog.py
+```
+
+### 步驟 6：啟動本機伺服器
+* **啟動後端服務（Agent 1）**：
+  ```bash
   python line_bot.py
-  # 伺服器將於 http://localhost:5000 啟動，探測路徑：http://localhost:5000/health
-  `
-* **啟動前端靜態預覽**：
-  `ash
-  # 使用 Python 內建伺服器預覽 static 目錄
+  # 健康檢查探測：http://localhost:5000/health
+  # 精油資料庫：http://localhost:5000/api/oils
+  ```
+* **啟動前端靜態預覽（Agent 2）**：
+  ```bash
   python -m http.server 8000 -d static
   # 瀏覽器造訪：http://localhost:8000/
-  `
+  ```
 
 ---
 
-## 📁 5. 資料夾結構說明
+## 📁 6. 資料夾結構說明
 
-`	ext
+```text
 doterra/
-├── adapters/                  # 介面轉接層
-│   └── line_adapter.py        # 將核心邏輯結果轉換為 LINE Flex Message 卡片
+├── .github/workflows/         # 🧪 Agent 3: GitHub Actions CI/CD 自動化工作流
+├── adapters/                  # 介面轉接層（LINE Flex Message 卡片轉譯）
+│   └── line_adapter.py
+├── api/                       # 🛡️ Agent 1: 後端 API 藍圖模組
+│   ├── README.md              # Agent 1 守則與 API 協議
+│   ├── __init__.py            # 匯出 api_bp 藍圖
+│   └── routes.py              # 全站 API 路由（/health, /api/oils, /api/draws）
+├── catalog/                   # 📦 Agent 4: 商品母體與內容審定目錄
+│   ├── README.md              # Agent 4 定價容量與合規守則
+│   └── sync_catalog.py        # 商品資料庫自動同步腳本
+├── components/                # 🎨 Agent 2: 前端 UI 元件庫
+│   ├── README.md              # Agent 2 元件規範
+│   └── cart/                  # 日式側滑購物車（cart.css, cart.js）
 ├── core/                      # 系統核心商業邏輯
-│   ├── card_deck.py           # 69 張精油卡與 12 張指示卡資料庫核心
-│   ├── database_manager.py    # 資料讀取與 CSV 聚合處理
-│   ├── draw_logger.py         # 抽卡歷史紀錄與統計
-│   └── experience_handoff.py  # 安全抽卡交接 Token 與防偽機制
-├── static/                    # 前端靜態網站根目錄（Vercel 部署目標）
-│   ├── index.html             # 官網首頁（Hero 區、3 欄牌陣介紹、安心承諾、預約表單）
-│   ├── cards.html             # 線上抽卡主工具頁面（支援 12 種模式與 LIFF 容器）
-│   ├── oils.html              # 精油圖鑑 · 自然醫學調息全書（131 款精油與搜尋篩選）
-│   ├── booking.html           # 貴賓調息禮盒一對一正式預約表單
-│   ├── admin.html             # 後台管理入口首頁（4 大模組導航與登入守門）
-│   ├── reception.html         # 受付與抽牌紀錄（預約名單、狀態更新、明細展開）
-│   ├── inventory.html         # 精油庫存管理（條碼掃描、Google 試算表同步）
-│   ├── sites.html             # 站點健康監測中心（Render, Vercel, LINE Webhook 探測）
-│   ├── style.css              # 日式極簡美學核心樣式表
-│   ├── fonts.css              # LINESeedTW 字型非同步載入樣式
-│   ├── script.js              # 抽卡流程、動畫與體驗碼主控制器
-│   ├── supabase-client.js     # 前端 Supabase Client 初始化與 RPC 包裝
-│   ├── images/                # 品牌 Logo、水墨紋樣與卡牌圖檔
-│   └── fonts/                 # LINESeedTW 繁體中文 WebFont 檔案
-├── supabase/                  # 資料庫遷移腳本與 Edge Functions
-│   ├── supabase_schema.sql    # 完整資料表結構、RLS 策略與 RPC 函式定義
-│   ├── migrations/            # 版本化資料庫遷移紀錄（依時間戳命名）
-│   └── functions/             # Supabase Edge Functions (sync-inventory)
-├── AGENTS.md                  # AI 協同開發與品質稽核規範指引
-├── doterra.csv                # 131 款現代精油核心資料庫（性味歸經、位格、調息箋）
+│   ├── database_manager.py    # 17 欄位精油母體安全讀取
+│   ├── draw_logger.py         # 抽卡歷程安全日誌
+│   └── experience_handoff.py  # 短效加密 Token 與 LINE 身分校驗
+├── infra/                     # 💳 Agent 5: 維運與金流整合目錄
+│   ├── README.md              # Agent 5 多雲與資安守則
+│   ├── dns_custom_domain.md   # 自訂頂級網域 DNS 解析指南
+│   └── payment_gateway_blueprint.md # 綠界 / LINE Pay 金流串接架構
+├── static/                    # 🎨 Agent 2: 正式發布靜態目錄（Vercel 部署目標）
+│   ├── index.html             # 官網首頁（含調息選品商城）
+│   ├── cards.html             # 12 牌陣線上抽卡主頁
+│   ├── oils.html              # 精油圖鑑 · 自然醫學調息全書
+│   ├── booking.html           # 貴賓一對一預約表單
+│   ├── reception.html         # 受付與抽牌紀錄後台
+│   ├── inventory.html         # 精油庫存儀表板
+│   ├── sites.html             # 站點健康監測中心
+│   ├── oils-catalog.json      # 131 款建議零售價高速 JSON
+│   ├── images/                # 品牌 Logo、卡牌與選品圖檔
+│   └── fonts/                 # LINESeedTW 繁體中文 WebFont
+├── supabase/                  # 資料庫 SQL 遷移紀錄與 Edge Functions
+├── tests/                     # 🧪 Agent 3: 全套自動化測試目錄
+│   ├── README.md              # 測試指南與執行命令
+│   ├── test_api_endpoints.py  # 後端 API 狀態碼與欄位測試
+│   ├── test_asset_integrity.py# 全站靜態資產零破圖檢驗
+│   ├── test_cart_logic.js     # 側滑購物車 LocalStorage 運算測試
+│   ├── test_catalog_integrity.py # 建議零售價與自然醫學法規合規測試
+│   ├── test_experience_handoff.py# 短效 Token 加密防禦測試
+│   └── test_live_endpoints.py # 線上生產環境活體探測
+├── AGENTS.md                  # 五大 Agent 職責邊界與開發憲法
+├── doterra.csv                # 131 款現代精油核心資料庫（建議零售價、官方容量）
 ├── indicator_cards.csv        # 12 款指示卡元資料
-├── line_bot.py                # 後端 Flask Webhook 主程式入口
-├── router.py                  # LINE 訊息文字意圖解析與分發路由
-├── requirements.txt           # Python 套件清單
-└── vercel.json                # Vercel 安全標頭與路由配置
-`
+├── line_bot.py                # 後端 Flask Webhook 主程式進入點
+└── router.py                  # LINE 訊息文字意圖解析與分發路由
+```
 
 ---
 
-## ❓ 6. 常見問題 (FAQ)
+## ❓ 7. 常見問題 (FAQ)
 
-### Q1：為什麼在 LINE 點擊圖文選單時，能瞬間跳轉對應牌陣？
-> 本系統採用「雙重偵測與即時直跳路由」機制：  
-> 1. 用戶點擊選單發送關鍵字（如 【🪞 鏡子 1~5】）時，outer.py 即時回傳帶有專屬 Category 參數的 LIFF 連結。  
-> 2. 首頁 <head> 第一行內建 User-Agent 偵測，若在 LINE App 內直接點開網址，會在 0.05 秒內無感重新導向至卡牌頁面，跳過行銷首頁直接開抽。
+### Q1：為什麼精油圖鑑與禮盒價格全面改為「單一建議零售價」？
+> 為消滅過去雙軌定價（會員價／零售價標示不清）產生的困惑，全站 131 款精油與首頁 4 大禮盒全面對等台灣多特瑞官方之「單一建議零售價」，提供最透明、無爭議的消費與預約體驗。
 
 ### Q2：抽牌後的「體驗碼」如何防止偽造或外流？
 > 系統廢棄了早期的 URL 參數傳遞體驗碼（experience_code），全面改採 **短效 Opaque Handoff 機制**：  
 > 抽卡完成後只在伺服器端產生一組加密雜湊的短效憑證（有效期限 600 秒），使用者必須透過 LINE 登入／LIFF 驗證其真實身分後，才能解鎖並兌換真正的體驗碼。
 
-### Q3：後台點擊「全部歸零」出現 DELETE requires a WHERE clause 該如何解決？
-> 這是因為 Supabase / PostgreSQL 啟用了 safeupdate 安全擴充套件，強制所有 DELETE 語句必須包含條件式。  
-> 請確認已套用最新遷移腳本 20260828131800_fix_admin_reset_reception_where_clause.sql，該版本已在 RPC 函式內加入 WHERE true 並宣告 SECURITY DEFINER，即可安全執行全表歸零。
+### Q3：如何新增或修改精油資料？
+> 任何精油資料異動由 **Agent 4** 專責：  
+> 1. 編輯 `doterra.csv`（注意容量必須為 15ml / 5ml / 10ml 滾珠 / 115ml，價格必須為建議零售價正整數）。  
+> 2. 執行 `python catalog/sync_catalog.py` 完成前端 JSON 編譯。  
+> 3. 執行 `python -m unittest tests/test_catalog_integrity.py` 驗收法規合規性。
 
-### Q4：網站文案與圖鑑內容是否有合規風險？
+### Q4：網站文案與圖鑑內容是否有法規合規風險？
 > 全站文案與 131 款精油處方箋，皆已嚴格依據台灣相關法規進行合規校正：全面去除「治療、抗炎、療效、處方」等具醫療診斷暗示之用語，統一代換為 **「自然醫學調息箋」、「身心校準」、「撫慰調適」**，兼顧專業深度與法律合規。
+
+### Q5：五大 Agent 體系如何避免代碼衝突？
+> 透過 [`AGENTS.md`](AGENTS.md) 嚴格定義目錄管轄邊界（`/api/`, `/components/`, `/tests/`, `/catalog/`, `/infra/`）。每位 Agent 僅能在專屬目錄下作業，無論在多分支平行開發或 AI 協同作業時，代碼衝突率均為 0%。
 
 ---
 
-## 🤝 7. 貢獻與授權條款 (Contributing & License)
+## 🤝 8. 貢獻與授權條款 (Contributing & License)
 
 ### 如何參與貢獻
 1. **Fork 本專案** 至個人 GitHub 帳號。
-2. 建立功能分支（git checkout -b feature/amazing-feature）。
-3. 遵循 AGENTS.md 規範進行開發，並執行語法與安全性檢查。
-4. 提交 Commit（git commit -m 'feat: 新增特定牌陣支援'）。
-5. 推送至分支（git push origin feature/amazing-feature）並發起 **Pull Request**。
+2. 建立功能分支（`git checkout -b feature/amazing-feature`）。
+3. 遵循 [`AGENTS.md`](AGENTS.md) 規範進行開發，並執行語法與安全性檢查。
+4. 提交 Commit（`git commit -m 'feat: 新增特定牌陣支援'`）。
+5. 推送至分支（`git push origin feature/amazing-feature`）並發起 **Pull Request**。
 
 ### 授權條款 (License)
 本專案採 **MIT License** 授權開源，詳細條款請參閱根目錄之 [LICENSE](LICENSE) 檔案。  
