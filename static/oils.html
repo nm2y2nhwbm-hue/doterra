@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
 <!-- Google tag (gtag.js) -->
@@ -17,6 +17,7 @@
   <link rel="icon" href="favicon.png?v=3" type="image/png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
   <link rel="stylesheet" href="style.css?v=20">
+  <link rel="stylesheet" href="cart.css?v=1">
 <link rel="stylesheet" href="fonts.css?v=1" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="fonts.css?v=1"></noscript>
   <style>
@@ -295,7 +296,10 @@
         <div><b style="color:var(--forest-deep);">🧘 脈輪對應：</b><span id="m-chakra">--</span></div>
       </div>
 
-      <a href="booking.html" class="modal-book-cta">預約一對一調配 · 體驗此守護油處方 →</a>
+      <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
+        <button type="button" id="m-add-cart-btn" class="modal-book-cta" style="background:var(--forest-deep);border:1px solid var(--gold-accent);flex:1;cursor:pointer;min-width:180px;">＋ 加入調息清單 (NT$ 1,200)</button>
+        <a href="booking.html" class="modal-book-cta" style="flex:1.2;min-width:200px;">預約一對一調配處方 →</a>
+      </div>
     </div>
   </div>
 
@@ -431,6 +435,22 @@
       document.getElementById('m-guidance').textContent = c.guidance || c.description;
       document.getElementById('m-chakra').textContent = c.chakra ? c.chakra : '心輪';
 
+      const addBtn = document.getElementById('m-add-cart-btn');
+      if (addBtn) {
+        addBtn.onclick = () => {
+          if (window.ModernOilCart) {
+            window.ModernOilCart.add({
+              id: c.sku || c.name,
+              name: c.name + (c.name_en ? ' (' + c.name_en + ')' : ''),
+              price: 1200,
+              capacity: '15ml',
+              pillar: c.pillar || '現代精油',
+              image: c.image_filename ? `images/${c.image_filename}` : 'images/logo-emblem.png'
+            }, 1);
+          }
+        };
+      }
+
       document.getElementById('insight-modal').classList.add('active');
     }
 
@@ -438,5 +458,6 @@
       document.getElementById('insight-modal').classList.remove('active');
     }
   </script>
+  <script defer src="cart.js?v=1"></script>
 </body>
 </html>

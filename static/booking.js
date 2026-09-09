@@ -21,6 +21,15 @@
     drawCodeNote.textContent = `已帶入你的抽牌體驗碼：${drawCode}`;
   }
 
+  const concernParam = params.get('concern');
+  if (concernParam && document.getElementById('f-concern')) {
+    document.getElementById('f-concern').value = concernParam;
+  }
+  const noteParam = params.get('note');
+  if (noteParam && document.getElementById('f-note')) {
+    document.getElementById('f-note').value = noteParam;
+  }
+
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     formMsg.textContent = '';

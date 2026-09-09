@@ -42,6 +42,7 @@
 <link rel="icon" href="favicon.png?v=3" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="stylesheet" href="style.css?v=21">
+<link rel="stylesheet" href="cart.css?v=1">
 <link rel="stylesheet" href="fonts.css?v=1" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="fonts.css?v=1"></noscript>
 </head>
@@ -53,10 +54,16 @@
     <nav class="site-nav-links">
       <a href="cards.html">線上抽牌</a>
       <a href="oils.html">精油圖鑑</a>
+      <a href="#shop">調息選品</a>
       <a href="#gift" id="nav-gift-link">貴賓禮盒</a>
       <a href="#about" id="home-guide-link" role="button" aria-label="卡牌說明">卡牌說明</a>
     </nav>
-    <button class="site-nav-cta" id="nav-book-btn" type="button" onclick="location.href='booking.html'">立即預約</button>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button class="nav-cart-link site-nav-cta" type="button" style="background:transparent;border:1px solid var(--gold-accent,#C5A059);color:var(--forest-deep,#253B2F);padding:7px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;" aria-label="查看調息購物清單">
+        🛒<span class="nav-cart-count" style="display:none;background:var(--gold-accent,#C5A059);color:#1A1A1A;border-radius:10px;padding:1px 6px;font-size:11px;font-weight:700;">0</span>
+      </button>
+      <button class="site-nav-cta" id="nav-book-btn" type="button" onclick="location.href='booking.html'">立即預約</button>
+    </div>
   </div>
 </header>
 
@@ -153,6 +160,76 @@
     <div class="category-row" id="home-category-row"></div>
   </section>
 
+  <section class="home-section" id="shop">
+    <div class="home-section-title">調息香氣選品 · 現代精油逸品</div>
+    <p style="text-align:center;font-size:0.9rem;color:var(--text-sub,#6B645C);margin-top:-14px;margin-bottom:28px;">依三大牌陣與生命位格精心調配，將抽牌時觸動身心的植物能量帶回日常</p>
+    <div class="shop-grid">
+      <!-- 商品 1 -->
+      <div class="shop-card">
+        <span class="shop-card-badge">🪞 鏡子對應</span>
+        <div class="shop-card-img-wrap">
+          <img src="images/logo-emblem.png?v=3" alt="鏡子 · 當下覺察調息禮盒" class="shop-card-img" style="object-fit:contain;padding:24px;">
+        </div>
+        <div class="shop-card-title">【鏡子】當下覺察調息禮盒</div>
+        <div class="shop-card-desc">柑橘清新與岩蘭草深層安定的雙重協奏，附心靈肯定小語卡。專注於照看當下、舒緩現代人緊繃思緒。</div>
+        <div class="shop-card-foot">
+          <div class="shop-card-price">NT$ 1,680 <span>/ 組</span></div>
+          <button type="button" class="shop-add-btn" data-add-cart data-cart-item='{"id":"SET-MIRROR-01","name":"【鏡子】當下覺察調息禮盒","price":1680,"capacity":"15ml×2","pillar":"中柱 · 平衡","image":"images/logo-emblem.png"}'>
+            <span>＋ 加入清單</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 商品 2 -->
+      <div class="shop-card">
+        <span class="shop-card-badge">🌊 河流對應</span>
+        <div class="shop-card-img-wrap">
+          <img src="images/logo-emblem.png?v=3" alt="河流 · 時間軌跡梳理禮盒" class="shop-card-img" style="object-fit:contain;padding:24px;">
+        </div>
+        <div class="shop-card-title">【河流】時間軌跡梳理禮盒</div>
+        <div class="shop-card-desc">高山雪松與迷迭香草本複方，陪伴梳理人生階段與時間流動，為關鍵轉折點帶來清晰明朗的洞察力。</div>
+        <div class="shop-card-foot">
+          <div class="shop-card-price">NT$ 1,980 <span>/ 組</span></div>
+          <button type="button" class="shop-add-btn" data-add-cart data-cart-item='{"id":"SET-RIVER-02","name":"【河流】時間軌跡梳理禮盒","price":1980,"capacity":"15ml×2","pillar":"右柱 · 慈悲","image":"images/logo-emblem.png"}'>
+            <span>＋ 加入清單</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 商品 3 -->
+      <div class="shop-card">
+        <span class="shop-card-badge">⛩️ 岔路對應</span>
+        <div class="shop-card-img-wrap">
+          <img src="images/logo-emblem.png?v=3" alt="岔路 · 重大抉擇守護禮盒" class="shop-card-img" style="object-fit:contain;padding:24px;">
+        </div>
+        <div class="shop-card-title">【岔路】重大抉擇守護禮盒</div>
+        <div class="shop-card-desc">神聖乳香與大馬士革玫瑰珍稀調合，於人生十字路口賦予堅定不移的決斷勇氣，以及接納未知的溫柔底氣。</div>
+        <div class="shop-card-foot">
+          <div class="shop-card-price">NT$ 2,280 <span>/ 組</span></div>
+          <button type="button" class="shop-add-btn" data-add-cart data-cart-item='{"id":"SET-CROSS-03","name":"【岔路】重大抉擇守護禮盒","price":2280,"capacity":"15ml×2","pillar":"左柱 · 嚴厲","image":"images/logo-emblem.png"}'>
+            <span>＋ 加入清單</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 商品 4 -->
+      <div class="shop-card">
+        <span class="shop-card-badge">💎 芳療客製</span>
+        <div class="shop-card-img-wrap">
+          <img src="images/logo-emblem.png?v=3" alt="雫之洞悉 · 專屬位格滾珠精油" class="shop-card-img" style="object-fit:contain;padding:24px;">
+        </div>
+        <div class="shop-card-title">【客製】專屬位格滾珠精油 10ml</div>
+        <div class="shop-card-desc">由專業芳療師依照您在線上抽牌的專屬位格與調息箋，親手調配的隨身守護滾珠油，隨時隨地香氣調息。</div>
+        <div class="shop-card-foot">
+          <div class="shop-card-price">NT$ 980 <span>/ 瓶</span></div>
+          <button type="button" class="shop-add-btn" data-add-cart data-cart-item='{"id":"CUSTOM-ROLLER-10","name":"【客製】專屬位格滾珠精油","price":980,"capacity":"10ml","pillar":"位格特調","image":"images/logo-emblem.png"}'>
+            <span>＋ 加入清單</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="home-section" id="gift">
     <div class="home-section-title">貴賓體驗禮盒</div>
     <div class="home-feature-grid">
@@ -177,5 +254,6 @@
 <script defer src="home.js?v=2"></script>
 <script defer src="guide-modal.js?v=1"></script>
 <script defer src="site-fixes.js?v=3"></script>
+<script defer src="cart.js?v=1"></script>
 </body>
 </html>
