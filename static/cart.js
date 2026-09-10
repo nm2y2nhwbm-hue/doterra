@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 雫之洞悉 · 返魂堂 · 全站購物車與商品邏輯 (cart.js)
  */
 (function() {
@@ -43,6 +43,7 @@
       }
       this.save(items);
       showToast(`已將「${product.name}」加入調息清單`);
+      triggerCartBounce();
     },
     remove(id) {
       let items = this.get();
@@ -89,11 +90,34 @@
   }
 
   // 建立抽屜與懸浮按鈕 DOM
-  let drawerEl, backdropEl, badgeEl, listEl, totalEl, checkoutBtn;
+  let floatBtn, drawerEl, backdropEl, badgeEl, listEl, totalEl, checkoutBtn;
+
+  function triggerCartBounce() {
+    if (floatBtn && floatBtn.classList) {
+      floatBtn.classList.remove('bounce');
+      if (typeof floatBtn.offsetWidth !== 'undefined') {
+        void floatBtn.offsetWidth;
+      }
+      floatBtn.classList.add('bounce');
+      setTimeout(() => {
+        if (floatBtn && floatBtn.classList) floatBtn.classList.remove('bounce');
+      }, 700);
+    }
+    if (badgeEl && badgeEl.classList) {
+      badgeEl.classList.remove('pop');
+      if (typeof badgeEl.offsetWidth !== 'undefined') {
+        void badgeEl.offsetWidth;
+      }
+      badgeEl.classList.add('pop');
+      setTimeout(() => {
+        if (badgeEl && badgeEl.classList) badgeEl.classList.remove('pop');
+      }, 400);
+    }
+  }
 
   function initUI() {
     // 1. 懸浮按鈕
-    const floatBtn = document.createElement('button');
+    floatBtn = document.createElement('button');
     floatBtn.className = 'floating-cart-btn';
     floatBtn.setAttribute('type', 'button');
     floatBtn.setAttribute('aria-label', '查看調息購物清單');
@@ -166,6 +190,36 @@
         closeDrawer();
       }
     });
+
+    // 行動版向右輕滑關閉抽屜手勢 (Swipe-to-Dismiss)
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchDiffX = 0;
+
+    drawerEl.addEventListener('touchstart', (e) => {
+      if (!drawerEl.classList.contains('open') || !e.touches || !e.touches[0]) return;
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      touchDiffX = 0;
+    }, { passive: true });
+
+    drawerEl.addEventListener('touchmove', (e) => {
+      if (!drawerEl.classList.contains('open') || !e.touches || !e.touches[0]) return;
+      const currentX = e.touches[0].clientX;
+      const currentY = e.touches[0].clientY;
+      const dx = currentX - touchStartX;
+      const dy = Math.abs(currentY - touchStartY);
+      if (dx > 0 && dx > dy) {
+        touchDiffX = dx;
+      }
+    }, { passive: true });
+
+    drawerEl.addEventListener('touchend', () => {
+      if (touchDiffX > 60) {
+        closeDrawer();
+      }
+      touchDiffX = 0;
+    }, { passive: true });
 
     // 導覽列若有 .nav-cart-btn 也一併綁定
     document.querySelectorAll('.nav-cart-link').forEach(btn => {

@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    雫之洞悉 · 返魂堂 · 日式款待全站側滑購物車樣式表 (cart.css)
    ========================================================================== */
 
@@ -26,6 +26,19 @@
   box-shadow: 0 12px 30px rgba(37, 59, 47, 0.38);
   border-color: #E2C785;
 }
+.floating-cart-btn:active {
+  transform: scale(0.92);
+}
+@keyframes cartBounce {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.18) rotate(-6deg); }
+  50% { transform: scale(0.96) rotate(4deg); }
+  75% { transform: scale(1.06) rotate(-2deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+.floating-cart-btn.bounce {
+  animation: cartBounce 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
 .floating-cart-btn svg {
   width: 24px;
   height: 24px;
@@ -52,6 +65,14 @@
 }
 .cart-badge-count.show {
   display: block;
+}
+@keyframes badgePulse {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.25); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.cart-badge-count.pop {
+  animation: badgePulse 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* 購物車遮罩 */
@@ -121,6 +142,9 @@
 .cart-close-btn:hover {
   color: var(--forest-deep, #253B2F);
   background: var(--paper-deep, #ECE3D2);
+}
+.cart-close-btn:active {
+  transform: scale(0.9);
 }
 
 /* 購物車內容清單 */
@@ -211,6 +235,10 @@
 .cart-qty-btn:hover {
   background: var(--paper-deep, #ECE3D2);
 }
+.cart-qty-btn:active {
+  transform: scale(0.88);
+  background: var(--paper-deep, #ECE3D2);
+}
 .cart-qty-val {
   min-width: 24px;
   text-align: center;
@@ -229,10 +257,13 @@
   cursor: pointer;
   padding: 4px;
   line-height: 1;
-  transition: color 0.2s ease;
+  transition: color 0.2s ease, transform 0.15s ease;
 }
 .cart-item-del:hover {
   color: #C24136;
+}
+.cart-item-del:active {
+  transform: scale(0.85);
 }
 
 /* 購物車為空狀態 */
@@ -309,6 +340,10 @@
   background: var(--forest, #355343);
   transform: translateY(-2px);
   box-shadow: 0 6px 18px rgba(37, 59, 47, 0.25);
+}
+.cart-checkout-btn:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 2px 8px rgba(37, 59, 47, 0.2);
 }
 .cart-clear-link {
   display: block;
@@ -461,4 +496,78 @@
 .shop-add-btn:hover {
   background: var(--forest, #355343);
   transform: translateY(-1px);
+}
+.shop-add-btn:active {
+  transform: translateY(1px) scale(0.95);
+}
+
+/* ==========================================================================
+   行動版體驗與觸控最佳化 (Mobile UX & Safe Area Insets)
+   ========================================================================== */
+@media (max-width: 600px) {
+  .floating-cart-btn {
+    bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+    right: 18px;
+    width: 52px;
+    height: 52px;
+  }
+  .cart-drawer {
+    width: 100vw;
+  }
+  .cart-drawer-header {
+    padding: calc(16px + env(safe-area-inset-top, 0px)) 18px 14px;
+  }
+  .cart-close-btn {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    border-radius: 50%;
+  }
+  .cart-drawer-body {
+    padding: 16px 18px;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  .cart-drawer-footer {
+    padding: 16px 18px calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+  .cart-qty-ctrl {
+    border-radius: 6px;
+  }
+  .cart-qty-btn {
+    width: 34px;
+    height: 34px;
+    font-size: 16px;
+    touch-action: manipulation;
+  }
+  .cart-qty-val {
+    min-width: 28px;
+    font-size: 13px;
+  }
+  .cart-item-del {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    top: 4px;
+    right: 4px;
+  }
+  .cart-toast {
+    left: 16px;
+    right: 16px;
+    bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+    text-align: center;
+    justify-content: center;
+    font-size: 0.82rem;
+    padding: 10px 14px;
+  }
+  .shop-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
 }
