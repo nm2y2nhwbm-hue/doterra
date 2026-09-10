@@ -81,23 +81,33 @@ class TestSecurityAndComplianceAudit(unittest.TestCase):
             cart_code = cart_js.read_text(encoding="utf-8")
             has_cart_escape = "escapeHtml" in cart_code
 
-        # 記錄於測試警告輸出中，督促 Agent 2 儘速落實
-        if not has_inventory_escape:
-            print("[WARN][Agent 3 照妖鏡警報] static/inventory.js 尚未導入 escapeHtml，存在 Stored XSS 漏洞！")
-        if not has_cart_escape:
-            print("[WARN][Agent 3 照妖鏡警報] components/cart/cart.js 尚未對 item.name / image 導入 escapeHtml！")
-
-
-        # 當前版本暫不 assertFail 以免阻斷 CI，但記錄為已知待修復安全項目
-        self.assertTrue(inventory_js.exists() and cart_js.exists())
+        # 嚴格斷言：確認 Agent 2 已完成全站 XSS 實體轉義與 URL 安全過濾
+        self.assertTrue(has_inventory_escape, "static/inventory.js 必須包含 escapeHtml 轉義函式！")
+        self.assertTrue(has_cart_escape, "components/cart/cart.js 必須包含 escapeHtml 轉義函式！")
+        self.assertIn("sanitizeUrl", inv_code, "static/inventory.js 必須包含 sanitizeUrl 函式！")
+        self.assertIn("sanitizeUrl", cart_code, "components/cart/cart.js 必須包含 sanitizeUrl 函式！")
 
     def test_keep_warm_configuration_safety(self):
-        """保溫服務安全檢測：確認 keep_warm 具備自適應 SERVER_BASE_URL 機制"""
+        """保溫服務安全檢測：確認 keep_warm 預設使用 Render 外部 Ingress 網址維持活躍流量"""
         from core import keep_warm
         status = keep_warm.get_warm_status()
         self.assertIn("status", status)
         self.assertIn("service", status)
         self.assertEqual(status["status"], "warm")
+
+        # 檢驗保溫探測目標絕非內部 127.0.0.1，必須穿透外部 Ingress
+        target_url = keep_warm._resolve_target_url()
+        self.assertFalse("127.0.0.1" in target_url, "keep_warm 探測目標不可為 127.0.0.1，否則無法維持 Render 喚醒！")
+        self.assertTrue(target_url.startswith("https://") or target_url.startswith("http://"))
+
+    def test_payment_manager_supabase_persistence(self):
+        """金流資料持久化檢驗：確認 OrderStore 具備 Supabase 雙寫與重啟恢復能力 (Finding 0.1 根治驗證)"""
+        from core import payment_manager
+        # 驗證具備 Supabase 憑證探測、雙寫同步與記憶體冷啟動檢索函式
+        self.assertTrue(hasattr(payment_manager, "_sync_order_to_supabase"))
+        self.assertTrue(hasattr(payment_manager, "_fetch_order_from_supabase"))
+        self.assertTrue(hasattr(payment_manager, "_supabase_credentials"))
+
 
     def test_payment_manager_idempotency_contract(self):
         """金流安全合約：確認已支付訂單具備 1|OK 冪等防護"""
