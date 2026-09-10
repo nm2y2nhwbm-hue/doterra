@@ -38,3 +38,9 @@ htmlcov/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Tool & Runtime Data
+.gemini/
+draw_logs.csv
+core/data/
+

@@ -3,10 +3,11 @@
 Agent 1 負責範圍：後端 API 路由藍圖 (api/routes.py)
 包含健康檢查、精油與指示卡資料查詢、抽卡紀錄、體驗碼交接等核心端點。
 """
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, Response
 from core import database_manager as db
 from core import draw_logger
 from core import experience_handoff
+from core import payment_manager
 
 api_bp = Blueprint('api', __name__)
 
@@ -47,7 +48,7 @@ def health():
     return jsonify({
         "status": "ok",
         "service": "modern-oil-oracle-api",
-        "version": "2.1.0",
+        "version": "2.2.0",
         "catalog_items": oils_count,
     })
 
@@ -108,3 +109,45 @@ def api_redeem_draw():
         return _no_store_json(result)
     except experience_handoff.HandoffError as error:
         return _handoff_error_response(error)
+
+
+# =========================================================================
+# 💳 第三方金流（綠界 ECPay / LINE Pay）API 路由
+# =========================================================================
+
+@api_bp.route("/api/payments/create", methods=['POST'])
+def api_create_payment():
+    """建立付款訂單（強制伺服器端重算金額並產出金流表單參數）"""
+    data = request.get_json(silent=True) or {}
+    try:
+        client_ip = _request_client_ip()
+        result = payment_manager.create_payment_order(data, client_ip=client_ip)
+        return _no_store_json(result, 201)
+    except payment_manager.PaymentValidationError as error:
+        return _no_store_json({"success": False, "error": error.message}, error.status_code)
+    except Exception as e:
+        return _no_store_json({"success": False, "error": "伺服器內部錯誤"}, 500)
+
+
+@api_bp.route("/api/payments/ecpay/callback", methods=['POST'])
+def api_ecpay_callback():
+    """綠界 ECPay 異步背景通知回調（Server-to-Server）"""
+    form_data = request.form.to_dict()
+    if not form_data:
+        form_data = request.get_json(silent=True) or {}
+    try:
+        response_text = payment_manager.process_ecpay_callback(form_data)
+        return Response(response_text, mimetype='text/plain')
+    except (payment_manager.PaymentSignatureError, payment_manager.PaymentValidationError) as error:
+        return f"0|{error.message}", 400
+    except Exception as e:
+        return "0|Internal Error", 500
+
+
+@api_bp.route("/api/payments/status/<order_id>", methods=['GET'])
+def api_payment_status(order_id):
+    """查詢訂單付款狀態"""
+    status_info = payment_manager.get_order_status(order_id)
+    if not status_info:
+        return _no_store_json({"success": False, "error": "查無此訂單"}, 404)
+    return _no_store_json({"success": True, "order": status_info})
