@@ -104,15 +104,17 @@ git log --oneline --decorate -n 10
 
 ## 驗證規則
 
-本 repo 目前沒有統一的自動化測試套件。依修改範圍執行可用檢查並如實回報未能執行的項目：
+專案已全面導入 **Testing Depth 2.0 深度自動化測試矩陣**（由 Agent 3 專責統籌），涵蓋 L1 語法層至 L6 統一調度層。提交前依規範執行檢查：
 
-- 所有變更至少執行 `git diff --check` 並檢視 `git diff --stat` 與完整 diff。
-- JavaScript 修改後，若環境有 Node.js，對變更的 `.js` 檔執行 `node --check <file>`。
-- Python 修改後，使用與 Render 相容的 Python 環境做語法／import 檢查；缺少 runtime 或 secrets 時不要假裝通過。
-- HTML/CSS/瀏覽器流程修改後，至少檢查首頁、`cards.html`、`booking.html` 及受影響後台頁。
-- LINE／LIFF 修改必須分別驗證一般瀏覽器與 LINE App；只檢查 DOM 不算完整 end-to-end 驗證。
-- Admin / reception 修改需驗證未登入不顯示資料，並在有授權測試帳號時驗證 session、admin 白名單、列表讀取與狀態更新。
-- Production URL 或監測設定修改後，確認 `static/sites.js` 以 `https://doterra-two.vercel.app/booking.html` 作為正式 booking URL。
+- **一鍵全量深度測試**：執行 `python tests/run_all_tests.py`，驗收全量 12 大深度測試套件（100% 綠燈）。
+- **Git 完整性檢查**：所有變更執行 `git diff --check` 並檢視 `git diff --stat` 與完整 diff。
+- **JavaScript 語法檢查**：`node tests/test_js_syntax.js`（遞迴掃描全站 18 個 JS 腳本 AST 語法）。
+- **資安與法規邊界檢查**：`python -m unittest tests/test_security_audit.py`（XSS 轉義、雙寫持久化與自然醫學合規）。
+- **Python 後端與金流檢查**：`python -m unittest tests/test_api_endpoints.py` 與 `python -m unittest tests/test_payment_api.py`。
+- **HTML/CSS/瀏覽器流程修改後**：至少檢查首頁、`cards.html`、`booking.html`、`oils.html` 及受影響後台頁。
+- **LINE／LIFF 修改**：必須分別驗證一般瀏覽器與 LINE App 雙環境，確認防回音攔截與自動回傳順暢。
+- **Admin / reception / inventory 修改**：驗證未登入不顯示資料，登入後資料完全經由 `escapeHtml` 轉義防範 Stored XSS。
+- **Production URL 或監測設定修改後**：確認 `static/sites.js` 以 `https://doterra-two.vercel.app/booking.html` 作為正式 booking URL。
 
 ## Git 與發布規則
 
@@ -123,12 +125,10 @@ git log --oneline --decorate -n 10
 
 ## 目前已知待處理事項
 
-以下是 2026-08-18 稽核結果，開始修復前應重新確認現況，完成後更新或移除本節：
+以下是 2026-09-10 稽核與整改結果，開始工作前應重新確認現況：
 
-- Production `main` 已移除 `experience_code` query 解鎖、第三方 QR、localStorage 自我解鎖及本機假體驗碼，並切換到安全抽卡交接 API。
-- Supabase 已套用 `secure_draw_handoff`、外鍵索引與 `set_draw_code` schema-qualified trigger migration；後端與前端已發布短效交接 token、LINE ID Token 驗證及唯讀就緒檢查。
-- 已建立 `20260827010025_retire_legacy_save_draw_rpc.sql` 正式撤銷 `anon`／`authenticated`／`public` 對舊 `save_draw` RPC 之權限並 drop 該函式；`supabase_schema.sql` 已同步移除舊 `save_draw`。
-- `create_booking` RPC 已完成伺服器端資料校驗（姓名長度限制、Email 格式、聯絡方式必填一項、禁止過去預約日期、字數限制）與資料表 Check Constraints。
-- Reception 後台（`static/admin.js`）已全面導入 `escapeHtml` 與 `sanitizeUrl`，杜絕 Stored XSS 漏洞。
-- 庫存同步 Edge Function（`sync-inventory`）已加入管理員 JWT 與 `admins` 白名單驗證，前端 `inventory.js` 同步改傳管理員 access token。
-- Supabase 從 `20260818015900_admin_reception_delete_reset.sql` 開始建立 migration history。
+- **LINE OA 抽卡防回音死循環**：已由 Agent 1 在 `router.py` 最前置攔截 `DRAW_RESULT_KEYWORDS`（體驗碼、INSIGHT-、牌陣結果）直接靜默返回 `None`；Agent 2 於 `script.js` 實現自動回傳與防手震；Agent 3 建立正反向控制整合測試（`test_line_webhook_echo_loop_prevention`）。
+- **金流訂單 Supabase 雙寫持久化**：Agent 1 於 `core/payment_manager.py` 實裝 `_sync_order_to_supabase` 與 `_fetch_order_from_supabase`，訂單建立與付款狀態自動雙寫遠端 PostgreSQL，根除 Render 免費實例容器休眠臨時磁碟清空導致之掉單問題。
+- **全站 XSS 實體轉義完備**：Agent 2 於 `static/inventory.js`、`components/cart/cart.js`、`static/cart.js` 全面導入 `escapeHtml` 與 `sanitizeUrl`；Agent 3 於 `test_security_audit.py` 實施永久強制斷言。
+- **外部 Ingress 活躍保溫**：Agent 1 將 `core/keep_warm.py` 探測 fallback 提升為 Render 外部 Ingress 網址（`https://doterra-73pv.onrender.com/health`），真實穿透負載平衡器消除 15 分鐘冷啟動。
+- **Testing Depth 2.0 全面落實**：全站具備 12 大深度自動化測試套件（78+ 項斷言）、統一調度器 `tests/run_all_tests.py` 與 GitHub Actions CI/CD 雙環境自動化管線。

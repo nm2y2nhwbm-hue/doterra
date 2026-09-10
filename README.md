@@ -59,7 +59,7 @@
 | :--- | :--- | :--- |
 | 🛡️ **Agent 1（後端工程師）** | [`/api/`](api/) | API 路由藍圖（`/health`, `/api/oils`, `/api/draws`）、LINE Webhook 簽章驗證、Supabase RPC 安全互動 |
 | 🎨 **Agent 2（前端切版工程師）** | [`/components/`](components/) | 日式 UI 元件庫（側滑購物車 Drawer、首頁選品、圖鑑彈窗）、CSS 樣式表、發布目錄 [`/static/`](static/) |
-| 🧪 **Agent 3（品管與測試工程師）** | [`/tests/`](tests/) | 34+ 自動化測試套件、CI/CD 管線（`.github/workflows/`）、活體端點監控、零破圖與語法檢驗 |
+| 🧪 **Agent 3（品管與測試工程師）** | [`/tests/`](tests/) | 12 大深度自動化測試套件（Testing Depth 2.0）、CI/CD 管線（`.github/workflows/`）、活體端點監控、零破圖與語法檢驗 |
 | 📦 **Agent 4（商品與文案主編）** | [`/catalog/`](catalog/) | 131 款精油資料庫母體（`doterra.csv`）、單一建議零售價審查、自然醫學文案合規、同步工具（`sync_catalog.py`） |
 | 💳 **Agent 5（維運與金流工程師）** | [`/infra/`](infra/) | 自訂獨立頂級網域 DNS 解析配置、Vercel / Render 規格、綠界 ECPay / LINE Pay 第三方線上金流架構 |
 
@@ -73,8 +73,9 @@
 | **後端 (Backend)** | Python 3.8+, Flask, Blueprint, LineBotSDK, Gunicorn | 模組化 API 藍圖、LINE Webhook 路由分發、短效 Opaque Token 防刷加密 |
 | **商品母體 (Catalog)** | CSV, JSON 雙向同步 | `doterra.csv` 建議零售價與容量規範，自動編譯為前端高速 JSON |
 | **維運金流 (Infra)** | DNS CNAME, ECPay, LINE Pay, SSL | 自訂網域解析指南、第三方金流閘道器架構與多雲配置 |
-| **測試品質 (QA/CI)** | Python unittest, GitHub Actions, Node.js | 34 項自動化測試套件、持續整合 CI/CD 工作流、線上活體探測 |
+| **測試品質 (QA/CI)** | Python unittest, GitHub Actions, Node.js | 12 大深度測試套件矩陣（Testing Depth 2.0，78+ 項斷言）、持續整合 CI/CD 工作流、線上活體探測 |
 | **資料庫 (Database)** | Supabase (PostgreSQL 15+) | RLS（Row Level Security）、SECURITY DEFINER 安全 RPC 函式、Check Constraints 約束 |
+
 | **雲端部署 (Cloud)** | Vercel, Render | Vercel 託管靜態前端與邊緣快取；Render 託管 Python 後端 Web 服務 |
 
 ---
@@ -171,14 +172,23 @@ doterra/
 │   ├── images/                # 品牌 Logo、卡牌與選品圖檔
 │   └── fonts/                 # LINESeedTW 繁體中文 WebFont
 ├── supabase/                  # 資料庫 SQL 遷移紀錄與 Edge Functions
-├── tests/                     # 🧪 Agent 3: 全套自動化測試目錄
-│   ├── README.md              # 測試指南與執行命令
-│   ├── test_api_endpoints.py  # 後端 API 狀態碼與欄位測試
-│   ├── test_asset_integrity.py# 全站靜態資產零破圖檢驗
-│   ├── test_cart_logic.js     # 側滑購物車 LocalStorage 運算測試
-│   ├── test_catalog_integrity.py # 建議零售價與自然醫學法規合規測試
-│   ├── test_experience_handoff.py# 短效 Token 加密防禦測試
-│   └── test_live_endpoints.py # 線上生產環境活體探測
+├── tests/                     # 🧪 Agent 3: 全套自動化測試目錄 (Testing Depth 2.0)
+│   ├── README.md              # 測試指南、階梯架構與執行指令
+│   ├── QA_COLLABORATION_MEMO.md # 跨 Agent 品質稽核與資安通報備忘錄
+│   ├── run_all_tests.py       # 雙環境全量一鍵測試調度器
+│   ├── test_api_endpoints.py  # 後端 API、防偽邊界與防回音測試
+│   ├── test_payment_api.py    # 綠界 / LINE Pay 金流防偽強制重算測試
+│   ├── test_security_audit.py # 全站資安照妖鏡、XSS 轉義與自然醫學法規測試
+│   ├── test_experience_handoff.py# 短效 Token 加密與防刷邊界測試
+│   ├── test_catalog_integrity.py # 建議零售價與官方規格完整性測試
+│   ├── test_catalog_sync.py   # 目錄 CSV/JSON 1:1 精準映射測試
+│   ├── test_asset_integrity.py# 全站靜態資產零破圖與日式美學規範測試
+│   ├── test_live_endpoints.py # 線上生產環境活體探測
+│   ├── test_js_syntax.js      # 全站 18 個 JS 模組 AST 語法編譯測試
+│   ├── test_cart_logic.js     # 側滑購物車狀態單元測試
+│   ├── test_cart_integration.js # 購物車與預約結帳合約整合測試
+│   └── test_supabase_client.js# 前端 RPC 客戶端安全測試
+
 ├── AGENTS.md                  # 五大 Agent 職責邊界與開發憲法
 ├── doterra.csv                # 131 款現代精油核心資料庫（建議零售價、官方容量）
 ├── indicator_cards.csv        # 12 款指示卡元資料
