@@ -1,0 +1,60 @@
+<!-- 
+  雫之洞悉 · 返魂堂 · 精油圖鑑自然醫學調息彈窗元件 (components/oils-catalog/insight-modal.html)
+  131 款精油圖鑑 Modal、三大位格印章與自然醫學調息箋展開
+-->
+<div id="insight-modal" class="insight-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="m-name" aria-hidden="true">
+  <div class="insight-card-container">
+    <button type="button" class="insight-close-btn" id="insight-close-btn" aria-label="關閉彈窗">&times;</button>
+    
+    <div class="insight-header">
+      <img id="m-art" class="insight-art" src="images/logo-emblem.png" alt="精油卡牌圖鑑">
+      <div class="insight-title-block">
+        <div id="m-sku" class="insight-sku">SKU: --</div>
+        <h2 id="m-name" class="insight-main-title">--</h2>
+        <div id="m-en" class="insight-en-title">--</div>
+        
+        <!-- 三大位格印章與用法規格 -->
+        <div class="seal-row" id="m-seals">
+          <span id="m-pillar" class="seal-pill tag-balance">中柱 · 平衡</span>
+          <span id="m-capacity" class="seal-pill seal-capacity">規格：15ml</span>
+          <span id="m-price" class="seal-pill seal-price">建議售價 NT$ 1,310</span>
+          <span id="m-usage" class="seal-pill seal-usage">A T I</span>
+          <span id="m-safety" class="seal-safety safety-direct">🌿 直塗可</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 自然醫學調息箋 -->
+    <div class="doctor-prescription-box">
+      <div class="prescription-title">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M12 2v20M2 12h20"/>
+        </svg>
+        <span>自然醫學建議 · 性味調息指引</span>
+      </div>
+      <div id="m-doctor" class="prescription-content">主調和身心、平衡能量。</div>
+    </div>
+
+    <!-- 心靈指引與脈輪對應 -->
+    <div class="insight-meta-box">
+      <div class="insight-meta-row">
+        <b class="insight-meta-label">🌿 心靈指引：</b>
+        <span id="m-guidance">--</span>
+      </div>
+      <div class="insight-meta-row">
+        <b class="insight-meta-label">🧘 脈輪對應：</b>
+        <span id="m-chakra">--</span>
+      </div>
+    </div>
+
+    <!-- 款待行動按鈕列 -->
+    <div class="insight-actions-row">
+      <button type="button" id="m-add-cart-btn" class="modal-cart-cta">
+        <span>＋ 加入調息清單</span>
+      </button>
+      <a href="booking.html" class="modal-book-cta">
+        <span>預約一對一調配處方 →</span>
+      </a>
+    </div>
+  </div>
+</div>

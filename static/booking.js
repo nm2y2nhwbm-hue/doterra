@@ -6,6 +6,10 @@
   const formMsg = document.getElementById('booking-form-msg');
   const bookingDateInput = document.getElementById('f-date');
 
+  function escapeHtml(s) {
+    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
   function localDateString(){
     const now = new Date();
     const offset = now.getTimezoneOffset() * 60000;
@@ -29,6 +33,61 @@
   if (noteParam && document.getElementById('f-note')) {
     document.getElementById('f-note').value = noteParam;
   }
+
+  // 日式調息逸品奉呈卡 (Cart Summary Banner)
+  const cartBanner = document.getElementById('cart-summary-banner');
+  const cartCountEl = document.getElementById('csb-item-count');
+  const cartListEl = document.getElementById('csb-items-list');
+  const cartTotalEl = document.getElementById('csb-total-amount');
+
+  function initCartSummary() {
+    let cartItems = [];
+    try {
+      const raw = localStorage.getItem('modern_oil_cart');
+      if (raw) {
+        cartItems = JSON.parse(raw);
+      }
+    } catch (e) {
+      console.warn('[Booking] 解析購物車暫存失敗', e);
+    }
+
+    if (cartBanner && cartItems && cartItems.length > 0) {
+      const count = cartItems.reduce((sum, i) => sum + (i.qty || 1), 0);
+      const total = cartItems.reduce((sum, i) => sum + ((i.price || 0) * (i.qty || 1)), 0);
+
+      if (cartCountEl) cartCountEl.textContent = `${count} 件逸品`;
+      if (cartTotalEl) cartTotalEl.textContent = `NT$ ${total.toLocaleString()}`;
+
+      if (cartListEl) {
+        cartListEl.innerHTML = cartItems.map(item => `
+          <div class="csb-item">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <img src="${escapeHtml(item.image || 'images/logo-emblem.png')}" alt="${escapeHtml(item.name || '')}" class="csb-item-img">
+              <div>
+                <div class="csb-item-name">${escapeHtml(item.name || '')}</div>
+                <div class="csb-item-meta">${item.capacity ? escapeHtml(item.capacity) + ' · ' : ''}數量：${item.qty || 1}</div>
+              </div>
+            </div>
+            <div class="csb-item-price">NT$ ${((item.price || 0) * (item.qty || 1)).toLocaleString()}</div>
+          </div>
+        `).join('');
+      }
+
+      cartBanner.style.display = 'block';
+
+      const noteInput = document.getElementById('f-note');
+      if (noteInput && !noteInput.value) {
+        const itemNames = cartItems.map(i => `${i.name}×${i.qty || 1}`).join('、');
+        noteInput.value = `選購商品：${itemNames} (預約調息合計 NT$ ${total.toLocaleString()})`;
+      }
+      const concernInput = document.getElementById('f-concern');
+      if (concernInput && !concernInput.value) {
+        concernInput.value = '購買調息禮盒與專屬體驗';
+      }
+    }
+  }
+
+  initCartSummary();
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -78,6 +137,11 @@
       form.style.display = 'none';
       confirmBox.style.display = 'block';
       if (persisted && receiptNo) {
+        try {
+          localStorage.removeItem('modern_oil_cart');
+          if (cartBanner) cartBanner.style.display = 'none';
+        } catch (e) {}
+
         confirmBox.innerHTML = `
           <div class="ep-label">預約已送出，妳的受付編號</div>
           <div class="ep-code">${escapeHtml(receiptNo)}</div>

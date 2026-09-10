@@ -1,0 +1,230 @@
+/**
+ * 雫之洞悉 · 返魂堂 · 導覽與頁尾樣式表 (components/navigation/nav.css)
+ * 遵循日式款待美學 (Omotenashi) 與和紙溫潤質感
+ */
+
+/* ---------- 固定頂部導覽列 ---------- */
+.site-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(var(--nav-h, 60px) + env(safe-area-inset-top, 0px));
+  z-index: 100;
+  padding-top: env(safe-area-inset-top, 0px);
+  background: rgba(246, 241, 231, 0.94);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--gold-border, rgba(184, 145, 46, 0.28));
+  display: flex;
+  align-items: center;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.site-nav-inner {
+  width: 100%;
+  max-width: var(--content-max, 1140px);
+  margin: 0 auto;
+  padding: 0 var(--page-gutter, 20px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* 品牌標誌 */
+.site-nav-logo {
+  font-family: var(--font-family-base, 'LINE Seed TW', -apple-system, sans-serif);
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  color: var(--forest-deep, #253B2F);
+  font-weight: 600;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  transition: opacity 0.25s ease;
+}
+
+.site-nav-logo:hover {
+  opacity: 0.85;
+}
+
+.site-nav-logo-img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+/* 導覽連結清單 */
+.site-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.site-nav-links a {
+  font-size: 13.5px;
+  color: var(--ink-soft, #5A524C);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  transition: color 0.25s ease;
+  position: relative;
+  padding: 4px 0;
+}
+
+.site-nav-links a:hover {
+  color: var(--forest-deep, #253B2F);
+}
+
+.site-nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 1.5px;
+  background: var(--gold-accent, #C5A059);
+  transition: width 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.site-nav-links a:hover::after {
+  width: 100%;
+}
+
+/* 動作按鈕群 */
+.site-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 購物車導覽按鈕 */
+.site-nav-cart-btn {
+  background: transparent;
+  border: 1px solid var(--gold-accent, #C5A059);
+  color: var(--forest-deep, #253B2F);
+  padding: 7px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+  font-size: 13px;
+  transition: all 0.25s ease;
+}
+
+.site-nav-cart-btn:hover {
+  background: rgba(197, 160, 89, 0.12);
+  transform: translateY(-1px);
+}
+
+.site-nav-cart-btn:active {
+  transform: translateY(1px) scale(0.96);
+}
+
+.nav-cart-count {
+  background: var(--gold-accent, #C5A059);
+  color: #1A1A1A;
+  border-radius: 10px;
+  padding: 1px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* 立即預約按鈕 */
+.site-nav-cta {
+  flex-shrink: 0;
+  min-height: 40px;
+  padding: 0 18px;
+  background: var(--forest, #355343);
+  color: #FAF6EC;
+  border: none;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(51, 70, 58, 0.25);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  font-family: inherit;
+}
+
+.site-nav-cta:hover {
+  background: var(--forest-deep, #253B2F);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(51, 70, 58, 0.35);
+}
+
+.site-nav-cta:active {
+  transform: translateY(1px);
+  opacity: 0.9;
+}
+
+/* ---------- 頁尾水墨印章暗門 ---------- */
+.home-footer {
+  background: var(--paper-deep, #ECE3D2);
+  border-top: 1px solid var(--gold-hairline, rgba(184, 145, 46, 0.25));
+  padding: 40px 20px calc(40px + env(safe-area-inset-bottom, 0px));
+  text-align: center;
+  color: var(--ink-soft, #5A524C);
+  font-size: 13px;
+  letter-spacing: 0.05em;
+}
+
+.footer-logo-link {
+  display: inline-block;
+  margin-bottom: 12px;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+}
+
+.footer-logo-link:hover {
+  transform: scale(1.04);
+  opacity: 0.9;
+}
+
+.footer-logo {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
+}
+
+.footer-brand-title {
+  margin: 6px 0 2px;
+  font-weight: 600;
+  color: var(--forest-deep, #253B2F);
+}
+
+.footer-sub-title {
+  font-size: 11px;
+  opacity: 0.75;
+  margin: 0;
+  letter-spacing: 0.1em;
+}
+
+/* 行動版自適應 */
+@media (max-width: 768px) {
+  .site-nav-inner {
+    padding: 0 14px;
+    gap: 10px;
+  }
+  .site-nav-links {
+    display: none; /* 手機版精簡主選單，保留核心動作 */
+  }
+  .site-nav-logo {
+    font-size: 14px;
+  }
+  .site-nav-cta {
+    padding: 0 14px;
+    font-size: 12px;
+    min-height: 36px;
+  }
+}

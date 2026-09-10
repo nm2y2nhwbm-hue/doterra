@@ -290,10 +290,20 @@
     if (items.length === 0) {
       listEl.innerHTML = `
         <div class="cart-empty-state">
-          <div class="cart-empty-circle">❀</div>
-          <div class="cart-empty-title">目前尚未挑選香氣商品</div>
-          <div class="cart-empty-sub">讓直覺帶你探索，將觸動心靈的植物能量收進生活之中。</div>
-          <a class="home-cta primary" href="cards.html" style="font-size:0.85rem;padding:8px 18px;display:inline-flex;" onclick="window.ModernOilCart.close()">🔮 線上直覺抽卡</a>
+          <div class="cart-empty-icon-wrap">
+            <svg class="cart-zen-svg" viewBox="0 0 64 64" fill="none" stroke="currentColor">
+              <ellipse cx="32" cy="46" rx="22" ry="7" stroke-width="1.2" stroke-dasharray="2 3" opacity="0.4"/>
+              <ellipse cx="32" cy="46" rx="14" ry="4.5" stroke-width="1.4" opacity="0.6"/>
+              <path d="M32 14 C32 14 20 30 20 38 C20 44.6 25.4 50 32 50 C38.6 50 44 44.6 44 38 C44 30 32 14 32 14 Z" stroke-width="1.8" fill="rgba(184,145,46,0.06)"/>
+              <circle cx="32" cy="36" r="3" fill="var(--gold-accent, #C5A059)" opacity="0.75"/>
+            </svg>
+          </div>
+          <div class="cart-empty-haiku">「風止香在 · 靜待直覺」</div>
+          <div class="cart-empty-title">目前尚未挑選調息逸品</div>
+          <div class="cart-empty-sub">給心靈片刻留白，讓直覺指引卡帶您探索當下所需的神聖香氣。</div>
+          <a class="home-cta primary cart-empty-cta" href="cards.html" onclick="window.ModernOilCart.close()">
+            <span>🔮 線上直覺抽卡指引</span>
+          </a>
         </div>
       `;
       return;

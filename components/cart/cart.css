@@ -270,24 +270,59 @@
 .cart-empty-state {
   text-align: center;
   margin: auto;
-  padding: 36px 16px;
+  padding: 40px 20px;
   color: var(--text-sub, #6B645C);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
-.cart-empty-circle {
-  font-size: 42px;
-  margin-bottom: 12px;
-  opacity: 0.75;
+.cart-empty-icon-wrap {
+  width: 72px;
+  height: 72px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(197, 160, 89, 0.12) 0%, transparent 70%);
+}
+.cart-zen-svg {
+  width: 56px;
+  height: 56px;
+  stroke: var(--forest, #355343);
+  animation: floatZen 4s ease-in-out infinite;
+}
+@keyframes floatZen {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+.cart-empty-haiku {
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  color: var(--gold-accent, #C5A059);
+  font-weight: 600;
+  margin-bottom: 8px;
 }
 .cart-empty-title {
   font-size: 1.05rem;
   font-weight: 700;
   color: var(--forest-deep, #253B2F);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 .cart-empty-sub {
   font-size: 0.85rem;
-  line-height: 1.6;
-  margin-bottom: 20px;
+  line-height: 1.8;
+  color: var(--text-sub, #6B645C);
+  max-width: 280px;
+  margin: 0 auto 24px;
+}
+.cart-empty-cta {
+  font-size: 0.88rem !important;
+  padding: 10px 24px !important;
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 16px rgba(37, 59, 47, 0.22);
 }
 
 /* 抽屜底層結帳列 */
@@ -361,7 +396,7 @@
   color: #C24136;
 }
 
-/* 加入購物車 Toast 動態通知 */
+/* 加入購物車 Toast 動態通知（所作與殘心餘韻高斯模糊淡出） */
 .cart-toast {
   position: fixed;
   bottom: 96px;
@@ -373,16 +408,18 @@
   border-radius: 30px;
   font-size: 0.85rem;
   font-weight: 600;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
   z-index: 1001;
   opacity: 0;
   transform: translateY(12px);
+  filter: blur(4px);
   pointer-events: none;
-  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1), transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), filter 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .cart-toast.show {
   opacity: 1;
   transform: translateY(0);
+  filter: blur(0px);
 }
 
 /* ==========================================================================

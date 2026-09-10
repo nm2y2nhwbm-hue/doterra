@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
 <!-- Google tag (gtag.js) -->
@@ -43,6 +43,22 @@
 <main>
   <div id="booking-form-wrap">
     <p class="booking-intro">留下你的聯絡方式與此刻的心情，我們會依你的抽牌結果安排專屬的精油體驗諮詢與禮盒。</p>
+
+    <!-- 日式調息逸品奉呈卡 (Cart Summary Banner) -->
+    <div id="cart-summary-banner" class="cart-summary-banner" style="display:none;" aria-live="polite">
+      <div class="csb-header">
+        <div class="csb-title">
+          <span class="csb-seal">香氣奉呈</span>
+          <span>已挑選專屬調息逸品</span>
+        </div>
+        <span class="csb-count" id="csb-item-count">0 件商品</span>
+      </div>
+      <div class="csb-list" id="csb-items-list"></div>
+      <div class="csb-footer">
+        <span class="csb-label">預約調息合計</span>
+        <span class="csb-total" id="csb-total-amount">NT$ 0</span>
+      </div>
+    </div>
 
     <form id="booking-form" class="booking-form">
       <div class="form-field">
