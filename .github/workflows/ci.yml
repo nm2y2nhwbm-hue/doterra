@@ -37,6 +37,8 @@ jobs:
           python -m unittest tests/test_catalog_integrity.py
           python -m unittest tests/test_catalog_sync.py
           python -m unittest tests/test_asset_integrity.py
+          if [ -f tests/test_security_audit.py ]; then python -m unittest tests/test_security_audit.py; fi
+
 
       - name: Run Live Endpoint Smoke Probes (Production)
         continue-on-error: true

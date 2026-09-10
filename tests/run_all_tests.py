@@ -28,9 +28,13 @@ PYTHON_SUITES = [
     ('test_live_endpoints.py', 'L5 正式環境活體韌性探測', 'Agent 5 / 營運'),
 ]
 
-# 若本機工作區已建置金流測試則一併納入
+# 若本機工作區已建置金流與資安測試則一併納入
 if os.path.isfile(os.path.join(TESTS_DIR, 'test_payment_api.py')):
     PYTHON_SUITES.insert(1, ('test_payment_api.py', 'L3 第三方金流與防偽驗簽', 'Agent 5 / Agent 1'))
+
+if os.path.isfile(os.path.join(TESTS_DIR, 'test_security_audit.py')):
+    PYTHON_SUITES.append(('test_security_audit.py', 'L3 資安漏洞與自然醫學法規', 'Agent 3 照妖鏡'))
+
 
 NODE_SUITES = [
     ('test_js_syntax.js', 'L1 全站 JS AST 語法編譯', 'Agent 2 / Agent 3'),
