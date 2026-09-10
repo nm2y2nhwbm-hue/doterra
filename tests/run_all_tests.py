@@ -54,12 +54,15 @@ def find_node_executable():
     except FileNotFoundError:
         pass
 
-    # 檢測常見 Playwright Node 路徑
+    # 檢測候選路徑：優先檢測當前 Python 虛擬環境（支援 nodeenv 整合，如 SD_forge_Venv）
     candidates = [
+        os.path.join(sys.prefix, 'Scripts', 'node.exe'),
+        os.path.join(sys.prefix, 'bin', 'node'),
         os.path.join(os.environ.get('LOCALAPPDATA', ''), 'Programs', 'Python', 'Python312', 'Lib', 'site-packages', 'playwright', 'driver', 'node.exe'),
         os.path.join(sys.prefix, 'Lib', 'site-packages', 'playwright', 'driver', 'node.exe'),
         r'C:\Program Files\nodejs\node.exe'
     ]
+
     for c in candidates:
         if os.path.isfile(c):
             return c
