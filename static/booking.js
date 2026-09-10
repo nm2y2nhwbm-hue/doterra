@@ -180,6 +180,10 @@
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${anonKey}` },
         body: JSON.stringify({ receiptNo }),
       });
+      if (!res.ok) {
+        msgEl.style.display = 'none';
+        return;
+      }
       const data = await res.json();
       if (data.ok && data.message) {
         msgEl.textContent = data.message;

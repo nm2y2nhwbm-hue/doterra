@@ -6,6 +6,25 @@
 
   const STORAGE_KEY = 'modern_oil_cart';
 
+  function escapeHtml(str) {
+    if (str == null) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function sanitizeUrl(url) {
+    if (!url) return 'images/logo-emblem.png';
+    const clean = String(url).trim();
+    if (/^(https?:\/\/|\/|images\/)/i.test(clean)) {
+      return clean.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    return 'images/logo-emblem.png';
+  }
+
   // 購物車資料管理
   const CartStore = {
     get() {
@@ -309,29 +328,40 @@
       return;
     }
 
-    listEl.innerHTML = items.map(item => `
-      <div class="cart-item-card" data-id="${item.id}">
-        <img class="cart-item-thumb" src="${item.image}" alt="${item.name}">
+    listEl.innerHTML = items.map(item => {
+      const id = escapeHtml(item.id || '');
+      const name = escapeHtml(item.name || '調息選品');
+      const img = sanitizeUrl(item.image);
+      const pillar = escapeHtml(item.pillar || '');
+      const capacity = escapeHtml(item.capacity || '');
+      const price = Number(item.price) || 0;
+      const qty = Math.max(1, Number(item.qty) || 1);
+      const subtotal = (price * qty).toLocaleString();
+
+      return `
+      <div class="cart-item-card" data-id="${id}">
+        <img class="cart-item-thumb" src="${img}" alt="${name}">
         <div class="cart-item-info">
           <div class="cart-item-title-row">
             <div>
-              <div class="cart-item-name">${item.name}</div>
-              ${item.pillar ? `<div class="cart-item-pillar">${item.pillar}</div>` : ''}
-              ${item.capacity ? `<div style="font-size:11px;color:#8E867E;">${item.capacity}</div>` : ''}
+              <div class="cart-item-name">${name}</div>
+              ${pillar ? `<div class="cart-item-pillar">${pillar}</div>` : ''}
+              ${capacity ? `<div style="font-size:11px;color:#8E867E;">${capacity}</div>` : ''}
             </div>
             <button type="button" class="cart-item-del" data-action="del" aria-label="移除品項">✕</button>
           </div>
           <div class="cart-item-price-row">
-            <span class="cart-item-price">NT$ ${(item.price * item.qty).toLocaleString()}</span>
+            <span class="cart-item-price">NT$ ${subtotal}</span>
             <div class="cart-qty-ctrl">
               <button type="button" class="cart-qty-btn" data-action="minus" aria-label="減少數量">-</button>
-              <span class="cart-qty-val">${item.qty}</span>
+              <span class="cart-qty-val">${qty}</span>
               <button type="button" class="cart-qty-btn" data-action="plus" aria-label="增加數量">+</button>
             </div>
           </div>
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
 
     // 綁定加減與刪除事件
     listEl.querySelectorAll('.cart-item-card').forEach(card => {

@@ -52,10 +52,11 @@
 
 4. **⏳ 四、「間（Ma）」—— 消滅 Render 冷啟動延遲的預暖款待**
    * 實作 `core/keep_warm.py` 輕量背景守護 Worker 與 `GET /api/keep-warm` 端點。
-   * 每 9 分鐘探測保溫，消滅免費用戶造訪時 30~50 秒之冷啟動等待。
+   * 探測目標預設對齊 Render 外部 Ingress 網址（`https://doterra-73pv.onrender.com/health`），使負載平衡器正確辨識進站活躍流量，杜絕 15 分鐘無流量休眠。
 
-5. **💳 五、「安心の証明（Trust Assurance）」—— 銀行級透明信任標章**
+5. **💳 五、「安心の証明（Trust Assurance）」—— 銀行級透明信任標章與雙寫持久化**
    * 訂單回傳附帶 SHA-256 驗證、官方母體定價驗證與 100% 正品承諾元資料 (`trust_assurance`)。
+   * **`OrderStore` 雙寫持久化架構**：支援本機記憶體/快取與 Supabase PostgreSQL 遠端雙寫；若 Render 容器重啟或冷啟動清空臨時磁碟，綠界 Webhook 回調時自動自 Supabase 檢索恢復，確保訂單狀態流轉不中斷。
 
 ---
 

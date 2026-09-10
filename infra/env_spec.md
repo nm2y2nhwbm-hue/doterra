@@ -19,11 +19,12 @@
 | :--- | :---: | :--- | :--- |
 | `PORT` | 低 | `10000` | Render 監聽通訊埠 |
 | `FLASK_ENV` | 低 | `production` | Flask 運行模式 |
+| `KEEP_WARM_TARGET_URL` | 低 | `https://doterra-73pv.onrender.com/health` | **🚨 外部 Ingress 喚醒 URL**（解決本機 localhost ping 無法阻止休眠問題） |
 | `LINE_CHANNEL_SECRET` | 🔴 極高 | 32 位元十六進位字串 | LINE Webhook 簽章校驗 (HMAC-SHA256) |
 | `LINE_CHANNEL_ACCESS_TOKEN` | 🔴 極高 | 長字串 (Channel Access Token) | LINE Messaging API 發布推播訊息 |
 | `LIFF_ID` | 中 | `2006...-xxxx` | LINE LIFF 應用程式唯一代碼 |
 | `SUPABASE_URL` | 中 | `https://xxxx.supabase.co` | Supabase 專案 API URL |
-| `SUPABASE_KEY` | 🔴 極高 | JWT (service_role 或 server anon) | 後端安全資料庫操作憑證 |
+| `SUPABASE_KEY` | 🔴 極高 | JWT (service_role 或 server key) | **金流訂單持久化至 Supabase 之憑證**（杜絕容器暫存清空） |
 | `ECPAY_MERCHANT_ID` | 中 | `3002607` (測試) / 7位數字 | 綠界特店編號 |
 | `ECPAY_HASH_KEY` | 🔴 極高 | `pwFHCqoQZGmho4w6` (測試) | 綠界交易壓碼 HashKey (SHA256) |
 | `ECPAY_HASH_IV` | 🔴 極高 | `EkRm7iFT261dpevs` (測試) | 綠界交易壓碼 HashIV (SHA256) |

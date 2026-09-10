@@ -1,6 +1,6 @@
 # ☁️ Vercel 與 Render 雲端維運規格書 (`infra/cloud_specs.md`)
 
-本文件由 **Agent 5（維運與金流工程師）** 制定，明確規範「現代精油心靈指引卡」專案之多雲部署架構、運算節點規格、快取策略與高可用性監控指引。
+本文件由 **Agent 5（維運與金流工程師）** 制定，明確規範「現代精油心靈指引卡」專案之多雲部署架構、運算節點規格、快取策略、HSTS A+ 資安標頭與高可用性監控指引。
 
 ---
 
@@ -47,12 +47,40 @@
 * **JavaScript / CSS 資產**：`Cache-Control: public, max-age=31536000, immutable`（搭配版本雜湊或靜態長效快取）
 * **圖片與多媒體 (`/static/images/`)**：`Cache-Control: public, max-age=86400, stale-while-revalidate=604800`（加速精油圖鑑圖檔載入）
 
-### 3. 安全標頭規格 (Security Headers)
-```http
-X-Content-Type-Options: nosniff
-X-Frame-Options: SAMEORIGIN
-Referrer-Policy: strict-origin-when-cross-origin
-Permissions-Policy: camera=(), microphone=(), geolocation=()
+### 3. A+ 級安全標頭規格 (Security Headers & HSTS)
+> 💡 依據 Agent 3 照妖鏡稽核建議（第 4.1 項），全站應具備防點擊劫持（Clickjacking）、MIME 嗅探與強制 HTTPS 傳輸之完整保護。
+
+#### 標準配置範本 (`vercel.json` 邊緣路由注入標準)
+```json
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        }
+      ]
+    }
+  ]
+}
 ```
 
 ---
@@ -69,16 +97,24 @@ Permissions-Policy: camera=(), microphone=(), geolocation=()
   - **RAM**：512 MB
   - **連線逾時**：120 秒（滿足 LINE Webhook 異步處理與金流回調）
 
-### 2. 健康檢查與保活策略 (Keep-Alive & Health Check)
+### 2. 健康檢查與外部保活防護 (Keep-Alive & Ingress Awakening)
+> 🚨 響應 Agent 3 照妖鏡通報（第 0.4 項）：Render 平台休眠偵測**僅採計經由外部 Ingress 負載平衡器之進站請求**；本機探測 `127.0.0.1` 無法被判定為活躍流量！
+
 * **健康端點**：`GET /health`
 * **正常回應**：`HTTP 200 OK`，JSON: `{"status": "ok", "version": "2.1.0", "timestamp": ...}`
-* **冷啟動 (Spin-Down) 防護方案**：
-  - Render 免費方案於閒置 15 分鐘後會進入休眠（冷啟動需耗時 30~50 秒）。
-  - **防護措施**：由外掛 UptimeRobot 或 GitHub Actions 定時每 10 分鐘發送一次 `GET /health`，保持容器處於常駐熱機（Warm）狀態，確保用戶結帳與抽卡零等待。
+* **雙軌外部保活架構 (Dual External Keep-Alive)**：
+  1. **容器內外網喚醒配置**：
+     - 後端服務環境變數必須注入 `KEEP_WARM_TARGET_URL=https://doterra-73pv.onrender.com/health`。
+     - 容器內部保溫線程（`core/keep_warm.py`）探測時必須對該外部公開 HTTPS 網址發送請求，確保流量穿越 Render 外部 Ingress。
+  2. **外部雲端排程防護 (UptimeRobot / Cron)**：
+     - 在第三方免費監測平台（如 UptimeRobot 或 GitHub Actions 定時 Workflow）配置監控探針。
+     - 設定頻率：**每 9 分鐘一次**（Render 休眠閥值為 15 分鐘）。
+     - 探測目標：`https://doterra-73pv.onrender.com/health`。
+     - 效益：徹底根絕容器冷啟動（Spin-Down），使結帳與 Webhook 響應時間維持在 **< 300ms**。
 
 ---
 
-## 🗄️ 四、Supabase 維運規格 (Database & Auth Specs)
+## 🗄️ 四、Supabase 維運規格 (Database & Functions Specs)
 
 * **雲端主機區**：AWS `ap-northeast-1` (東京，Tokyo)
 * **資料庫版本**：PostgreSQL 15 (Active Healthy)
@@ -86,4 +122,6 @@ Permissions-Policy: camera=(), microphone=(), geolocation=()
   - 強制 SSL 模式 (`sslmode=require`)
   - 嚴禁於瀏覽器客戶端暴露 `service_role` 密鑰
   - 核心資料表（`bookings`、`draws`、`orders`、`payment_logs`）強制啟用 RLS（Row Level Security）
-* **維護日誌**：定時稽核連線數池（Pooler: PgBouncer）與磁碟容量配額。
+* **Edge Functions 維運標準 (響應 Agent 3 第 0.6 項通報)**：
+  - **已正式投產**：`sync-inventory`（定時庫存安全同步）。
+  - **規劃中或未投產函式**（如 `generate-booking-confirmation`）：在 Edge Function 未由維運完成部署前，規範前端呼叫端必須加入 `try...catch` 靜默容錯，不可導致瀏覽器 Console 出現阻斷性 404 報錯。

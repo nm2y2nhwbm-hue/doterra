@@ -14,6 +14,7 @@ import string
 import random
 import hashlib
 import urllib.parse
+import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 from threading import Lock
@@ -101,8 +102,108 @@ class PaymentSignatureError(Exception):
         }
 
 
+def _supabase_credentials():
+    url = (os.environ.get("SUPABASE_URL") or "").rstrip("/")
+    key = os.environ.get("SUPABASE_SECRET_KEY") or os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or os.environ.get("SUPABASE_KEY")
+    if url and key:
+        return url, key
+    return None, None
+
+
+def _sync_order_to_supabase(order):
+    """
+    🛡️ 將訂單同步至 Supabase PostgreSQL 資料庫，解決 Render 容器重啟臨時磁碟被清空之問題 (Finding 0.1)
+    """
+    url, key = _supabase_credentials()
+    if not url or not key:
+        return
+
+    try:
+        req_url = f"{url}/rest/v1/orders"
+        customer = order.get("customer", {})
+        payload = {
+            "order_no": order.get("order_id"),
+            "trade_no": order.get("merchant_trade_no"),
+            "customer_name": customer.get("name", "貴賓"),
+            "customer_email": customer.get("email") or None,
+            "customer_phone": customer.get("phone") or "未提供",
+            "items": order.get("items", []),
+            "total_amount": int(order.get("amount", 0)),
+            "currency": "TWD",
+            "payment_method": order.get("provider", "ecpay"),
+            "status": str(order.get("status", "pending")).lower(),
+            "paid_at": order.get("paid_at"),
+            "created_at": order.get("created_at"),
+            "updated_at": order.get("updated_at"),
+        }
+        data_bytes = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        req = urllib.request.Request(
+            req_url,
+            data=data_bytes,
+            headers={
+                "apikey": key,
+                "Authorization": f"Bearer {key}",
+                "Content-Type": "application/json",
+                "Prefer": "resolution=merge-duplicates",
+            },
+            method="POST"
+        )
+        with urllib.request.urlopen(req, timeout=3) as resp:
+            pass
+    except Exception:
+        # Supabase 尚未套用 schema 或離線環境時安全略過，維持本機正常運作
+        pass
+
+
+def _fetch_order_from_supabase(order_id_or_trade_no):
+    """
+    若容器冷啟動或重啟後記憶體與本機檔案為空，自動向 Supabase 檢索恢復訂單 (Finding 0.1)
+    """
+    url, key = _supabase_credentials()
+    if not url or not key:
+        return None
+
+    try:
+        escaped_key = urllib.parse.quote(str(order_id_or_trade_no))
+        query_url = f"{url}/rest/v1/orders?or=(order_no.eq.{escaped_key},trade_no.eq.{escaped_key})&limit=1"
+        req = urllib.request.Request(
+            query_url,
+            headers={
+                "apikey": key,
+                "Authorization": f"Bearer {key}",
+                "Accept": "application/json",
+            },
+            method="GET"
+        )
+        with urllib.request.urlopen(req, timeout=3) as resp:
+            if resp.status == 200:
+                rows = json.loads(resp.read().decode("utf-8"))
+                if rows and len(rows) > 0:
+                    row = rows[0]
+                    recovered = {
+                        "order_id": row.get("order_no"),
+                        "merchant_trade_no": row.get("trade_no"),
+                        "status": str(row.get("status", "PENDING")).upper(),
+                        "amount": row.get("total_amount"),
+                        "provider": row.get("payment_method", "ecpay"),
+                        "items": row.get("items", []),
+                        "customer": {
+                            "name": row.get("customer_name"),
+                            "email": row.get("customer_email"),
+                            "phone": row.get("customer_phone"),
+                        },
+                        "created_at": row.get("created_at"),
+                        "updated_at": row.get("updated_at"),
+                        "paid_at": row.get("paid_at"),
+                    }
+                    return recovered
+    except Exception:
+        pass
+    return None
+
+
 class OrderStore:
-    """訂單儲存引擎，支援記憶體快取與 JSON 檔案持久化"""
+    """訂單儲存引擎，支援記憶體快取、JSON 檔案持久化與 Supabase 雙寫/重啟恢復機制"""
     def __init__(self, filepath=_ORDERS_FILE):
         self.filepath = Path(filepath)
         self._lock = Lock()
@@ -136,21 +237,50 @@ class OrderStore:
                 self._orders[order["merchant_trade_no"]] = order
             self._save()
 
+        # 雙寫持久化至 Supabase PostgreSQL（避免容器休眠重啟時丟失）
+        _sync_order_to_supabase(order)
+
     def get_order(self, order_id_or_trade_no):
         with self._lock:
-            return self._orders.get(order_id_or_trade_no)
+            order = self._orders.get(order_id_or_trade_no)
+            if order:
+                return order
+
+        # 若記憶體查無（如 Render 重啟或冷啟動清空臨時磁碟），嘗試向 Supabase 檢索恢復
+        recovered = _fetch_order_from_supabase(order_id_or_trade_no)
+        if recovered:
+            with self._lock:
+                self._orders[recovered["order_id"]] = recovered
+                if recovered.get("merchant_trade_no"):
+                    self._orders[recovered["merchant_trade_no"]] = recovered
+                self._save()
+            return recovered
+
+        return None
 
     def update_status(self, order_id_or_trade_no, status, update_fields=None):
         with self._lock:
             order = self._orders.get(order_id_or_trade_no)
             if not order:
-                return None
+                # 嘗試自 Supabase 恢復
+                recovered = _fetch_order_from_supabase(order_id_or_trade_no)
+                if recovered:
+                    order = recovered
+                    self._orders[order["order_id"]] = order
+                    if order.get("merchant_trade_no"):
+                        self._orders[order["merchant_trade_no"]] = order
+                else:
+                    return None
+
             order["status"] = status
             order["updated_at"] = datetime.now(timezone.utc).isoformat()
             if update_fields:
                 order.update(update_fields)
             self._save()
-            return order
+
+        # 同步更新至 Supabase
+        _sync_order_to_supabase(order)
+        return order
 
     def clear(self):
         with self._lock:

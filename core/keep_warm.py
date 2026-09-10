@@ -17,6 +17,15 @@ _RUNNING = False
 _LOCK = threading.Lock()
 
 
+def _resolve_target_url():
+    """解析保溫探測目標網址（優先採用 KEEP_WARM_TARGET_URL，缺省採用 Render 外部 Ingress 網址以有效維持喚醒）"""
+    target = os.environ.get("KEEP_WARM_TARGET_URL")
+    if target:
+        return target
+    base_url = os.environ.get("SERVER_BASE_URL", "https://doterra-73pv.onrender.com").rstrip("/")
+    return f"{base_url}/health"
+
+
 def get_warm_status():
     """取得當前伺服器保溫與存活狀態"""
     uptime = int(time.time() - _START_TIME)
@@ -26,6 +35,7 @@ def get_warm_status():
         "uptime_seconds": uptime,
         "last_heartbeat": _LAST_HEARTBEAT,
         "keep_warm_active": _RUNNING,
+        "target_url": _resolve_target_url(),
     }
 
 
@@ -53,10 +63,7 @@ def _keep_warm_loop(interval_seconds=540):
         time.sleep(interval_seconds)
         if not _RUNNING:
             break
-        target_url = os.environ.get("KEEP_WARM_TARGET_URL")
-        if not target_url:
-            base_url = os.environ.get("SERVER_BASE_URL", "http://127.0.0.1:5000").rstrip("/")
-            target_url = f"{base_url}/health"
+        target_url = _resolve_target_url()
         _ping_target(target_url)
 
 

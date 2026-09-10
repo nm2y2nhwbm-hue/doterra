@@ -23,10 +23,11 @@
 ## 📚 目錄架構與文件索引
 
 * 🌐 [`dns_custom_domain.md`](dns_custom_domain.md)：品牌自訂頂級網域綁定與 DNS 解析設定實務手冊。
-* ☁️ [`cloud_specs.md`](cloud_specs.md)：Vercel 前端邊緣 CDN 與 Render 後端容器運算規格書。
-* 💳 [`payment_gateway_blueprint.md`](payment_gateway_blueprint.md)：綠界科技（ECPay）與 LINE Pay 線上支付串接架構藍圖。
+* ☁️ [`cloud_specs.md`](cloud_specs.md)：Vercel 前端邊緣 CDN 與 Render 後端容器運算規格書（含 HSTS A+ 安全標頭與雙軌保活）。
+* 💳 [`payment_gateway_blueprint.md`](payment_gateway_blueprint.md)：綠界科技（ECPay）與 LINE Pay 線上支付串接架構藍圖（含持久化防禦與日式款待過渡）。
 * 🗄️ [`payment_schema_spec.sql`](payment_schema_spec.sql)：線上支付訂單表（`orders`）與稽核日誌（`payment_logs`）之 Schema 與 Supabase RLS 安全策略規格。
 * 🔐 [`env_spec.md`](env_spec.md)：多雲環境變數配置清冊與金流金鑰安全規範。
+* 🛡️ [`SECURITY_RESPONSE.md`](SECURITY_RESPONSE.md)：Agent 5 針對 Agent 3 全站資安照妖鏡稽核通報之維運整改回覆書。
 
 ---
 

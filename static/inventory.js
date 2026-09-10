@@ -60,6 +60,25 @@
     return 'other';
   }
 
+  function escapeHtml(str){
+    if (str == null) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function sanitizeUrl(url){
+    if (!url) return '';
+    const clean = String(url).trim();
+    if (/^(https?:\/\/|\/|images\/)/i.test(clean)) {
+      return clean.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    return '';
+  }
+
   const statBottles = document.getElementById('stat-bottles');
   const statItems = document.getElementById('stat-items');
   const statSingle = document.getElementById('stat-single');
@@ -149,7 +168,7 @@
     const activeFilterEl = document.getElementById('inv-active-filter');
     if (activeCategoryFilter) {
       activeFilterEl.style.display = 'flex';
-      activeFilterEl.innerHTML = `目前篩選：${CATEGORY_LABELS[activeCategoryFilter]} <button type="button" id="inv-clear-filter">✕ 清除</button>`;
+      activeFilterEl.innerHTML = `目前篩選：${escapeHtml(CATEGORY_LABELS[activeCategoryFilter])} <button type="button" id="inv-clear-filter">✕ 清除</button>`;
       document.getElementById('inv-clear-filter').addEventListener('click', () => {
         activeCategoryFilter = null;
         document.querySelectorAll('.admin-stat-filter').forEach(el => el.classList.remove('active'));
@@ -169,7 +188,7 @@
       let badge = '';
       if (d !== null) {
         if (d < 0) badge = '<span class="status-badge status-cancelled">已過期</span>';
-        else if (d <= 60) badge = `<span class="status-badge status-pending">${d} 天後到期</span>`;
+        else if (d <= 60) badge = `<span class="status-badge status-pending">${escapeHtml(d)} 天後到期</span>`;
         else badge = '<span class="status-badge status-done">效期正常</span>';
       }
 
@@ -180,33 +199,44 @@
         let pClass = 'tag-balance';
         if (kInfo.pillar && kInfo.pillar.includes('右柱')) pClass = 'tag-mercy';
         if (kInfo.pillar && kInfo.pillar.includes('左柱')) pClass = 'tag-severity';
-        pillarBadge = `<span class="seal-pill ${pClass}" style="font-size:10px; padding:2px 6px; margin-left:6px;">${kInfo.pillar.split(' ')[0]}</span>`;
+        const pillarText = kInfo.pillar ? kInfo.pillar.split(' ')[0] : '';
+        pillarBadge = `<span class="seal-pill ${pClass}" style="font-size:10px; padding:2px 6px; margin-left:6px;">${escapeHtml(pillarText)}</span>`;
         if (kInfo.dilution_guide) {
           let sClass = kInfo.dilution_guide === '直塗' ? 'safety-direct' : kInfo.dilution_guide === '敏感' ? 'safety-sensitive' : 'safety-dilute';
           let sLabel = kInfo.dilution_guide === '直塗' ? '直塗' : kInfo.dilution_guide === '敏感' ? '敏感稀釋' : '必稀釋';
-          pillarBadge += `<span class="seal-safety ${sClass}" style="font-size:10px; padding:2px 6px; margin-left:4px;">${sLabel}</span>`;
+          pillarBadge += `<span class="seal-safety ${sClass}" style="font-size:10px; padding:2px 6px; margin-left:4px;">${escapeHtml(sLabel)}</span>`;
         }
         if (kInfo.doctor_advice) {
-          adviceHtml = `<div style="font-size:11.5px; color:var(--forest-deep); margin-top:5px; line-height:1.6; background:rgba(184,145,46,0.06); padding:4px 8px; border-radius:6px;">🌿 ${kInfo.doctor_advice}</div>`;
+          adviceHtml = `<div style="font-size:11.5px; color:var(--forest-deep); margin-top:5px; line-height:1.6; background:rgba(184,145,46,0.06); padding:4px 8px; border-radius:6px;">🌿 ${escapeHtml(kInfo.doctor_advice)}</div>`;
         }
       }
+
+      const oilName = escapeHtml(i.oil_name || '');
+      const productId = escapeHtml(i.product_id || '');
+      const quantity = escapeHtml(i.quantity != null ? i.quantity : 0);
+      const inUse = escapeHtml(i.in_use != null ? i.in_use : 0);
+      const unit = escapeHtml(i.unit || '瓶');
+      const capacity = escapeHtml(i.capacity || '');
+      const expiryDate = escapeHtml(i.expiry_date || '');
+      const note = escapeHtml(i.note || '');
+      const id = escapeHtml(i.id || '');
 
       return `
         <div class="booking-card">
           <div class="booking-card-head">
             <div>
-              <div class="booking-receipt" style="display:flex; align-items:center; flex-wrap:wrap;">${i.oil_name}${pillarBadge}</div>
-              ${i.product_id ? `<div class="booking-created">產品編號：${i.product_id}</div>` : ''}
+              <div class="booking-receipt" style="display:flex; align-items:center; flex-wrap:wrap;">${oilName}${pillarBadge}</div>
+              ${productId ? `<div class="booking-created">產品編號：${productId}</div>` : ''}
             </div>
             ${badge}
           </div>
-          <div class="booking-row">庫存 ${i.quantity} ${i.unit || '瓶'}｜使用中 ${i.in_use || 0} ${i.unit || '瓶'}${i.capacity ? '｜容量 ' + i.capacity : ''}</div>
-          ${i.expiry_date ? `<div class="booking-row">有效期限：${i.expiry_date}</div>` : ''}
+          <div class="booking-row">庫存 ${quantity} ${unit}｜使用中 ${inUse} ${unit}${capacity ? '｜容量 ' + capacity : ''}</div>
+          ${expiryDate ? `<div class="booking-row">有效期限：${expiryDate}</div>` : ''}
           ${adviceHtml}
-          ${i.note ? `<div class="booking-row">備註：${i.note}</div>` : ''}
+          ${note ? `<div class="booking-row">備註：${note}</div>` : ''}
           <div class="booking-actions">
-            <button type="button" class="draw-toggle-btn" data-edit="${i.id}">編輯</button>
-            <button type="button" class="draw-toggle-btn" data-delete="${i.id}">刪除</button>
+            <button type="button" class="draw-toggle-btn" data-edit="${id}">編輯</button>
+            <button type="button" class="draw-toggle-btn" data-delete="${id}">刪除</button>
           </div>
         </div>`;
     }).join('');

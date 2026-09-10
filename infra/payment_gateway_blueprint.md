@@ -10,7 +10,7 @@
 [Agent 2: 前端日式購物車] ──(1. 提交商品清單與數量)──> [Agent 1: POST /api/orders]
                                                               │
                                                    (2. 查驗 doterra.csv 單一建議零售價)
-                                                   (3. 建立訂單狀態: Pending)
+                                                   (3. 強制寫入 Supabase orders 表: Pending)
                                                               │
                                                               ▼
 [使用者瀏覽器] <──(4. 返回金流跳轉 HTML / 付款連結)── [綠界 ECPay / LINE Pay SDK]
@@ -23,10 +23,11 @@
       └─────────────────────────────────────────> (6. 異步 Webhook 通知伺服器)
                                                               │
                                                    (7. 驗簽 CheckMacValue / Hmac)
-                                                   (8. 更新訂單狀態: Paid)
+                                                   (8. 更新 Supabase orders 表: Paid)
+                                                   (9. 記錄 payment_logs 審計日誌)
                                                               │
                                                               ▼
-[使用者跳轉回官網款待致謝頁] <──(9. 查詢最新訂單狀態: Paid)── [Agent 1: GET /api/orders/:id]
+[使用者跳轉回官網款待致謝頁] <──(10. 查詢最新訂單狀態: Paid)── [Agent 1: GET /api/orders/:id]
 ```
 
 ---
@@ -82,13 +83,16 @@ X-LINE-Authorization: {Base64(HmacSHA256(ChannelSecret + URI + RequestBody + Non
 
 ---
 
-## 🛡️ 四、Agent 5 訂立之資安防禦原則
+## 🛡️ 四、Agent 5 訂立之資安防禦原則（含 Agent 3 照妖鏡稽核整改）
 
 1. **金額伺服器端重算 (Server-Side Price Validation)**：
    * 前端購物車傳入的商品 ID 與數量，後端（Agent 1）必須對照 `doterra.csv` 之官方建議零售價重新計算總額，**絕不信任前端傳來的單價或總金額**。
-2. **防重放與冪等性防禦 (Idempotency)**：
+2. **🚨 嚴禁本機磁碟暫存，強制 Supabase 資料庫持久化 (Zero Ephemeral Storage - 響應 Agent 3 第 0.1 項 P0 通報)**：
+   * **缺陷防範**：Render 容器於休眠（Spin-down）或重新部署時，臨時檔案（如 `core/data/orders.json`）會被清空，導致綠界異步回調時遭遇 `ORDER_NOT_FOUND`。
+   * **標準規範**：後端 `OrderStore` 嚴格禁止使用本機 JSON 檔案，必須全面介接 Supabase PostgreSQL 之 `public.orders` 與 `public.payment_logs` 資料表（定義於 [`infra/payment_schema_spec.sql`](payment_schema_spec.sql)）。保證訂單於容器重啟、休眠喚醒後 100% 可被綠界 Webhook 正確檢索與更新！
+3. **防重放與冪等性防禦 (Idempotency)**：
    * 建立訂單與金流回調必須紀錄 `MerchantTradeNo` / `TransactionId`，若收到重複 Webhook 請求，直接返回成功 `1|OK`，不重複觸發庫存扣除。
-3. **零金鑰外洩 (Zero Hardcoding)**：
+4. **零金鑰外洩 (Zero Hardcoding)**：
    * 所有金流金鑰透過 Render 環境變數注入，禁止寫入任何程式碼或前端 Bundle。
 
 ---
