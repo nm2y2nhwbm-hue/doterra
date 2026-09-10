@@ -8,8 +8,13 @@ from core import database_manager as db
 from core import draw_logger
 from core import experience_handoff
 from core import payment_manager
+from core import keep_warm
 
 api_bp = Blueprint('api', __name__)
+
+# 啟動日式「間（Ma）」冷啟動預暖保溫守護 Daemon
+keep_warm.start_keep_warm()
+
 
 
 def _no_store_json(payload, status=200):
@@ -48,9 +53,17 @@ def health():
     return jsonify({
         "status": "ok",
         "service": "modern-oil-oracle-api",
-        "version": "2.2.0",
+        "version": "2.3.0",
         "catalog_items": oils_count,
     })
+
+
+@api_bp.route("/api/keep-warm", methods=['GET'])
+def api_keep_warm():
+    """日式「間（Ma）」心跳探測與保溫狀態端點。"""
+    status = keep_warm.get_warm_status()
+    return _no_store_json(status, 200)
+
 
 
 @api_bp.route("/api/oils", methods=['GET'])
@@ -124,9 +137,16 @@ def api_create_payment():
         result = payment_manager.create_payment_order(data, client_ip=client_ip)
         return _no_store_json(result, 201)
     except payment_manager.PaymentValidationError as error:
-        return _no_store_json({"success": False, "error": error.message}, error.status_code)
+        return _no_store_json(error.to_dict(), error.status_code)
     except Exception as e:
-        return _no_store_json({"success": False, "error": "伺服器內部錯誤"}, 500)
+        return _no_store_json({
+            "success": False,
+            "code": "INTERNAL_SERVER_ERROR",
+            "message": "伺服器內部暫時無法處理您的請求，請稍候重試",
+            "guidance": "若問題持續，請連繫返魂堂客服人員。",
+            "error": "伺服器內部錯誤"
+        }, 500)
+
 
 
 @api_bp.route("/api/payments/ecpay/callback", methods=['POST'])

@@ -144,6 +144,22 @@ class TestApiEndpoints(unittest.TestCase):
             ip = _request_client_ip()
             self.assertEqual(ip, '192.0.2.1')
 
+    def test_line_webhook_echo_loop_prevention(self):
+        """防回音測試案例：模擬 LINE Webhook 收到體驗碼與抽卡結果時，斷言回傳為 None（杜絕死循環卡片再次出現）"""
+        from router import route_message
+        test_messages = [
+            "體驗碼：INSIGHT-ABC123",
+            "體驗碼：INSIGHT-XYZ999\n請提供給您的精油顧問，即可了解禮盒體驗 🌿",
+            "INSIGHT-ABC123",
+            "今日能量牌陣結果：乳香、安定平衡",
+        ]
+        for msg in test_messages:
+            res = route_message("test-user-id", msg)
+            self.assertIsNone(
+                res,
+                f"收到抽卡回傳訊息 '{msg}' 時未返回 None，將導致機器人產生死循環抽卡卡片回覆！"
+            )
+
 
 if __name__ == '__main__':
     unittest.main()

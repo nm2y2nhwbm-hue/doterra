@@ -50,6 +50,10 @@ MODE_MAP = {
 }
 
 
+# 抽卡結果與體驗碼回傳攔截關鍵字（方案 A：靜默不回覆，消滅重複抽卡卡片）
+DRAW_RESULT_KEYWORDS = ["體驗碼", "INSIGHT-", "牌陣結果", "抽牌結果", "抽卡結果"]
+
+
 def _contains_any(text: str, keywords) -> bool:
     return any(kw in text for kw in keywords)
 
@@ -57,6 +61,10 @@ def _contains_any(text: str, keywords) -> bool:
 def route_message(user_id: str, text: str):
     text = (text or "").strip()
     if not text:
+        return None
+
+    # 0. 抽卡結果與體驗碼回傳辨識攔截（方案 A：直接 return None，後端靜默不回覆）
+    if _contains_any(text.upper(), [kw.upper() for kw in DRAW_RESULT_KEYWORDS]):
         return None
 
     if _contains_any(text, BLACKLIST_KEYWORDS):

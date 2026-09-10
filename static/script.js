@@ -1,4 +1,4 @@
-﻿(function(){
+(function(){
   "use strict";
 
   const API_BASE = "https://doterra-73pv.onrender.com";
@@ -465,6 +465,7 @@
     if (existingO2O2) existingO2O2.remove();
     drawnCount = 0;
     collectedResults = [];
+    isSendingExperience = false;
 
     fanItems = deckItems.map(d => ({ ...d, el: null }));
 
@@ -940,11 +941,21 @@
       <button type="button" class="ep-send-btn" id="ep-send-btn">傳送體驗碼，了解禮盒</button>
       <a class="ep-book-link" href="booking.html?code=${encodeURIComponent(code)}">或直接預約貴賓體驗 →</a>`;
     const btn = experiencePanel.querySelector('#ep-send-btn');
-    btn.addEventListener('click', () => sendExperienceCode(code, modeTitle));
+    btn.addEventListener('click', () => sendExperienceCode(code, modeTitle, false));
+
+    // 現象 1（體驗優化）：抽完卡後在 LINE LIFF 環境自動嘗試回傳至聊天室
+    // 同時保留按鈕作為 fallback，避免部分手機受限於安全限制阻擋時無法發送
+    if (isVerifiedLineSession()) {
+      sendExperienceCode(code, modeTitle, true);
+    }
   }
 
-  function sendExperienceCode(code, modeTitle){
+  let isSendingExperience = false;
+
+  function sendExperienceCode(code, modeTitle, isAuto = false){
     const btn = experiencePanel.querySelector('#ep-send-btn');
+    if (isSendingExperience) return;
+    isSendingExperience = true;
     if (btn) btn.disabled = true;
 
     if (currentDrawLineVerified && isVerifiedLineSession()) {
@@ -957,17 +968,32 @@
       };
       const codeMessage = { type: "text", text: `體驗碼：${code}\n請提供給您的精油顧問，即可了解禮盒體驗 🌿` };
 
-      sendStatus.textContent = '正在將結果送回聊天室……';
+      sendStatus.textContent = isAuto ? '正在為您自動送回 LINE 聊天室……' : '正在將結果送回聊天室……';
       liff.sendMessages([flexMessage, codeMessage]).then(() => {
         sendStatus.textContent = '已送回 LINE 聊天室 ✓';
-        if (btn) btn.disabled = false;
+        if (btn) {
+          btn.textContent = '已送回 LINE 聊天室 ✓（點擊可再次傳送）';
+          btn.disabled = false;
+        }
+        isSendingExperience = false;
       }).catch((err) => {
+        isSendingExperience = false;
         const reason = (err && err.message) ? err.message : String(err);
-        sendStatus.textContent = `送回聊天室失敗：${reason}`;
-        console.error('[liff.sendMessages error]', err);
-        if (btn) btn.disabled = false;
+        console.warn('[liff.sendMessages error]', err);
+        if (isAuto) {
+          // 若自動發送被手機客戶端安全策略或未帶 User Gesture 攔截，平滑降級至手動點擊
+          sendStatus.textContent = '請點擊下方按鈕，將抽卡結果傳送至聊天室';
+          if (btn) {
+            btn.textContent = '傳送體驗碼，了解禮盒';
+            btn.disabled = false;
+          }
+        } else {
+          sendStatus.textContent = `送回聊天室失敗：${reason}`;
+          if (btn) btn.disabled = false;
+        }
       });
     } else {
+      isSendingExperience = false;
       sendStatus.textContent = '請由已登入的 LINE LIFF 頁面傳送體驗碼';
       if (btn) btn.disabled = false;
     }
