@@ -50,12 +50,15 @@ class TestLiveEndpoints(unittest.TestCase):
         data = json.loads(body.decode('utf-8'))
         self.assertIsInstance(data, list)
         self.assertGreaterEqual(len(data), 60)
-        # 檢驗核心欄位存在
+        # 檢驗核心欄位存在（含建議零售價與官方容量）
         for item in data[:5]:
             self.assertIn('id', item)
             self.assertIn('name', item)
             self.assertIn('name_en', item)
             self.assertIn('guidance', item)
+            self.assertIn('price_retail', item)
+            self.assertIn('capacity', item)
+        self.assertLess(latency, 15000, f"Render API 延遲過高: {latency}ms")
 
     def test_live_render_api_indicators(self):
         """探測 Render API: /api/indicators 指示卡資料庫"""

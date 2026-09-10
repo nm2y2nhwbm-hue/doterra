@@ -1,10 +1,11 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 Agent 3 負責範圍：後端 API 端點自動化整合測試 (tests/test_api_endpoints.py)
+涵蓋健康檢查、精油與指示卡資料查詢、抽卡事件記錄、抽卡交接探測與安全邊界防禦。
 """
-import unittest
-import os
 import json
+import os
+import unittest
 
 # 設定測試環境變數
 os.environ['CHANNEL_ACCESS_TOKEN'] = 'test-token'
@@ -12,28 +13,47 @@ os.environ['CHANNEL_SECRET'] = 'test-secret'
 
 
 class TestApiEndpoints(unittest.TestCase):
+    """後端 API 路由完整性與安全防護測試"""
+
     def setUp(self):
         try:
             from line_bot import app
+            self.flask_app = app
             self.app = app.test_client()
             self.app.testing = True
         except ImportError:
             self.skipTest("Flask 依賴未安裝，跳過客戶端測試")
 
     def test_health_endpoint(self):
-        """測試 /health 健康檢查端點"""
+        """測試 /health 健康檢查端點（回傳版本、服務名稱與品項統計）"""
         response = self.app.get('/health')
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data)
         self.assertEqual(data.get('status'), 'ok')
+        self.assertEqual(data.get('service'), 'modern-oil-oracle-api')
+        self.assertIn('version', data)
+        self.assertGreaterEqual(data.get('catalog_items', 0), 60)
 
     def test_api_oils_endpoint(self):
-        """測試 /api/oils 回傳精油資料庫"""
+        """測試 /api/oils 精油資料庫端點（驗證容量與建議零售價映射）"""
         response = self.app.get('/api/oils')
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data)
         self.assertIsInstance(data, list)
-        self.assertGreater(len(data), 0)
+        self.assertGreaterEqual(len(data), 60)
+
+        # 檢驗第一筆精油關鍵欄位
+        sample = data[0]
+        self.assertIn('id', sample)
+        self.assertIn('name', sample)
+        self.assertIn('name_en', sample)
+        self.assertIn('guidance', sample)
+        self.assertIn('chakra', sample)
+        self.assertIn('description', sample)
+        self.assertIn('price_retail', sample)
+        self.assertIn('capacity', sample)
+        self.assertIsInstance(sample['price_retail'], int)
+        self.assertGreater(sample['price_retail'], 0)
 
     def test_api_indicators_endpoint(self):
         """測試 /api/indicators 回傳指示卡資料庫"""
@@ -41,7 +61,88 @@ class TestApiEndpoints(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data)
         self.assertIsInstance(data, list)
-        self.assertGreater(len(data), 0)
+        self.assertGreaterEqual(len(data), 12)
+        sample = data[0]
+        self.assertIn('id', sample)
+        self.assertIn('name', sample)
+
+    def test_api_draws_health_endpoint(self):
+        """測試 /api/draws/health 抽卡服務探測端點"""
+        response = self.app.get('/api/draws/health')
+        self.assertIn(response.status_code, [200, 503])
+        data = json.loads(response.data)
+        self.assertIn('status', data)
+
+    def test_api_log_draw_endpoint(self):
+        """測試 /api/log-draw POST 抽卡事件記錄"""
+        payload = {
+            "user_id": "test-user-001",
+            "display_name": "測試使用者",
+            "mode": "mirror",
+            "cards": ["乳香", "安定平衡"]
+        }
+        response = self.app.post(
+            '/api/log-draw',
+            data=json.dumps(payload),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data)
+        self.assertIn("success", data)
+
+    def test_api_create_draw_empty_payload(self):
+        """測試 /api/draws 建立抽卡紀錄於空負載時的安全拒絕 (400)"""
+        response = self.app.post(
+            '/api/draws',
+            data=json.dumps({}),
+            content_type='application/json'
+        )
+        self.assertIn(response.status_code, [400, 422, 500])
+        data = json.loads(response.data)
+        self.assertFalse(data.get('persisted', False))
+
+    def test_api_redeem_draw_invalid_token(self):
+        """測試 /api/draws/redeem 兌換無效或竄改之 Token 安全阻斷"""
+        payload = {
+            "token": "invalid-tampered-token-123",
+            "id_token": "fake-line-id-token"
+        }
+        response = self.app.post(
+            '/api/draws/redeem',
+            data=json.dumps(payload),
+            content_type='application/json'
+        )
+        self.assertIn(response.status_code, [400, 401, 403, 404, 422, 500])
+        data = json.loads(response.data)
+        self.assertFalse(data.get('persisted', False))
+
+    def test_client_ip_header_precedence(self):
+        """測試反向代理客戶端 IP 辨識優先級 (CF-Connecting-IP > X-Real-IP > X-Forwarded-For)"""
+        from api.routes import _request_client_ip
+
+        # 測試 CF-Connecting-IP 最高優先級
+        with self.flask_app.test_request_context(headers={
+            'CF-Connecting-IP': '203.0.113.195',
+            'X-Real-IP': '198.51.100.1',
+            'X-Forwarded-For': '192.0.2.1, 10.0.0.1'
+        }):
+            ip = _request_client_ip()
+            self.assertEqual(ip, '203.0.113.195')
+
+        # 測試 X-Real-IP 優先於 X-Forwarded-For
+        with self.flask_app.test_request_context(headers={
+            'X-Real-IP': '198.51.100.1',
+            'X-Forwarded-For': '192.0.2.1, 10.0.0.1'
+        }):
+            ip = _request_client_ip()
+            self.assertEqual(ip, '198.51.100.1')
+
+        # 測試 X-Forwarded-For 逗號分隔取第一個原始 IP
+        with self.flask_app.test_request_context(headers={
+            'X-Forwarded-For': '192.0.2.1, 10.0.0.1'
+        }):
+            ip = _request_client_ip()
+            self.assertEqual(ip, '192.0.2.1')
 
 
 if __name__ == '__main__':

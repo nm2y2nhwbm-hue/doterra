@@ -3,6 +3,7 @@
 Agent 3 負責範圍：全站靜態資源、圖檔路徑、JS 語法與 SEO 完整性自動化測試 (tests/test_asset_integrity.py)
 """
 import csv
+import json
 import os
 import re
 import subprocess
@@ -90,9 +91,9 @@ class TestAssetIntegrity(unittest.TestCase):
         ]
         for comp_path, static_path in pairs:
             if os.path.exists(comp_path) and os.path.exists(static_path):
-                with open(comp_path, 'r', encoding='utf-8') as f1:
+                with open(comp_path, 'r', encoding='utf-8-sig') as f1:
                     c1 = f1.read()
-                with open(static_path, 'r', encoding='utf-8') as f2:
+                with open(static_path, 'r', encoding='utf-8-sig') as f2:
                     c2 = f2.read()
                 self.assertEqual(
                     c1.strip(), c2.strip(),
@@ -114,6 +115,63 @@ class TestAssetIntegrity(unittest.TestCase):
             self.assertIn('<title>', html, f"{page} 缺少 <title> 標籤")
             self.assertIn('viewport', html.lower(), f"{page} 缺少 viewport meta 標籤")
             self.assertIn('G-LH6J1MM1LK', html, f"{page} 缺少 GA4 評估 ID G-LH6J1MM1LK")
+
+    def test_css_internal_urls_exist(self):
+        """驗證 style.css, cart.css, fonts.css 內部所有 url() 引用的字型與圖檔 100% 存在且有效"""
+        css_files = ['style.css', 'cart.css', 'fonts.css']
+        missing_urls = []
+        found_urls = 0
+        for cf in css_files:
+            cp = os.path.join(STATIC_DIR, cf)
+            if not os.path.exists(cp):
+                continue
+            with open(cp, 'r', encoding='utf-8') as f:
+                content = f.read()
+            urls = re.findall(r'url\([\'"]?([^\'")]+)[\'"]?\)', content)
+            for u in urls:
+                if u.startswith('data:'):
+                    continue
+                clean_u = u.split('?')[0].split('#')[0]
+                target_path = os.path.normpath(os.path.join(STATIC_DIR, clean_u))
+                found_urls += 1
+                if not os.path.exists(target_path):
+                    missing_urls.append((cf, u, target_path))
+
+        self.assertGreater(found_urls, 0, "未在 CSS 中找到任何 url() 資源引用")
+        self.assertEqual(len(missing_urls), 0, f"CSS 內部發現損壞的資源參照: {missing_urls}")
+
+    def test_japanese_aesthetic_specs(self):
+        """驗證 style.css 嚴格遵循日式款待美學核心規範（字型、蒔繪金箔細線、漫射光影、呼吸感行高與絲滑過渡）"""
+        style_path = os.path.join(STATIC_DIR, 'style.css')
+        self.assertTrue(os.path.exists(style_path), "缺少 style.css")
+        with open(style_path, 'r', encoding='utf-8') as f:
+            css = f.read()
+
+        self.assertIn('LINE Seed TW', css, "style.css 缺少官方 LINE Seed TW 繁中字型族系設定")
+        self.assertTrue(('184, 145, 46' in css) or ('184,145,46' in css), "缺少蒔繪金箔細線配色 (184, 145, 46)")
+        self.assertIn('--shadow-diffuse', css, "缺少日式紙行燈漫射光影 --shadow-diffuse")
+        self.assertTrue(('1.95' in css) or ('1.9' in css), "缺少「間」呼吸感行高規範 (1.9~2.0)")
+        self.assertIn('cubic-bezier', css, "缺少「所作」平滑過渡 cubic-bezier 定義")
+
+    def test_shop_items_cart_data(self):
+        """驗證首頁 index.html 調息選品卡片具備合法 data-cart-item JSON、單一建議零售價與官方容量"""
+        index_path = os.path.join(STATIC_DIR, 'index.html')
+        self.assertTrue(os.path.exists(index_path), "缺少 index.html")
+        with open(index_path, 'r', encoding='utf-8') as f:
+            html = f.read()
+
+        items_raw = re.findall(r"data-cart-item='([^']+)'", html)
+        self.assertGreaterEqual(len(items_raw), 3, "首頁調息選品卡片數量應至少 3 款")
+
+        for raw in items_raw:
+            item = json.loads(raw)
+            self.assertTrue(item.get('id'), "選品缺少 id")
+            self.assertTrue(item.get('name'), "選品缺少 name")
+            price = item.get('price')
+            self.assertIsInstance(price, int, f"{item.get('name')} 價格應為整數")
+            self.assertGreater(price, 0, f"{item.get('name')} 價格應大於 0")
+            cap = item.get('capacity', '')
+            self.assertTrue(any(v in cap for v in ['15ml', '5ml', '10ml', '115ml']), f"{item.get('name')} 容量不合規: {cap}")
 
 
 if __name__ == '__main__':

@@ -32,8 +32,10 @@ jobs:
           CHANNEL_SECRET: 'ci-secret'
         run: |
           python -m unittest tests/test_api_endpoints.py
+          if [ -f tests/test_payment_api.py ]; then python -m unittest tests/test_payment_api.py; fi
           python -m unittest tests/test_experience_handoff.py
           python -m unittest tests/test_catalog_integrity.py
+          python -m unittest tests/test_catalog_sync.py
           python -m unittest tests/test_asset_integrity.py
 
       - name: Run Live Endpoint Smoke Probes (Production)
@@ -64,3 +66,7 @@ jobs:
       - name: Run Shopping Cart Logic & LocalStorage Unit Tests
         run: |
           node tests/test_cart_logic.js
+
+      - name: Run Shopping Cart Booking Handoff Integration Tests
+        run: |
+          node tests/test_cart_integration.js
