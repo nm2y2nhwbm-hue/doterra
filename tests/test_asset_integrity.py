@@ -173,6 +173,37 @@ class TestAssetIntegrity(unittest.TestCase):
             cap = item.get('capacity', '')
             self.assertTrue(any(v in cap for v in ['15ml', '5ml', '10ml', '115ml']), f"{item.get('name')} 容量不合規: {cap}")
 
+    def test_japanese_color_contrast_ratio(self):
+        """驗證暖米紙底 (#F6F1E7) 與常磐深綠主字 (#2B3D31) 對比度符合 WCAG AA (>= 4.5:1)"""
+        def srgb_to_linear(c):
+            c = c / 255.0
+            return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+
+        def relative_luminance(r, g, b):
+            return 0.2126 * srgb_to_linear(r) + 0.7152 * srgb_to_linear(g) + 0.0722 * srgb_to_linear(b)
+
+        # 暖米底與常磐深綠
+        bg_lum = relative_luminance(246, 241, 231)  # #F6F1E7
+        text_lum = relative_luminance(43, 61, 49)    # #2B3D31
+        contrast = (bg_lum + 0.05) / (text_lum + 0.05)
+        self.assertGreaterEqual(contrast, 4.5, f"日式和色可讀性對比度不足: {contrast:.2f}:1")
+
+    def test_zen_design_tokens_and_motion(self):
+        """驗證日式侘寂款待美學核心 Design Tokens 與禪意所作緩動完整宣告"""
+        style_path = os.path.join(STATIC_DIR, 'style.css')
+        with open(style_path, 'r', encoding='utf-8') as f:
+            css = f.read()
+
+        tokens = [
+            '--paper', '--paper-deep', '--ink', '--ink-soft',
+            '--forest', '--forest-deep', '--gold', '--gold-hairline',
+            '--shadow-diffuse', '--ease-zen', '--font-family-base'
+        ]
+        for token in tokens:
+            self.assertIn(token, css, f"style.css 缺少日式美學設計 Token: {token}")
+
+        self.assertIn('cubic-bezier(0.22, 1, 0.36, 1)', css, "缺少標準所作禪意緩動 cubic-bezier")
+
 
 if __name__ == '__main__':
     unittest.main()

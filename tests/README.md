@@ -77,3 +77,12 @@ node tests/test_cart_logic.js
 node tests/test_cart_integration.js
 node tests/test_supabase_client.js
 ```
+
+---
+
+## 📋 跨 Agent 品質稽核發現與協同備忘 (Cross-Agent Memos)
+
+品管檢驗所發現之跨領域優化建議（如日式和色 Token 整併、動態留白「間」、微互動「殘心」與款待文案建議），完整登載於：
+👉 **[`tests/QA_COLLABORATION_MEMO.md`](./QA_COLLABORATION_MEMO.md)**
+
+供 **Agent 1（後端）**、**Agent 2（前端）**、**Agent 4（文案）**、**Agent 5（維運）** 隨時查閱並作為下一輪迭代之具體優化指引。
