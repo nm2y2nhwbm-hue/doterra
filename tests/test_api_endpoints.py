@@ -145,20 +145,53 @@ class TestApiEndpoints(unittest.TestCase):
             self.assertEqual(ip, '192.0.2.1')
 
     def test_line_webhook_echo_loop_prevention(self):
-        """防回音測試案例：模擬 LINE Webhook 收到體驗碼與抽卡結果時，斷言回傳為 None（杜絕死循環卡片再次出現）"""
+        """防回音與訊息路由測試案例：
+        1. 模擬 LINE Webhook 收到體驗碼與抽卡結果時，斷言回傳為 None（杜絕死循環卡片再次出現）
+        2. 正向對照組：確認正規使用者選單指令（今日能量、鏡子、河流、岔路）仍能正常回傳導向卡片
+        """
         from router import route_message
-        test_messages = [
+
+        # 1. 攔截測試：體驗碼與抽卡結果應直接靜默（return None）
+        echo_messages = [
             "體驗碼：INSIGHT-ABC123",
             "體驗碼：INSIGHT-XYZ999\n請提供給您的精油顧問，即可了解禮盒體驗 🌿",
             "INSIGHT-ABC123",
+            "insight-lowercase-001",
             "今日能量牌陣結果：乳香、安定平衡",
+            "抽牌結果：乳香、永久花",
+            "抽卡結果：神聖之蓮",
+            "這是我的體驗碼：INSIGHT-TEST99",
         ]
-        for msg in test_messages:
+        for msg in echo_messages:
             res = route_message("test-user-id", msg)
             self.assertIsNone(
                 res,
                 f"收到抽卡回傳訊息 '{msg}' 時未返回 None，將導致機器人產生死循環抽卡卡片回覆！"
             )
+
+        # 2. 正向對照組：驗證合法關鍵字未被誤殺
+        normal_cases = [
+            ("今日能量", "mode_redirect"),
+            ("鏡子 1~5", "category_redirect"),
+            ("河流 6~10", "category_redirect"),
+            ("岔路 11~12", "category_redirect"),
+            ("一般日常諮詢詢問", "category_redirect"),
+        ]
+        for keyword, expected_type in normal_cases:
+            res = route_message("test-user-id", keyword)
+            self.assertIsNotNone(
+                res,
+                f"合法指令 '{keyword}' 遭誤判為 None！"
+            )
+            self.assertEqual(
+                res.get("type"),
+                expected_type,
+                f"合法指令 '{keyword}' 回傳之類型錯誤：預期 {expected_type}，實際取得 {res.get('type')}"
+            )
+
+        # 3. 空訊息測試
+        self.assertIsNone(route_message("test-user-id", ""))
+
 
 
 if __name__ == '__main__':
