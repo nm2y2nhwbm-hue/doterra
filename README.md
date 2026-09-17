@@ -51,17 +51,64 @@
 
 ---
 
-## 🏛️ 3. 五大 Agent 專業分工體系 (Five-Agent Architecture)
+## 🏛️ 3. 五大 Agent 專業分工體系 (Five-Agent Architecture · TDD 品管優先編制)
 
-專案全面落實目錄級三權分立與五星專業分工，嚴禁越權跨目錄修改：
+專案全面落實「測試先行 (TDD)、後端接力、前端收斂」之五星專業分工與目錄級三權分立，嚴禁越權跨目錄修改：
 
 | 代理人角色 | 專屬目錄 | 職責與管轄範圍 |
 | :--- | :--- | :--- |
-| 🛡️ **Agent 1（後端工程師）** | [`/api/`](api/) | API 路由藍圖（`/health`, `/api/oils`, `/api/draws`）、LINE Webhook 簽章驗證、Supabase RPC 安全互動 |
-| 🎨 **Agent 2（前端切版工程師）** | [`/components/`](components/) | 日式 UI 元件庫（側滑購物車 Drawer、首頁選品、圖鑑彈窗）、CSS 樣式表、發布目錄 [`/static/`](static/) |
-| 🧪 **Agent 3（品管與測試工程師）** | [`/tests/`](tests/) | 12 大深度自動化測試套件（Testing Depth 2.0）、CI/CD 管線（`.github/workflows/`）、活體端點監控、零破圖與語法檢驗 |
-| 📦 **Agent 4（商品與文案主編）** | [`/catalog/`](catalog/) | 131 款精油資料庫母體（`doterra.csv`）、單一建議零售價審查、自然醫學文案合規、同步工具（`sync_catalog.py`） |
-| 💳 **Agent 5（維運與金流工程師）** | [`/infra/`](infra/) | 自訂獨立頂級網域 DNS 解析配置、Vercel / Render 規格、綠界 ECPay / LINE Pay 第三方線上金流架構 |
+| 🛡️ **Agent 1（品管與測試工程師）** | [`/tests/`](tests/) | 第一順位品質守護，全站 12 大深度測試矩陣（Testing Depth 2.0）、CI/CD 管線（`.github/workflows/`）、活體端點監控、全站「照妖鏡」資安審計與品質驗收清單（`QA_ACCEPTANCE_CRITERIA.md`） |
+| ⚙️ **Agent 2（後端工程師）** | [`/api/`](api/) | 核心業務邏輯與 API 路由藍圖（`/health`, `/api/oils`, `/api/draws`, `/api/payments/create`）、LINE Webhook 防回音路由、Supabase RPC 安全互動與金流訂單持久化 |
+| 🎨 **Agent 3（前端切版工程師）** | [`/components/`](components/) | 日式美學 UI 元件庫（側滑購物車 Drawer、首頁選品、圖鑑彈窗）、CSS 和色樣式表、發布目錄 [`/static/`](static/) 與全站 XSS `escapeHtml` 實體轉義 |
+| 📦 **Agent 4（商品與文案主編）** | [`/catalog/`](catalog/) | 131 款精油資料庫母體（`doterra.csv`）、官方單一建議零售價審定、官方標準容量規範、合規自然醫學文案把關與商品圖鑑同步工具（`sync_catalog.py`） |
+| 💳 **Agent 5（維運與金流工程師）** | [`/infra/`](infra/) | 自訂獨立頂級網域 DNS 解析配置、Vercel 邊緣 CDN、Render 外部 Ingress 活躍保溫探測、綠界 ECPay / LINE Pay 第三方線上金流架構與 Supabase 憑證安全 |
+
+---
+
+### ⚡ 3.1 Antigravity 團隊協同與裂變標準指令庫
+
+在 Google Antigravity 2.0 桌面端或 IDE 中，可直接在對話框複製貼上下列標準指令：
+
+#### 🚀 指令 A：五星 Subagent 協同團隊裂變標準指令（全自動模式）
+```text
+/teamwork-preview 請讀取本專案根目錄之 AGENTS.md，嚴格依據最新「五星專業分工架構（TDD 品管優先編制）」組建協同團隊。
+
+【重要命名要求】：調用 Subagent 時，請將各子代理的 Role（名稱）嚴格命名為帶有編號的完整格式，不得省略 Agent 編號：
+
+1. Role: "Agent 1: 品管與測試工程師 (/tests/, CI/CD)"
+   - 專屬邊界 `/tests/`：第一順位品質守護，優先執行全站 12 大深度自動化測試矩陣（`run_all_tests.py`）與全站「照妖鏡」資安審計，產出驗收報告與待修清單。
+2. Role: "Agent 2: 後端工程師 (/api/, line_bot.py)"
+   - 專屬邊界 `/api/` 與進入點 `line_bot.py`：依據 Agent 1 驗收報告實作 Flask API、防回音 Webhook、Supabase RPC 安全交互與金流訂單持久化。
+3. Role: "Agent 3: 前端切版工程師 (/components/, /static/)"
+   - 專屬邊界 `/components/` 與 `/static/`：對接已通過 Agent 1 驗收與 Agent 2 實作之穩定 API，優化日式美學 UI、購物車 Drawer 與落實全站 XSS `escapeHtml` 轉義。
+4. Role: "Agent 4: 商品與文案主編 (/catalog/, doterra.csv)"
+   - 專屬邊界 `/catalog/`：維護 131 款精油母體資料庫、官方定價審定、規格容量統一與自然醫學合規文案把關。
+5. Role: "Agent 5: 維運與金流工程師 (/infra/)"
+   - 專屬邊界 `/infra/`：負責 Vercel 邊緣 CDN、自訂網域 DNS、Render 外部 Ingress 活躍保溫、金流閘道器架構與憑證安全。
+
+請各 Subagent 先執行工作前 Git 狀態點檢，嚴格恪守目錄邊界，依序推進任務並向主控回報成果！
+```
+
+#### 🧹 指令 B：全站 5S 目錄邊界整頓 ＋ Git 全自動同步指令
+```text
+請依據根目錄之 AGENTS.md「五星專業分工架構（TDD 品管優先編制）」，即刻執行「全站 5S 目錄邊界徹底整頓」與「Git 自動化同步」：
+
+【第一階段：全站 5S 目錄分類與純淨化】
+1. 嚴格對照五大 Agent 專屬管轄目錄與根目錄邊界（Agent 1: tests, Agent 2: api/line_bot, Agent 3: components/static, Agent 4: catalog/doterra.csv, Agent 5: infra/supabase）。
+2. 徹底清理專案中的 `__pycache__`、臨時暫存檔、無效碎檔與幽靈空目錄。
+3. 【防呆鐵律】：資料母體 `doterra.csv` 與進入點 `line_bot.py` 維持現有絕對/相對路徑參照，禁止破壞 Production 行為。
+
+【第二階段：全量自動化測試健康自檢】
+- 執行 `python tests/run_all_tests.py`，確保全站 12 大深度測試矩陣 100% 綠燈全數通過，無任何斷言失敗。
+
+【第三階段：Git 全自動同步推送】
+- 測試全綠燈後，立即執行 Git 操作：
+  1. `git add -A`
+  2. `git commit -m "feat(5s): 依五星 TDD 架構完成目錄邊界 5S 整頓與全站測試綠燈驗收"`
+  3. `git push origin main`
+
+完成後，請輸出整頓後的「五星專案結構樹狀圖」與「Git 推送成功之 Commit 摘要」！
+```
 
 ---
 
