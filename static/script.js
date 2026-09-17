@@ -287,8 +287,8 @@
       const theme = INDICATOR_THEMES[ind.name] || '';
       item.innerHTML = `
         <div style="display:flex;flex-direction:column;gap:2px;">
-          <span><b>${ind.name}</b> <span class="en">${ind.name_en || ''}</span></span>
-          <span style="font-size:11.5px;color:#8a7c6c;">${theme}</span>
+          <span><b>${escapeHtml(ind.name)}</b> <span class="en">${escapeHtml(ind.name_en || '')}</span></span>
+          <span style="font-size:11.5px;color:#8a7c6c;">${escapeHtml(theme)}</span>
         </div>`;
       item.addEventListener('click', () => {
         selectedIndicatorName = ind.name;
@@ -495,7 +495,7 @@
 
   function flipCardInPlace(item, label){
     item.el.classList.add('revealed');
-    item.el.innerHTML = `<img src="${item.card.image_url}" alt="${item.card.name}"><div class="mini-cap">${item.card.name}</div>`;
+    item.el.innerHTML = `<img src="${escapeHtml(safeImageUrl(item.card.image_url))}" alt="${escapeHtml(item.card.name)}"><div class="mini-cap">${escapeHtml(item.card.name)}</div>`;
   }
 
   function drawStandardCard(item){

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Agent 3 負責範圍：精油圖鑑資料庫完整性、建議零售價與法規合規測試 (tests/test_catalog_integrity.py)
+Agent 1 負責範圍：精油圖鑑資料庫完整性、建議零售價與法規合規測試 (tests/test_catalog_integrity.py) [檢驗 Agent 4 資料母體邊界]
 """
 import csv
 import json

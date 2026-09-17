@@ -1,5 +1,5 @@
 /**
- * Agent 3 負責範圍：前端購物車狀態管理與價格計算單元測試 (tests/test_cart_logic.js)
+ * Agent 1 負責範圍：前端購物車狀態管理與價格計算單元測試 (tests/test_cart_logic.js) [檢驗 Agent 3 前端邊界]
  */
 const assert = require('node:assert/strict');
 const fs = require('node:fs');

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Agent 3 負責範圍：後端 API 端點自動化整合測試 (tests/test_api_endpoints.py)
+Agent 1 負責範圍：後端 API 端點自動化整合測試 (tests/test_api_endpoints.py) [檢驗 Agent 2 後端邊界]
 涵蓋健康檢查、精油與指示卡資料查詢、抽卡事件記錄、抽卡交接探測與安全邊界防禦。
 """
 import json

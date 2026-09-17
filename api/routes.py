@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Agent 1 負責範圍：後端 API 路由藍圖 (api/routes.py)
+Agent 2 負責範圍：後端 API 路由藍圖 (api/routes.py)
 包含健康檢查、精油與指示卡資料查詢、抽卡紀錄、體驗碼交接等核心端點。
 """
+import os
 from flask import Blueprint, request, jsonify, Response
 from core import database_manager as db
 from core import draw_logger
@@ -50,10 +51,12 @@ def health():
         oils_count = len(db.fetch_oils_data())
     except Exception:
         oils_count = 0
+    env = os.environ.get('ENVIRONMENT', 'production' if not os.environ.get('FLASK_DEBUG') else 'development')
     return jsonify({
         "status": "ok",
         "service": "modern-oil-oracle-api",
         "version": "2.3.0",
+        "environment": env,
         "catalog_items": oils_count,
     })
 
@@ -114,9 +117,13 @@ def api_create_draw():
 
 
 @api_bp.route("/api/draws/redeem", methods=['POST'])
+@api_bp.route("/api/exchange-token", methods=['POST'])
+@api_bp.route("/api/verify-draw", methods=['POST'])
 def api_redeem_draw():
-    """LINE 用戶兌換並解鎖體驗碼。"""
+    """LINE 用戶兌換並解鎖體驗碼（支援 /api/draws/redeem, /api/exchange-token, /api/verify-draw）。"""
     data = request.get_json(silent=True) or {}
+    if isinstance(data, dict) and "token" in data and "handoff_token" not in data:
+        data["handoff_token"] = data["token"]
     try:
         result = experience_handoff.redeem_draw(data)
         return _no_store_json(result)

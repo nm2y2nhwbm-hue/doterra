@@ -1,19 +1,19 @@
-# 🛡️ Agent 1：後端服務與 API 目錄 (`/api/`)
+# 🛡️ Agent 2：後端服務與 API 目錄 (`/api/`)
 
-本目錄為 **Agent 1（後端工程師）** 專屬維護範圍，掌管所有後端 API 端點、資料庫連線、LINE Webhook 接收、第三方金流核心與伺服器端資安防禦。
+本目錄為 **Agent 2（後端工程師）** 專屬維護範圍，掌管所有後端 API 端點、資料庫連線、LINE Webhook 接收、第三方金流核心與伺服器端資安防禦。
 
 ---
 
 ## 📌 負責職責與路由藍圖
 1. **API 路由與協議**：
-   * `GET /health`：後端存活探測（版本 `v2.3.0`）
+   * `GET /health`：後端存活探測（版本 `v2.3.0`，包含環境標籤與品項統計）
    * `GET /api/keep-warm`：**「間（Ma）」** 心跳探測與守護保溫狀態端點
    * `GET /api/oils`：131 款精油資料庫讀取（容量與建議零售價）
    * `GET /api/indicators`：12 款指示卡資料庫讀取
    * `POST /api/log-draw`：抽卡歷程記錄
    * `GET /api/draws/health`：抽卡交接服務探測
    * `POST /api/draws`：抽卡紀錄防刷與短效加密 Handoff Token 發放
-   * `POST /api/draws/redeem`：身分驗證與體驗碼兌換
+   * `POST /api/draws/redeem`（別名 `POST /api/exchange-token`, `POST /api/verify-draw`）：身分驗證與體驗碼兌換
    * `POST /api/payments/create`：建立付款訂單（商品金額伺服器端重算防偽）
    * `POST /api/payments/ecpay/callback`：綠界科技 ECPay 異步背景回調驗簽（`1|OK` 回應）
    * `GET /api/payments/status/<order_id>`：訂單付款狀態去敏查詢

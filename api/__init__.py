@@ -1,6 +1,6 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
-Agent 1 負責範圍：後端 API 模組 (api/__init__.py)
+Agent 2 負責範圍：後端 API 模組 (api/__init__.py)
 """
 from .routes import api_bp
 

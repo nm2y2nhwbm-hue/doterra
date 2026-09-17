@@ -1,5 +1,5 @@
 /**
- * Agent 3 負責範圍：購物車與預約結帳系統整合測試 (tests/test_cart_integration.js)
+ * Agent 1 負責範圍：購物車與預約結帳系統整合測試 (tests/test_cart_integration.js) [檢驗 Agent 3 前端邊界]
  * 驗證購物車資料模型、結帳參數序列化至 booking.html 之 URL 查詢參數、
  * 多品項加乘運算精度與空車禁用防呆機制。
  */

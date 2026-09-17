@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Agent 3 專用：全站自動化測試統一調度器 (tests/run_all_tests.py)
+Agent 1 專用：全站自動化測試統一調度器 (tests/run_all_tests.py)
 一鍵調度 Python 與 Node.js 雙環境全量測試套件，涵蓋 L1~L6 六大深度檢驗階層。
 """
 import os
@@ -20,27 +20,27 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TESTS_DIR = os.path.join(BASE_DIR, 'tests')
 
 PYTHON_SUITES = [
-    ('test_api_endpoints.py', 'L3 後端 API 與防偽邊界', 'Agent 1'),
-    ('test_experience_handoff.py', 'L3 短效 Token 防刷加密', 'Agent 1'),
+    ('test_api_endpoints.py', 'L3 後端 API 與防偽邊界', 'Agent 2'),
+    ('test_experience_handoff.py', 'L3 短效 Token 防刷加密', 'Agent 2'),
     ('test_catalog_integrity.py', 'L2 資料庫與建議零售價', 'Agent 4'),
     ('test_catalog_sync.py', 'L2 目錄同步與冪等校驗', 'Agent 4'),
-    ('test_asset_integrity.py', 'L4 日式美學與資產零破圖', 'Agent 2'),
+    ('test_asset_integrity.py', 'L4 日式美學與資產零破圖', 'Agent 3'),
     ('test_live_endpoints.py', 'L5 正式環境活體韌性探測', 'Agent 5 / 營運'),
 ]
 
 # 若本機工作區已建置金流與資安測試則一併納入
 if os.path.isfile(os.path.join(TESTS_DIR, 'test_payment_api.py')):
-    PYTHON_SUITES.insert(1, ('test_payment_api.py', 'L3 第三方金流與防偽驗簽', 'Agent 5 / Agent 1'))
+    PYTHON_SUITES.insert(1, ('test_payment_api.py', 'L3 第三方金流與防偽驗簽', 'Agent 5 / Agent 2'))
 
 if os.path.isfile(os.path.join(TESTS_DIR, 'test_security_audit.py')):
-    PYTHON_SUITES.append(('test_security_audit.py', 'L3 資安漏洞與自然醫學法規', 'Agent 3 照妖鏡'))
+    PYTHON_SUITES.append(('test_security_audit.py', 'L3 資安漏洞與自然醫學法規', 'Agent 1 照妖鏡'))
 
 
 NODE_SUITES = [
-    ('test_js_syntax.js', 'L1 全站 JS AST 語法編譯', 'Agent 2 / Agent 3'),
-    ('test_cart_logic.js', 'L4 購物車核心狀態單元測試', 'Agent 2'),
-    ('test_cart_integration.js', 'L4 預約結帳資料合約整合', 'Agent 2'),
-    ('test_supabase_client.js', 'L3 前端 RPC 客戶端安全', 'Agent 1 / Agent 2'),
+    ('test_js_syntax.js', 'L1 全站 JS AST 語法編譯', 'Agent 3 / Agent 1'),
+    ('test_cart_logic.js', 'L4 購物車核心狀態單元測試', 'Agent 3'),
+    ('test_cart_integration.js', 'L4 預約結帳資料合約整合', 'Agent 3'),
+    ('test_supabase_client.js', 'L3 前端 RPC 客戶端安全', 'Agent 2 / Agent 3'),
 ]
 
 
@@ -87,7 +87,7 @@ def run_suite(cmd, label):
 
 def main():
     print("=" * 80)
-    print("🧪 [Agent 3] 啟動全站深度自動化測試矩陣 (Testing Depth 2.0)")
+    print("🧪 [Agent 1] 啟動全站深度自動化測試矩陣 (Testing Depth 2.0)")
     print("=" * 80)
 
     total_start = time.time()
@@ -129,7 +129,7 @@ def main():
     # 3. 輸出彙總報表
     total_elapsed = time.time() - total_start
     print("\n" + "=" * 80)
-    print(f"📊 [Agent 3] 全矩陣檢驗報表 (總耗時: {total_elapsed:.2f}s)")
+    print(f"📊 [Agent 1] 全矩陣檢驗報表 (總耗時: {total_elapsed:.2f}s)")
     print("=" * 80)
     print(f"{'狀態':<8} {'測試模組檔案':<28} {'涵蓋層級與檢驗項目':<26} {'邊界歸屬':<16} {'耗時'}")
     print("-" * 80)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Agent 3 負責範圍：全站靜態資源、圖檔路徑、JS 語法與 SEO 完整性自動化測試 (tests/test_asset_integrity.py)
+Agent 1 負責範圍：全站靜態資源、圖檔路徑、JS 語法與 SEO 完整性自動化測試 (tests/test_asset_integrity.py) [檢驗 Agent 3 前端邊界]
 """
 import csv
 import json

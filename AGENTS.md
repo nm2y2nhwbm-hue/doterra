@@ -4,33 +4,33 @@
 
 本檔案適用於整個 `nm2y2nhwbm-hue/doterra` repository。開始工作前先閱讀本檔案；若未來子目錄另有 `AGENTS.md` 或 `AGENTS.override.md`，以較接近工作檔案的規則為優先。
 
-## 五大 Agent 職責與目錄邊界（五星專業分工架構）
+## 五大 Agent 職責與目錄邊界（五星專業分工架構 · TDD 品管優先編制）
 
-依據專案團隊升級規劃，專案劃分為五大獨立邊界目錄，各 Agent 嚴禁越權跨目錄修改：
+依據專案團隊升級規劃，專案劃分為五大獨立邊界目錄，落實「測試先行、後端接力、前端收斂」之專業分工，各 Agent 嚴禁越權跨目錄修改：
 
-1. **Agent 1 → `/api/`（後端工程師，當前助理專屬負責）**
+1. **Agent 1 → `/tests/`（品管與測試工程師，第一順位品質守護）**
+   - **專屬負責目錄**：`/tests/` 與 CI/CD 管線 (`.github/workflows/`)。
+   - **職責**：以「照妖鏡」為核心，優先執行全站 12 大深度測試矩陣（`run_all_tests.py`）、全站資安漏洞掃描（XSS / 金流防刷 / 雙寫持久化）、API 整合端點測試、精油資料母體完整性稽核與產出跨 Agent 驗收標準清單。
+   - **嚴格守則**：專注於撰寫、維護測試套件與產出驗收報告，嚴禁跨目錄修改業務邏輯。
+
+2. **Agent 2 → `/api/`（後端工程師，依約實作核心邏輯）**
    - **專屬負責目錄**：`/api/` 以及後端進入點 `line_bot.py` 的 Blueprint 註冊。
-   - **職責**：Flask API 端點（`/health`, `/api/oils`, `/api/indicators`, `/api/draws`）、LINE Webhook 簽章校驗與分發、Supabase RPC 安全互動、安全 Token 防刷指紋與後端業務邏輯。
+   - **職責**：Flask API 端點（`/health`, `/api/oils`, `/api/indicators`, `/api/draws`, `/api/payments/create`）、LINE Webhook 簽章校驗與防回音分發、Supabase RPC 安全互動、安全 Token 防刷指紋與後端金流訂單持久化。
    - **嚴格守則**：專注後端邏輯與 `/api/` 目錄，**嚴禁修改前端 UI 元件 (`/components/`)、靜態切版 (`/static/`) 與測試 (`/tests/`)**。
 
-2. **Agent 2 → `/components/`（前端切版工程師，由前端 Agent 專屬負責）**
+3. **Agent 3 → `/components/`（前端切版工程師，安全美學收斂）**
    - **專屬負責目錄**：`/components/` 與發布目錄 `/static/`。
-   - **職責**：日式美學 UI 元件（購物車 Cart Drawer、調息選品卡片、精油圖鑑彈窗、導覽列）、HTML5 頁面切版、CSS 樣式表、前端 JavaScript 互動邏輯。
+   - **職責**：對接已通過 Agent 1 驗收與 Agent 2 實作之穩定 API；維護日式美學 UI 元件（購物車 Cart Drawer、調息選品卡片、精油圖鑑彈窗、導覽列）、HTML5 頁面切版、CSS 和色樣式表、前端 JavaScript 互動邏輯與全站 XSS `escapeHtml` 實體轉義防護。
    - **嚴格守則**：不修改後端伺服器邏輯 (`/api/`)、自動化測試 (`/tests/`) 與商品定價母體 (`/catalog/`)。
 
-3. **Agent 3 → `/tests/`（品管與測試工程師，由測試 Agent 專屬負責）**
-   - **專屬負責目錄**：`/tests/` 與 CI/CD 管線 (`.github/workflows/`)。
-   - **職責**：單元測試、API 整合端點測試（`test_api_endpoints.py`）、交接 Token 安全校驗（`test_experience_handoff.py`）、資料庫與建議零售價完整性稽核（`test_catalog_integrity.py`）、線上活體端點驗證（`test_live_endpoints.py`）、前端元件與購物車邏輯驗證（`test_cart_logic.js`）、CI/CD 驗證與品質把關。
-   - **嚴格守則**：專注於撰寫、維護測試套件與產出驗證報告，嚴禁跨目錄修改業務邏輯。
-
-4. **Agent 4 → `/catalog/`（商品與文案主編，由內容 Agent 專屬負責）**
+4. **Agent 4 → `/catalog/`（商品與文案主編，資料母體合規把關）**
    - **專屬負責目錄**：`/catalog/` 與商品資料母體（`doterra.csv`, `indicator_cards.csv`）。
    - **職責**：131 款精油資料庫維護、官方單一建議零售價審定、官方標準容量（15ml / 5ml / 10ml 滾珠 / 115ml）、合規自然醫學文案把關（消滅醫療法規爭議詞彙）、商品圖鑑同步腳本（`sync_catalog.py`）。
    - **嚴格守則**：不更動前後端程式碼與測試套件，僅專注於資料母體與文案合規。
 
-5. **Agent 5 → `/infra/`（維運與金流工程師，由維運 Agent 專屬負責）**
+5. **Agent 5 → `/infra/`（維運與金流工程師，雲端基建與邊緣安全）**
    - **專屬負責目錄**：`/infra/`。
-   - **職責**：自訂獨立品牌頂級網域 DNS 解析配置、Vercel 邊緣 CDN 與 Render 伺服器規格、第三方線上金流閘道器（綠界 ECPay / LINE Pay）架構規格、Supabase RLS 與憑證安全管理。
+   - **職責**：自訂獨立品牌頂級網域 DNS 解析配置、Vercel 邊緣 CDN 與 Render 伺服器規格、第三方線上金流閘道器（綠界 ECPay / LINE Pay）架構規格、Supabase RLS 與憑證安全管理、外部 Ingress 活躍保溫探測。
    - **嚴格守則**：不修改核心業務 API 與前端樣式，任何金流密鑰嚴禁硬編碼。
 
 

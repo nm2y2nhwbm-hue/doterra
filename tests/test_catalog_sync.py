@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Agent 3 負責範圍：商品目錄同步腳本與資料庫對齊深度測試 (tests/test_catalog_sync.py)
+Agent 1 負責範圍：商品目錄同步腳本與資料庫對齊深度測試 (tests/test_catalog_sync.py) [檢驗 Agent 4 目錄邊界]
 檢驗 Agent 4 之 catalog/sync_catalog.py 執行邏輯、冪等性，以及 doterra.csv 與 oils-catalog.json 1:1 精準映射。
 """
 import csv

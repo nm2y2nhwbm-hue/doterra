@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Agent 3 負責範圍：全站資安漏洞、XSS 注入防護與自然醫學法規邊界自動化稽核 (tests/test_security_audit.py)
+Agent 1 負責範圍：全站資安漏洞、XSS 注入防護與自然醫學法規邊界自動化稽核 (tests/test_security_audit.py)
 檢驗項目：
 1. 前端 XSS 注入防護稽核：檢驗涉及 innerHTML 動態渲染之腳本是否具備 escapeHtml 機制
 2. 衛福部法規與自然醫學合規稽核：嚴格檢驗 doterra.csv 與 indicator_cards.csv 零醫療違規詞彙
@@ -63,6 +63,15 @@ class TestSecurityAndComplianceAudit(unittest.TestCase):
 
         self.assertIn("function escapeHtml", code, "booking.js 缺少 escapeHtml 函式！")
 
+    def test_sites_js_xss_protection(self):
+        """安全稽核：確認 sites.js 服務監測儀表板具備 escapeHtml 與 sanitizeUrl 雙層防護"""
+        sites_js_path = BASE_DIR / "static" / "sites.js"
+        self.assertTrue(sites_js_path.exists())
+        code = sites_js_path.read_text(encoding="utf-8")
+
+        self.assertIn("function escapeHtml", code, "sites.js 缺少 escapeHtml 函式！")
+        self.assertIn("function sanitizeUrl", code, "sites.js 缺少 sanitizeUrl 函式！")
+
     def test_inventory_and_cart_xss_audit_tracking(self):
         """
         照妖鏡安全追蹤：盤查 inventory.js 與 cart.js 的 innerHTML 轉義完整性
@@ -81,7 +90,7 @@ class TestSecurityAndComplianceAudit(unittest.TestCase):
             cart_code = cart_js.read_text(encoding="utf-8")
             has_cart_escape = "escapeHtml" in cart_code
 
-        # 嚴格斷言：確認 Agent 2 已完成全站 XSS 實體轉義與 URL 安全過濾
+        # 嚴格斷言：確認 Agent 3 已完成全站 XSS 實體轉義與 URL 安全過濾
         self.assertTrue(has_inventory_escape, "static/inventory.js 必須包含 escapeHtml 轉義函式！")
         self.assertTrue(has_cart_escape, "components/cart/cart.js 必須包含 escapeHtml 轉義函式！")
         self.assertIn("sanitizeUrl", inv_code, "static/inventory.js 必須包含 sanitizeUrl 函式！")

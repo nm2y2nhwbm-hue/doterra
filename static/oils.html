@@ -333,6 +333,25 @@
       console.error('資料載入異常:', err);
     });
 
+    function escapeHtml(str) {
+      if (str == null) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function sanitizeUrl(url) {
+      if (!url) return 'images/logo-emblem.png';
+      const clean = String(url).trim();
+      if (/^(https?:\/\/|\/|images\/)/i.test(clean)) {
+        return clean.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      }
+      return 'images/logo-emblem.png';
+    }
+
     function renderCards() {
       const container = document.getElementById('cards-container');
       container.innerHTML = '';
@@ -348,19 +367,24 @@
         item.onclick = () => openModal(c);
 
         let pillarClass = 'tag-balance';
-        if (c.pillar.includes('右柱')) pillarClass = 'tag-mercy';
-        if (c.pillar.includes('左柱')) pillarClass = 'tag-severity';
+        if (c.pillar && c.pillar.includes('右柱')) pillarClass = 'tag-mercy';
+        if (c.pillar && c.pillar.includes('左柱')) pillarClass = 'tag-severity';
 
         let safetyText = '🌿 直塗可';
         if (c.dilution_guide === '敏感') safetyText = '⚠️ 敏感需稀釋';
         if (c.dilution_guide === '稀釋') safetyText = '💧 必須稀釋';
 
+        const imgSrc = sanitizeUrl(`images/${c.image_filename}`);
+        const pillarTag = escapeHtml((c.pillar || '').split(' ')[0]);
+        const name = escapeHtml(c.name || '');
+        const nameEn = escapeHtml(c.name_en || '');
+
         item.innerHTML = `
-          <img src="images/${c.image_filename}" class="card-preview-img" onerror="this.src='images/logo-emblem.png'">
-          <span class="card-pillar-tag ${pillarClass}">${c.pillar.split(' ')[0]}</span>
-          <div class="card-preview-name">${c.name}</div>
-          <div class="card-preview-en">${c.name_en}</div>
-          <div style="font-size:11.5px; color:var(--ink-soft); font-weight:500;">${safetyText}</div>
+          <img src="${imgSrc}" class="card-preview-img" onerror="this.src='images/logo-emblem.png'" alt="${name}">
+          <span class="card-pillar-tag ${pillarClass}">${pillarTag}</span>
+          <div class="card-preview-name">${name}</div>
+          <div class="card-preview-en">${nameEn}</div>
+          <div style="font-size:11.5px; color:var(--ink-soft); font-weight:500;">${escapeHtml(safetyText)}</div>
         `;
         container.appendChild(item);
       });
@@ -396,15 +420,25 @@
       tbody.innerHTML = '';
       items.forEach(it => {
         const tr = document.createElement('tr');
+        const sku = escapeHtml(it.sku || '');
+        const name = escapeHtml(it.name || '');
+        const cap = escapeHtml(it.capacity || '15ml');
+        const price = Number(it.price) || 1310;
+        const pillarTag = escapeHtml((it.pillar || '').split(' ')[0]);
+        const pClass = (it.pillar && it.pillar.includes('右柱')) ? 'tag-mercy' : (it.pillar && it.pillar.includes('左柱')) ? 'tag-severity' : 'tag-balance';
+        const usage = escapeHtml(it.usage_tags || '');
+        const dilution = escapeHtml(it.dilution_guide || '');
+        const advice = escapeHtml(it.doctor_advice || '');
+
         tr.innerHTML = `
-          <td style="font-family:monospace; color:var(--sage);">${it.sku}</td>
-          <td><b>${it.name}</b></td>
-          <td><span style="font-size:11.5px;color:var(--forest-deep);background:var(--paper-deep);padding:3px 7px;border-radius:4px;font-weight:600;">${it.capacity || '15ml'}</span></td>
-          <td><b style="color:var(--forest-deep);font-size:13.5px;">NT$ ${(it.price || 1310).toLocaleString()}</b></td>
-          <td><span class="card-pillar-tag ${it.pillar.includes('右柱') ? 'tag-mercy' : it.pillar.includes('左柱') ? 'tag-severity' : 'tag-balance'}">${it.pillar.split(' ')[0]}</span></td>
-          <td>${it.usage_tags}</td>
-          <td>${it.dilution_guide}</td>
-          <td style="font-size:12.5px; color:var(--ink); line-height:1.6;">${it.doctor_advice}</td>
+          <td style="font-family:monospace; color:var(--sage);">${sku}</td>
+          <td><b>${name}</b></td>
+          <td><span style="font-size:11.5px;color:var(--forest-deep);background:var(--paper-deep);padding:3px 7px;border-radius:4px;font-weight:600;">${cap}</span></td>
+          <td><b style="color:var(--forest-deep);font-size:13.5px;">NT$ ${price.toLocaleString()}</b></td>
+          <td><span class="card-pillar-tag ${pClass}">${pillarTag}</span></td>
+          <td>${usage}</td>
+          <td>${dilution}</td>
+          <td style="font-size:12.5px; color:var(--ink); line-height:1.6;">${advice}</td>
         `;
         tbody.appendChild(tr);
       });

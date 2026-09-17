@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Agent 3 負責範圍：第三方金流（綠界 ECPay / LINE Pay）自動化整合測試 (tests/test_payment_api.py)
+Agent 1 負責範圍：第三方金流（綠界 ECPay / LINE Pay）自動化整合測試 (tests/test_payment_api.py) [檢驗 Agent 5 / Agent 2 金流邊界]
 檢驗項目：
 1. 金額伺服器端防偽重算（拒絕前端偽造價格、負數、不存在品項）
 2. 顧客資訊合法性校驗（姓名限制、聯絡方式必填一項）

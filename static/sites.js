@@ -30,9 +30,28 @@
     { key: 'line',     name: 'LINE Developers', api: 'https://api.line-status.info/api/v2/status.json', page: 'https://api.line-status.info/', note: 'Messaging API／LINE Developers／LIFF／LINE Login' },
   ];
 
+  function escapeHtml(str){
+    if (str == null) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function sanitizeUrl(url){
+    if (!url) return '';
+    const clean = String(url).trim();
+    if (/^(https?:\/\/|\/|images\/)/i.test(clean)) {
+      return clean.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    return '';
+  }
+
   function statusBadgeHtml(level, text){
     const cls = level === 'ok' ? 'status-done' : level === 'warn' ? 'status-pending' : level === 'bad' ? 'status-cancelled' : 'status-contacted';
-    return `<span class="status-badge ${cls}">${text}</span>`;
+    return `<span class="status-badge ${cls}">${escapeHtml(text)}</span>`;
   }
 
   function fetchWithTimeout(url, opts = {}, timeoutMs = 6000){
@@ -125,16 +144,20 @@
   function renderRow(container, title, sub, result, linkUrl){
     const el = document.createElement('div');
     el.className = 'booking-card';
+    const safeTitle = escapeHtml(title || '');
+    const safeSub = escapeHtml(sub || '');
+    const safeDetail = escapeHtml(result.detail || '');
+    const safeLink = sanitizeUrl(linkUrl);
     el.innerHTML = `
       <div class="booking-card-head">
         <div>
-          <div class="booking-receipt">${title}</div>
-          <div class="booking-created">${sub || ''}</div>
+          <div class="booking-receipt">${safeTitle}</div>
+          <div class="booking-created">${safeSub}</div>
         </div>
         ${statusBadgeHtml(result.level, result.label)}
       </div>
-      ${result.detail ? `<div class="booking-row">${result.detail}</div>` : ''}
-      ${linkUrl ? `<div class="booking-actions"><a class="draw-toggle-btn" href="${linkUrl}" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block;">開啟官方頁面 →</a></div>` : ''}
+      ${safeDetail ? `<div class="booking-row">${safeDetail}</div>` : ''}
+      ${safeLink ? `<div class="booking-actions"><a class="draw-toggle-btn" href="${safeLink}" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block;">開啟官方頁面 →</a></div>` : ''}
     `;
     container.appendChild(el);
   }

@@ -10,6 +10,15 @@
     return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
+  function sanitizeUrl(url) {
+    if (!url) return 'images/logo-emblem.png';
+    const clean = String(url).trim();
+    if (/^(https?:\/\/|\/|images\/)/i.test(clean)) {
+      return clean.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    return 'images/logo-emblem.png';
+  }
+
   function localDateString(){
     const now = new Date();
     const offset = now.getTimezoneOffset() * 60000;
@@ -62,7 +71,7 @@
         cartListEl.innerHTML = cartItems.map(item => `
           <div class="csb-item">
             <div style="display:flex;align-items:center;gap:10px;">
-              <img src="${escapeHtml(item.image || 'images/logo-emblem.png')}" alt="${escapeHtml(item.name || '')}" class="csb-item-img">
+              <img src="${sanitizeUrl(item.image)}" alt="${escapeHtml(item.name || '')}" class="csb-item-img">
               <div>
                 <div class="csb-item-name">${escapeHtml(item.name || '')}</div>
                 <div class="csb-item-meta">${item.capacity ? escapeHtml(item.capacity) + ' · ' : ''}數量：${item.qty || 1}</div>

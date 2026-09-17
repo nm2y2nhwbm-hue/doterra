@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Agent 3 負責範圍：線上正式環境端點活體探測與網路驗證 (tests/test_live_endpoints.py)
+Agent 1 負責範圍：線上正式環境端點活體探測與網路驗證 (tests/test_live_endpoints.py) [檢驗 Agent 5 雲端基建邊界]
 驗證 Render API 後端服務與 Vercel 前端靜態服務之健康狀態、CORS、資安標頭與延遲。
 """
 import time
