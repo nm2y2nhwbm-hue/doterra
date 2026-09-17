@@ -1,4 +1,4 @@
-name: Agent 3 Automated Quality & CI/CD Pipeline
+name: Agent 1 Automated Quality & CI/CD Pipeline (Dean Lin Testing Practice)
 
 on:
   push:

@@ -8,10 +8,19 @@
 
 依據專案團隊升級規劃，專案劃分為五大獨立邊界目錄，落實「測試先行、後端接力、前端收斂」之專業分工，各 Agent 嚴禁越權跨目錄修改：
 
-1. **Agent 1 → `/tests/`、`.github/`（品管與測試工程師，第一順位品質守護）**
-   - **專屬負責目錄**：`/tests/` 與 CI/CD 管線 (`.github/workflows/`)。
-   - **職責**：以「照妖鏡」為核心，優先執行全站 12 大深度測試矩陣（`run_all_tests.py`）、全站資安漏洞掃描（XSS / 金流防刷 / 雙寫持久化）、API 整合端點測試、精油資料母體完整性稽核與產出跨 Agent 驗收標準清單。
-   - **嚴格守則**：專注於撰寫、維護測試套件與產出驗收報告，嚴禁跨目錄修改業務邏輯。
+1. **Agent 1 → `/tests/`、`.github/`、`doc/test/`（品管與測試工程師，第一順位品質守護）**
+   - **專屬負責目錄**：`/tests/`、CI/CD 管線 (`.github/workflows/`)、測試案例規格文檔 (`doc/test/`) 與測試工作流 (`.agent/workflows/`)。
+   - **外部標準基準庫 (Reference Benchmark)**：
+     - **克隆／參考指令**：`gh repo clone deancourse/vibe-coding-testing-practice`
+       *(本機沙盒兼容指令：`git clone https://github.com/deancourse/vibe-coding-testing-practice.git D:/00_Sandbox/vibe-coding-testing-practice`)*
+     - **對標體系**：林鼎淵（Dean Lin）《Vibe Coding Testing Practice》自動化測試防禦規範。
+   - **核心職責與防呆五大工序 (Poka-Yoke Testing SOP)**：
+     1. **STEP 1 先規格後程式（Test-First Spec）**：建立 `doc/test/`，撰寫 Markdown 格式測試案例（【測試類型】測試說明、範例輸入、期待輸出），經 Review 確認邊界後才允許撰寫測試程式。
+     2. **STEP 2 測試結構嚴格對齊**：測試程式第二層 `describe()` 必須為「測試類型」，每個測試案例直接採用 Markdown 原文描述，不任意轉譯或改名。
+     3. **STEP 3 執行全量驗證與打勾標記**：執行全站 12 大深度測試矩陣（`python tests/run_all_tests.py`，100% 綠燈）；測試成功後將 `doc/test/` 之狀態由 `[ ]` 更新為 `[x]`。
+     4. **STEP 4 防回歸自我修復迴圈（Anti-Regression）**：若測試紅燈未符預期，最多重複修復 5 次，仍失敗則強制中斷並報告原因，杜絕 AI「越改越爛、按下葫蘆浮起瓢」。
+     5. **STEP 5 品質門神與分支保護（Branch Protection）**：全站資安掃描（XSS / 金流防刷 / 雙寫持久化）、API 整合端點測試、精油母體稽核。未通過 CI 綠燈嚴禁合入 `main` 正式分支。
+   - **嚴格守則**：專注於撰寫、維護測試套件與產出驗收報告，**嚴禁跨目錄修改業務邏輯**。
 
 2. **Agent 2 → `/api/`、`line_bot.py`、`router.py`、`/core/`、`/adapters/`（後端工程師，依約實作核心邏輯）**
    - **專屬負責目錄**：`/api/`、進入點 `line_bot.py`、`router.py`、`/core/` 與 `/adapters/`。
@@ -108,7 +117,7 @@ git log --oneline --decorate -n 10
 
 ## 驗證規則
 
-專案已全面導入 **Testing Depth 2.0 深度自動化測試矩陣**（由 Agent 3 專責統籌），涵蓋 L1 語法層至 L6 統一調度層。提交前依規範執行檢查：
+專案已全面導入 **Testing Depth 2.0 深度自動化測試矩陣**（由 Agent 1 專責統籌），涵蓋 L1 語法層至 L6 統一調度層。提交前依規範執行檢查：
 
 - **一鍵全量深度測試**：執行 `python tests/run_all_tests.py`，驗收全量 12 大深度測試套件（100% 綠燈）。
 - **Git 完整性檢查**：所有變更執行 `git diff --check` 並檢視 `git diff --stat` 與完整 diff。
@@ -120,12 +129,23 @@ git log --oneline --decorate -n 10
 - **Admin / reception / inventory 修改**：驗證未登入不顯示資料，登入後資料完全經由 `escapeHtml` 轉義防範 Stored XSS。
 - **Production URL 或監測設定修改後**：確認 `static/sites.js` 以 `https://doterra-two.vercel.app/booking.html` 作為正式 booking URL。
 
-## Git 與發布規則
+## Git 與發布規則（對標 Dean 影片：1.主支 / 2.分支 雙層防呆體系）
 
-- 不得自行 commit、push、merge、force-push、刪 branch 或直接改 GitHub 設定。
-- 需要 Git 操作時，先向使用者列出預計執行的命令、分支、commit 範圍與 production 影響，取得確認後再執行。
-- 發布前回報變更檔案、diff 摘要、已執行檢查、未驗證項目及 rollback 方式。
-- 不得建立新的 Vercel project 或 Render service；沿用現有 production 資源。
+1. **1. 主支（`main` · 生產保護主幹）**：
+   - 專案唯一的 Production Source of Truth。
+   - **嚴禁任何 Agent 或人員直接在 `main` 進行 commit 或 push**。
+   - 僅接受通過 GitHub Actions CI 測試綠燈檢驗的 Pull Request (PR) 合併。
+
+2. **2. 分支（`feature/*`、`test/*` · 任務工作分支）**：
+   - 任何改動（包含 Agent 1 的 TDD 規格、業務邏輯開發、修復）**一律先從 `main` 切換出獨立分支**。
+   - 命名慣例：`feature/agent1-vibe-testing`、`fix/payment-hmac`。
+   - 所有測試（`python tests/run_all_tests.py`）必須在分支內部 100% 跑通。
+
+3. **操作授權守則**：
+   - 不得自行 commit、push、merge、force-push、刪 branch 或直接改 GitHub 設定。
+   - 需要 Git 操作時，先向使用者列出預計執行的命令、分支、commit 範圍與 production 影響，取得確認後再執行。
+   - 發布前回報變更檔案、diff 摘要、已執行檢查、未驗證項目及 rollback 方式。
+   - 不得建立新的 Vercel project 或 Render service；沿用現有 production 資源。
 
 ## 目前已知待處理事項
 
