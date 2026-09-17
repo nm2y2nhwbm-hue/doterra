@@ -1,85 +1,111 @@
-# 💳 第三方金流（綠界 ECPay / LINE Pay）串接架構藍圖 (`infra/payment_gateway_blueprint.md`)
+# 💳 第三方金流（LINE Pay v3 Sandbox 官方測試沙盒）串接架構藍圖 (`infra/payment_gateway_blueprint.md`)
 
-本文件由 **Agent 5（維運與金流工程師）** 制定，明確規劃全站線上金流閘道器的串接架構、交易時序、API 規格、資安防禦機制，以及符合日式「おもてなし（款待美學）」之安心感結帳體驗規範，支援日式側滑購物車結帳。
+本文件由 **Agent 5（維運與金流工程師）** 制定，明確規劃全站線上金流閘道器的串接架構、交易時序、API 規格、資安防禦機制，以及符合日式「おもてなし（款待美學）」之安心感結帳體驗規範。
 
----
-
-## 🏗️ 一、系統交易時序圖 (Transaction Sequence)
-
-```
-[Agent 2: 前端日式購物車] ──(1. 提交商品清單與數量)──> [Agent 1: POST /api/orders]
-                                                              │
-                                                   (2. 查驗 doterra.csv 單一建議零售價)
-                                                   (3. 強制寫入 Supabase orders 表: Pending)
-                                                              │
-                                                              ▼
-[使用者瀏覽器] <──(4. 返回金流跳轉 HTML / 付款連結)── [綠界 ECPay / LINE Pay SDK]
-      │                                                       │
-      ▼ (進入 0.8s 日式款待過渡畫面)                          ▼
-[跳轉至金流收銀台]                                    [金流處理授權 / 付款]
-      │                                                       │
-(5. 付款完成)                                                 │
-      │                                                       ▼
-      └─────────────────────────────────────────> (6. 異步 Webhook 通知伺服器)
-                                                              │
-                                                   (7. 驗簽 CheckMacValue / Hmac)
-                                                   (8. 更新 Supabase orders 表: Paid)
-                                                   (9. 記錄 payment_logs 審計日誌)
-                                                              │
-                                                              ▼
-[使用者跳轉回官網款待致謝頁] <──(10. 查詢最新訂單狀態: Paid)── [Agent 1: GET /api/orders/:id]
-```
+> 📌 **重大架構宣告（2026-09-17）**：
+> 1. **金流唯一通道定錨**：全站線上支付管道**唯一鎖定為 LINE Pay v3**，全面運作於 LINE Pay 官方測試沙盒（Sandbox）模式。
+> 2. **舊渠道封存**：綠界科技（ECPay）渠道正式列為【封存 / Deprecated】，系統不再對外提供 ECPay 付款發起。
+> 3. **無痛升級通道**：預留日後取得正式商業特店 Channel ID 後，僅需調整環境變數即可一秒無痛切換正式營運。
 
 ---
 
-## 🟢 二、綠界科技（ECPay）全方位金流規格
+## 🏗️ 一、系統交易時序圖 (Transaction Sequence - LINE Pay v3)
 
-### 1. 支援支付方式
-* 信用卡一次付清（含 3D 驗證）
-* ATM 虛擬帳號轉帳
-* 超商代碼／超商條碼繳費
-
-### 2. 後端建立訂單參數 (AioCheckOut)
-```json
-{
-  "MerchantID": "ECPAY_MERCHANT_ID",
-  "MerchantTradeNo": "ORD20260910XXXX",
-  "MerchantTradeDate": "2026/09/10 10:30:00",
-  "PaymentType": "aio",
-  "TotalAmount": 2450,
-  "TradeDesc": "現代精油心靈指引卡選品結帳",
-  "ItemName": "真正薰衣草 15ml x 1#野橘 15ml x 1",
-  "ReturnURL": "https://doterra-73pv.onrender.com/api/payment/ecpay/callback",
-  "ClientBackURL": "https://doterra-two.vercel.app/booking.html?payment=success",
-  "ChoosePayment": "ALL",
-  "EncryptType": 1
-}
 ```
-
-### 3. CheckMacValue 壓碼驗證演算法 (SHA256)
-1. 將所有參數按照字典順序（A~Z）排序。
-2. 參數前後分別加入 `HashKey={ECPAY_HASH_KEY}&` 與 `&HashIV={ECPAY_HASH_IV}`。
-3. 進行 URL Encode（轉換為小寫，並遵循 .NET URL 編碼規則，如 `%20` ➔ `+`）。
-4. 進行 SHA256 運算並轉為全大寫字串，比對回傳之 `CheckMacValue`。
+[Agent 3: 前端日式購物車] ──(1. 提交商品清單與數量, provider='linepay')──> [Agent 2: POST /api/payments/create]
+                                                                       │
+                                                            (2. 查驗 doterra.csv 單一建議零售價重算)
+                                                            (3. 強制雙寫 Supabase orders 表: PENDING)
+                                                            (4. 呼叫 LINE Pay Request API 建立交易)
+                                                                       │
+                                                                       ▼
+[使用者瀏覽器] <──(5. 返回 LINE Pay Web 跳轉付款連結)──────────────────┘
+      │
+      ▼ (進入 0.8s 日式款待過渡畫面：正在為您連線至 LINE Pay 安全收銀台)
+[跳轉至 LINE Pay 收銀台] (https://sandbox-web-pay.line.me/...)
+      │
+      ▼ (6. 顧客在 LINE Pay 完成授權)
+[LINE Pay 伺服器] ──(7. 授權完成，重新導向跳轉)──> [Agent 2: GET /api/payments/linepay/confirm]
+                                                                       │
+                                                            (8. 伺服器驗簽並發送 Confirm API 實質扣款)
+                                                            (9. 更新 Supabase orders 表: PAID)
+                                                            (10. 記錄 payment_logs 審計日誌)
+                                                                       │
+                                                                       ▼
+[使用者跳轉回官網款待致謝頁] <──(11. 重新導向至 booking.html?payment=success&order_id=...)
+```
 
 ---
 
-## 🟢 三、LINE Pay 線上支付規格 (LINE Pay v3)
+## 🟢 二、LINE Pay 線上支付核心規格 (LINE Pay v3)
 
-### 1. 核心 API 互動
-* **付款請求 (Request API)**：`POST https://sandbox-api-pay.line.me/v3/payments/request`
-  - 帶入 `orderId`、`amount`、`currency: "TWD"`、`confirmUrl`、`cancelUrl`。
-  - 成功後取得 `web` 跳轉 URL，引導用戶在手機或桌面進行 LINE Pay 授權。
-* **確認付款 (Confirm API)**：`POST https://sandbox-api-pay.line.me/v3/payments/{transactionId}/confirm`
-  - 用戶授權完畢後，由後端發送 Confirm 扣款完成交易。
+### 1. 環境通道切換規範 (Sandbox ➔ Production)
+* **測試沙盒環境（預設啟用）**：
+  * 環境變數：`LINE_PAY_STAGE=true`
+  * API 網域：`https://sandbox-api-pay.line.me`
+  * Web 付款收銀台：`https://sandbox-web-pay.line.me`
+  * 預設沙盒測試金鑰（Fallback）：
+    * `LINE_PAY_CHANNEL_ID`: `2000000000`
+    * `LINE_PAY_CHANNEL_SECRET`: `mock-channel-secret-for-testing`
+* **正式生產環境（商戶上線）**：
+  * 環境變數：`LINE_PAY_STAGE=false`
+  * API 網域：`https://api-pay.line.me`
+  * Web 付款收銀台：`https://web-pay.line.me`
 
-### 2. 標頭安全簽名 (HMAC-SHA256 Signature)
+### 2. 核心 API 互動時序
+* **付款請求 (Request API)**：`POST {BASE_URL}/v3/payments/request`
+  - Request Body:
+    ```json
+    {
+      "amount": 1845,
+      "currency": "TWD",
+      "orderId": "SHIZUKU-20260917-XXXX",
+      "packages": [
+        {
+          "id": "PKG-1",
+          "amount": 1845,
+          "name": "現代精油心靈指引卡調息選品",
+          "products": [
+            {
+              "id": "SET-MIRROR-01",
+              "name": "【鏡子】當下覺察調息禮盒",
+              "quantity": 1,
+              "price": 1845
+            }
+          ]
+        }
+      ],
+      "redirectUrls": {
+        "confirmUrl": "https://doterra-73pv.onrender.com/api/payments/linepay/confirm",
+        "cancelUrl": "https://doterra-two.vercel.app/#shop"
+      }
+    }
+    ```
+  - 成功回傳：包含 `info.paymentUrl.web` (桌面端) 與 `info.paymentUrl.app` (LINE App 直跳)，以及 `info.transactionId`。
+* **確認付款 (Confirm API)**：`POST {BASE_URL}/v3/payments/{transactionId}/confirm`
+  - 用戶授權完畢後，由後端發送 Confirm 扣款完成實質交易：
+    ```json
+    {
+      "amount": 1845,
+      "currency": "TWD"
+    }
+    ```
+  - 成功回傳 `returnCode: "0000"`，更新訂單狀態為 `PAID`。
+
+### 3. 標頭安全簽名 (HMAC-SHA256 Signature)
+所有發送至 LINE Pay 之請求必須包含標準認證標頭：
 ```http
 Content-Type: application/json
 X-LINE-ChannelId: {LINE_PAY_CHANNEL_ID}
 X-LINE-Authorization-Nonce: {UUID / Timestamp}
 X-LINE-Authorization: {Base64(HmacSHA256(ChannelSecret + URI + RequestBody + Nonce))}
 ```
+*註：GET 請求之簽名組成為 `ChannelSecret + URI + QueryString + Nonce`。*
+
+---
+
+## 📦 三、已封存金流渠道規格：綠界科技 (ECPay) [DEPRECATED]
+> ⚠️ **狀態**：已封存（Archived / Deprecated）。後端一律拒絕 `provider='ecpay'` 之新發起訂單，歷史回調介面僅作相容性防禦保留。
 
 ---
 
@@ -107,11 +133,12 @@ X-LINE-Authorization: {Base64(HmacSHA256(ChannelSecret + URI + RequestBody + Non
   * 背景採用日式半透明水墨遮罩（`rgba(248, 246, 240, 0.92)` 搭配 `backdrop-filter: blur(8px)`）。
   * 居中展示品牌水墨 Logo 與副標 `MODERN OIL ORACLE`。
 * **安心引導文案**：
-  * 主標：*「正在為您連線至安全加密收銀台」*
-  * 副標：*「256-bit SSL 傳輸加密保護 ‧ 為您妥善保存選品」*
+  * 主標：*「正在為您連線至 LINE Pay 安全收銀台」*
+  * 副標：*「LINE Pay 官方安全傳輸加密 ‧ 為您妥善保存選品」*
+  * 環境標記：*「[LINE Pay Sandbox 測試沙盒環境]」*（於沙盒模式明確標註，提升測試透明度）
 * **防重送微互動 (Shosa 所作)**：
   * 按鈕立即轉為 Disabled 狀態，並開啟全螢幕防點擊遮罩，避免顧客焦慮連點造成重複發起多筆訂單。
-  * 過渡停留時間設定為 **800ms ~ 1200ms**，提供適度呼吸感（間 Ma）後順暢跳轉至綠界或 LINE Pay。
+  * 過渡停留時間設定為 **800ms ~ 1200ms**，提供適度呼吸感（間 Ma）後順暢跳轉至 LINE Pay 收銀台。
 
 ---
 

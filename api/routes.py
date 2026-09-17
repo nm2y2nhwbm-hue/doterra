@@ -4,7 +4,8 @@ Agent 2 負責範圍：後端 API 路由藍圖 (api/routes.py)
 包含健康檢查、精油與指示卡資料查詢、抽卡紀錄、體驗碼交接等核心端點。
 """
 import os
-from flask import Blueprint, request, jsonify, Response
+import urllib.parse
+from flask import Blueprint, request, jsonify, Response, redirect
 from core import database_manager as db
 from core import draw_logger
 from core import experience_handoff
@@ -137,7 +138,7 @@ def api_redeem_draw():
 
 @api_bp.route("/api/payments/create", methods=['POST'])
 def api_create_payment():
-    """建立付款訂單（強制伺服器端重算金額並產出金流表單參數）"""
+    """建立付款訂單（LINE Pay v3 測試沙盒，強制伺服器端重算金額防偽）"""
     data = request.get_json(silent=True) or {}
     try:
         client_ip = _request_client_ip()
@@ -152,6 +153,43 @@ def api_create_payment():
             "message": "伺服器內部暫時無法處理您的請求，請稍候重試",
             "guidance": "若問題持續，請連繫返魂堂客服人員。",
             "error": "伺服器內部錯誤"
+        }, 500)
+
+
+@api_bp.route("/api/payments/linepay/confirm", methods=['GET', 'POST'])
+def api_linepay_confirm():
+    """LINE Pay 授權完成回調與確認扣款端點 (Confirm API)"""
+    transaction_id = request.args.get("transactionId")
+    order_id = request.args.get("orderId")
+    amount = request.args.get("amount")
+
+    if request.method == 'POST':
+        json_data = request.get_json(silent=True) or {}
+        transaction_id = json_data.get("transactionId") or transaction_id
+        order_id = json_data.get("orderId") or order_id
+        amount = json_data.get("amount") or amount
+
+    try:
+        result = payment_manager.process_linepay_confirm(transaction_id, order_id=order_id, amount=amount)
+        # 若為 API 調用或請求 JSON，直接回傳 JSON
+        if request.headers.get("Accept", "").startswith("application/json") or request.is_json or request.args.get("format") == "json":
+            return _no_store_json(result, 200)
+
+        # 否則導向前端預約成功/致謝頁面
+        frontend_url = os.environ.get("FRONTEND_BASE_URL", "https://doterra-two.vercel.app")
+        redirect_url = f"{frontend_url}/booking.html?payment=success&order_id={result['order_id']}"
+        return redirect(redirect_url, code=302)
+    except payment_manager.PaymentValidationError as error:
+        if request.headers.get("Accept", "").startswith("application/json") or request.is_json or request.args.get("format") == "json":
+            return _no_store_json(error.to_dict(), error.status_code)
+        frontend_url = os.environ.get("FRONTEND_BASE_URL", "https://doterra-two.vercel.app")
+        return redirect(f"{frontend_url}/booking.html?payment=failed&error={urllib.parse.quote(error.message)}", code=302)
+    except Exception as e:
+        return _no_store_json({
+            "success": False,
+            "code": "INTERNAL_SERVER_ERROR",
+            "message": "處理 LINE Pay 扣款確認時發生內部錯誤",
+            "error": str(e)
         }, 500)
 
 

@@ -608,3 +608,85 @@
     gap: 16px;
   }
 }
+
+/* ==========================================================================
+   LINE Pay 日式款待過渡畫面 (Hospitality Transition Screen)
+   ========================================================================== */
+.linepay-transition-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(248, 246, 240, 0.94);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.linepay-transition-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.linepay-transition-modal {
+  text-align: center;
+  max-width: 420px;
+  width: 90%;
+  padding: 36px 24px;
+  background: #FFFFFF;
+  border: 1px solid rgba(184, 145, 46, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(43, 61, 49, 0.15);
+  animation: modalFadeIn 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.linepay-transition-spinner {
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 20px;
+  border: 3px solid rgba(184, 145, 46, 0.2);
+  border-top-color: #06C755;
+  border-radius: 50%;
+  animation: linepaySpin 0.9s linear infinite;
+}
+@keyframes linepaySpin {
+  to { transform: rotate(360deg); }
+}
+.linepay-transition-brand {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: #B8912E;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.linepay-transition-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #2B3D31;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+.linepay-transition-subtitle {
+  font-size: 0.85rem;
+  color: #635A4F;
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+.linepay-transition-badge {
+  display: inline-block;
+  font-size: 11px;
+  color: #058A3C;
+  background: rgba(6, 199, 85, 0.12);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  border: 1px solid rgba(6, 199, 85, 0.25);
+}

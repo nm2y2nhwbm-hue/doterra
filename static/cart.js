@@ -134,6 +134,35 @@
     }
   }
 
+  // LINE Pay 日式款待過渡畫面（Hospitality Transition Screen）
+  function showTransitionScreen() {
+    let screen = document.getElementById('linepay-transition-screen');
+    if (!screen) {
+      screen = document.createElement('div');
+      screen.id = 'linepay-transition-screen';
+      screen.className = 'linepay-transition-overlay';
+      screen.innerHTML = `
+        <div class="linepay-transition-modal">
+          <div class="linepay-transition-spinner"></div>
+          <div class="linepay-transition-brand">MODERN OIL ORACLE</div>
+          <div class="linepay-transition-title">正在為您連線至 LINE Pay 安全收銀台</div>
+          <div class="linepay-transition-subtitle">LINE Pay 官方安全傳輸加密 ‧ 為您妥善保存選品</div>
+          <div class="linepay-transition-badge">🟢 [LINE Pay Sandbox 測試沙盒環境]</div>
+        </div>
+      `;
+      document.body.appendChild(screen);
+    }
+    screen.classList.add('active');
+    console.log('[LINE Pay Sandbox 測試沙盒環境] 正在連線至 LINE Pay 安全收銀台...');
+  }
+
+  function hideTransitionScreen() {
+    const screen = document.getElementById('linepay-transition-screen');
+    if (screen) {
+      screen.classList.remove('active');
+    }
+  }
+
   function initUI() {
     // 1. 懸浮按鈕
     floatBtn = document.createElement('button');
@@ -181,7 +210,7 @@
           <span>全館調息禮盒享日式款待包裝與專人體驗安排</span>
         </div>
         <a href="booking.html" class="cart-checkout-btn" id="cart-checkout-btn">
-          <span>前往預約與配送結帳</span>
+          <span>🟢 LINE Pay 一鍵安全結帳</span>
           <span>→</span>
         </a>
         <button type="button" class="cart-clear-link" id="cart-clear-btn">清空所有選品</button>
@@ -201,6 +230,56 @@
       if (confirm('確定清空調息購物清單嗎？')) {
         CartStore.clear();
       }
+    });
+
+    // 🟢 LINE Pay 一鍵安全結帳點擊事件（款待過渡畫面與沙盒發起）
+    checkoutBtn.addEventListener('click', (e) => {
+      const items = CartStore.get();
+      if (!items || items.length === 0) return;
+
+      // 若在 Node 測試環境或無 fetch 支援時，維持原生 href 行為
+      if (typeof window.fetch !== 'function') return;
+
+      e.preventDefault();
+      showTransitionScreen();
+
+      fetch('/api/payments/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          customer: {
+            name: '線上貴賓',
+            phone: '0900-000-000',
+            note: '由官方購物車 LINE Pay 發起'
+          },
+          items: items.map(i => ({
+            id: i.id,
+            name: i.name,
+            qty: i.qty,
+            price: i.price
+          })),
+          provider: 'linepay'
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.payment && data.payment.action_url) {
+          setTimeout(() => {
+            window.location.href = data.payment.action_url;
+          }, 900); // 800ms ~ 1200ms 日式款待呼吸感
+        } else {
+          hideTransitionScreen();
+          alert(data.message || '連線 LINE Pay 收銀台未竟，請稍候重試');
+        }
+      })
+      .catch(err => {
+        console.error('[Cart LINE Pay] 連線異常', err);
+        hideTransitionScreen();
+        window.location.href = checkoutBtn.href;
+      });
     });
 
     // 鍵盤 Escape 關閉
