@@ -27,9 +27,13 @@
    - **職責**：Flask API 端點（`/health`, `/api/oils`, `/api/indicators`, `/api/draws`, `/api/payments/create`）、LINE Webhook 簽章校驗與防回音分發、Supabase RPC 安全互動、安全 Token 防刷指紋與後端金流訂單持久化。
    - **嚴格守則**：專注後端邏輯與後端目錄，**嚴禁修改前端 UI 元件 (`/components/`)、靜態切版 (`/static/`) 與測試 (`/tests/`)**。
 
-3. **Agent 3 → `/components/`、`/static/`（前端切版工程師，安全美學收斂）**
-   - **專屬負責目錄**：`/components/` 與發布目錄 `/static/`。
-   - **職責**：對接已通過 Agent 1 驗收與 Agent 2 實作之穩定 API；維護日式美學 UI 元件（購物車 Cart Drawer、調息選品卡片、精油圖鑑彈窗、導覽列）、HTML5 頁面切版、CSS 和色樣式表、前端 JavaScript 互動邏輯與全站 XSS `escapeHtml` 實體轉義防護。
+3. **Agent 3 → `/components/`、`/static/`、`/frontend/`（前端切版工程師，安全美學與 React 元件現代化）**
+   - **專屬負責目錄**：`/components/`、`/static/` 與現代化 React 原始碼目錄 (`/frontend/`)。
+   - **職責**：
+     - 對接已通過 Agent 1 驗收與 Agent 2 實作之穩定 API。
+     - 維護現有日式美學 UI 元件（購物車 Cart Drawer、調息選品卡片、精油圖鑑彈窗、導覽列）、HTML5 頁面切版與 CSS 和色樣式表。
+     - **React (Vite + React + TypeScript) 架構演進**：對標林鼎淵（Dean）示範專案，推動元件化現代架構（`<CartDrawer />`、`<OracleModal />`、`<OilCard />`、`<BookingForm />`、`<AdminPortal />`），導入宣告式狀態管理取代手動 DOM 同步。
+     - 全站 XSS `escapeHtml` 實體轉義防護與前端資料合約收斂。
    - **嚴格守則**：不修改後端伺服器邏輯 (`/api/`)、自動化測試 (`/tests/`) 與商品定價母體 (`/catalog/`)。
 
 4. **Agent 4 → `/catalog/`、`doterra.csv`、`indicator_cards.csv`（商品與文案主編，資料母體合規把關）**
@@ -114,6 +118,7 @@ git log --oneline --decorate -n 10
 - 不得把 Supabase `service_role`、LINE channel secret/access token 或其他秘密寫入前端、Git、log 或回覆。
 - 未經明確授權，不得修改 LINE OA、LIFF ID、Render service、Vercel project 或 Supabase project。
 - production smoke test 優先使用唯讀 GET；任何會建立資料、登入帳號、傳送 LINE 訊息或改變狀態的測試都要先取得授權。
+- **核心後端穩定性守則**：維持 **Python 3.13 Flask (Render) + PostgreSQL (Supabase)** 為專案核心運算與金流中樞，**嚴禁以 Google Apps Script (GAS) 替換核心後端**，以避免 GAS 固有之 302 轉址 CORS 阻擋、1 秒 Webhook 超時重試死循環與缺乏 ACID 行級鎖庫存超賣風險。GAS 僅限作為外部非同步營運通知（Google 試算表/日曆同步）外掛。
 
 ## 驗證規則
 
