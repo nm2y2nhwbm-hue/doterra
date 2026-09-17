@@ -8,30 +8,34 @@
 
 依據專案團隊升級規劃，專案劃分為五大獨立邊界目錄，落實「測試先行、後端接力、前端收斂」之專業分工，各 Agent 嚴禁越權跨目錄修改：
 
-1. **Agent 1 → `/tests/`（品管與測試工程師，第一順位品質守護）**
+1. **Agent 1 → `/tests/`、`.github/`（品管與測試工程師，第一順位品質守護）**
    - **專屬負責目錄**：`/tests/` 與 CI/CD 管線 (`.github/workflows/`)。
    - **職責**：以「照妖鏡」為核心，優先執行全站 12 大深度測試矩陣（`run_all_tests.py`）、全站資安漏洞掃描（XSS / 金流防刷 / 雙寫持久化）、API 整合端點測試、精油資料母體完整性稽核與產出跨 Agent 驗收標準清單。
    - **嚴格守則**：專注於撰寫、維護測試套件與產出驗收報告，嚴禁跨目錄修改業務邏輯。
 
-2. **Agent 2 → `/api/`（後端工程師，依約實作核心邏輯）**
-   - **專屬負責目錄**：`/api/` 以及後端進入點 `line_bot.py` 的 Blueprint 註冊。
+2. **Agent 2 → `/api/`、`line_bot.py`、`router.py`、`/core/`、`/adapters/`（後端工程師，依約實作核心邏輯）**
+   - **專屬負責目錄**：`/api/`、進入點 `line_bot.py`、`router.py`、`/core/` 與 `/adapters/`。
    - **職責**：Flask API 端點（`/health`, `/api/oils`, `/api/indicators`, `/api/draws`, `/api/payments/create`）、LINE Webhook 簽章校驗與防回音分發、Supabase RPC 安全互動、安全 Token 防刷指紋與後端金流訂單持久化。
-   - **嚴格守則**：專注後端邏輯與 `/api/` 目錄，**嚴禁修改前端 UI 元件 (`/components/`)、靜態切版 (`/static/`) 與測試 (`/tests/`)**。
+   - **嚴格守則**：專注後端邏輯與後端目錄，**嚴禁修改前端 UI 元件 (`/components/`)、靜態切版 (`/static/`) 與測試 (`/tests/`)**。
 
-3. **Agent 3 → `/components/`（前端切版工程師，安全美學收斂）**
+3. **Agent 3 → `/components/`、`/static/`（前端切版工程師，安全美學收斂）**
    - **專屬負責目錄**：`/components/` 與發布目錄 `/static/`。
    - **職責**：對接已通過 Agent 1 驗收與 Agent 2 實作之穩定 API；維護日式美學 UI 元件（購物車 Cart Drawer、調息選品卡片、精油圖鑑彈窗、導覽列）、HTML5 頁面切版、CSS 和色樣式表、前端 JavaScript 互動邏輯與全站 XSS `escapeHtml` 實體轉義防護。
    - **嚴格守則**：不修改後端伺服器邏輯 (`/api/`)、自動化測試 (`/tests/`) 與商品定價母體 (`/catalog/`)。
 
-4. **Agent 4 → `/catalog/`（商品與文案主編，資料母體合規把關）**
+4. **Agent 4 → `/catalog/`、`doterra.csv`、`indicator_cards.csv`（商品與文案主編，資料母體合規把關）**
    - **專屬負責目錄**：`/catalog/` 與商品資料母體（`doterra.csv`, `indicator_cards.csv`）。
    - **職責**：131 款精油資料庫維護、官方單一建議零售價審定、官方標準容量（15ml / 5ml / 10ml 滾珠 / 115ml）、合規自然醫學文案把關（消滅醫療法規爭議詞彙）、商品圖鑑同步腳本（`sync_catalog.py`）。
    - **嚴格守則**：不更動前後端程式碼與測試套件，僅專注於資料母體與文案合規。
 
-5. **Agent 5 → `/infra/`（維運與金流工程師，雲端基建與邊緣安全）**
-   - **專屬負責目錄**：`/infra/`。
+5. **Agent 5 → `/infra/`、`/supabase/`（維運與金流工程師，雲端基建與邊緣安全）**
+   - **專屬負責目錄**：`/infra/` 與 `/supabase/`。
    - **職責**：自訂獨立品牌頂級網域 DNS 解析配置、Vercel 邊緣 CDN 與 Render 伺服器規格、第三方線上金流閘道器（綠界 ECPay / LINE Pay）架構規格、Supabase RLS 與憑證安全管理、外部 Ingress 活躍保溫探測。
    - **嚴格守則**：不修改核心業務 API 與前端樣式，任何金流密鑰嚴禁硬編碼。
+
+6. **根目錄全域共用區（Shared Root Boundaries）**
+   - **保留於根目錄之專案核心檔**：`AGENTS.md`、`README.md`、`requirements.txt`、`.gitignore`、`LICENSE`。
+   - **防呆鐵律**：資料母體 `doterra.csv`、`indicator_cards.csv` 與後端進入點 `line_bot.py` 維持現有根目錄路徑參照，嚴禁搬移破壞 Production 行為。
 
 
 ## 專案目標與正式環境

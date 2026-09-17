@@ -108,10 +108,10 @@ SUPABASE_URL="https://your-project.supabase.co"
 SUPABASE_SERVICE_ROLE_KEY="your-supabase-service-role-key"
 ```
 
-### 步驟 4：執行完整自動化測試（Agent 3）
+#### 步驟 4：執行完整自動化測試（Agent 1）
 ```bash
-# 執行全套 34 項單元與整合測試
-python -m unittest discover tests
+# 執行雙環境 12 大深度自動化測試矩陣 (Testing Depth 2.0)
+python tests/run_all_tests.py
 ```
 
 ### 步驟 5：商品資料庫同步（Agent 4）
@@ -121,13 +121,13 @@ python catalog/sync_catalog.py
 ```
 
 ### 步驟 6：啟動本機伺服器
-* **啟動後端服務（Agent 1）**：
+* **啟動後端服務（Agent 2）**：
   ```bash
   python line_bot.py
   # 健康檢查探測：http://localhost:5000/health
   # 精油資料庫：http://localhost:5000/api/oils
   ```
-* **啟動前端靜態預覽（Agent 2）**：
+* **啟動前端靜態預覽（Agent 3）**：
   ```bash
   python -m http.server 8000 -d static
   # 瀏覽器造訪：http://localhost:8000/
@@ -135,24 +135,24 @@ python catalog/sync_catalog.py
 
 ---
 
-## 📁 6. 資料夾結構說明
+## 📁 6. 5S 目錄結構與五星 Agent 邊界
 
 ```text
 doterra/
-├── .github/workflows/         # 🧪 Agent 3: GitHub Actions CI/CD 自動化工作流
-├── adapters/                  # 介面轉接層（LINE Flex Message 卡片轉譯）
+├── .github/workflows/         # 🛡️ Agent 1: GitHub Actions CI/CD 自動化工作流
+├── adapters/                  # ⚙️ Agent 2: 介面轉接層（LINE Flex Message 卡片轉譯）
 │   └── line_adapter.py
-├── api/                       # 🛡️ Agent 1: 後端 API 藍圖模組
-│   ├── README.md              # Agent 1 守則與 API 協議
+├── api/                       # ⚙️ Agent 2: 後端 API 藍圖模組
+│   ├── README.md              # Agent 2 守則與 API 協議
 │   ├── __init__.py            # 匯出 api_bp 藍圖
 │   └── routes.py              # 全站 API 路由（/health, /api/oils, /api/draws）
 ├── catalog/                   # 📦 Agent 4: 商品母體與內容審定目錄
 │   ├── README.md              # Agent 4 定價容量與合規守則
 │   └── sync_catalog.py        # 商品資料庫自動同步腳本
-├── components/                # 🎨 Agent 2: 前端 UI 元件庫
-│   ├── README.md              # Agent 2 元件規範
+├── components/                # 🎨 Agent 3: 前端 UI 元件庫
+│   ├── README.md              # Agent 3 元件規範
 │   └── cart/                  # 日式側滑購物車（cart.css, cart.js）
-├── core/                      # 系統核心商業邏輯
+├── core/                      # ⚙️ Agent 2: 系統核心商業邏輯
 │   ├── database_manager.py    # 17 欄位精油母體安全讀取
 │   ├── draw_logger.py         # 抽卡歷程安全日誌
 │   └── experience_handoff.py  # 短效加密 Token 與 LINE 身分校驗
@@ -160,7 +160,7 @@ doterra/
 │   ├── README.md              # Agent 5 多雲與資安守則
 │   ├── dns_custom_domain.md   # 自訂頂級網域 DNS 解析指南
 │   └── payment_gateway_blueprint.md # 綠界 / LINE Pay 金流串接架構
-├── static/                    # 🎨 Agent 2: 正式發布靜態目錄（Vercel 部署目標）
+├── static/                    # 🎨 Agent 3: 正式發布靜態目錄（Vercel 部署目標）
 │   ├── index.html             # 官網首頁（含調息選品商城）
 │   ├── cards.html             # 12 牌陣線上抽卡主頁
 │   ├── oils.html              # 精油圖鑑 · 自然醫學調息全書
@@ -171,10 +171,11 @@ doterra/
 │   ├── oils-catalog.json      # 131 款建議零售價高速 JSON
 │   ├── images/                # 品牌 Logo、卡牌與選品圖檔
 │   └── fonts/                 # LINESeedTW 繁體中文 WebFont
-├── supabase/                  # 資料庫 SQL 遷移紀錄與 Edge Functions
-├── tests/                     # 🧪 Agent 3: 全套自動化測試目錄 (Testing Depth 2.0)
+├── supabase/                  # 💳 Agent 5: 資料庫 SQL 遷移紀錄與 Edge Functions
+├── tests/                     # 🛡️ Agent 1: 全套自動化測試目錄 (Testing Depth 2.0)
 │   ├── README.md              # 測試指南、階梯架構與執行指令
 │   ├── QA_COLLABORATION_MEMO.md # 跨 Agent 品質稽核與資安通報備忘錄
+│   ├── QA_ACCEPTANCE_CRITERIA.md# 全站健康度與各工位驗收標準清單
 │   ├── run_all_tests.py       # 雙環境全量一鍵測試調度器
 │   ├── test_api_endpoints.py  # 後端 API、防偽邊界與防回音測試
 │   ├── test_payment_api.py    # 綠界 / LINE Pay 金流防偽強制重算測試
@@ -188,12 +189,15 @@ doterra/
 │   ├── test_cart_logic.js     # 側滑購物車狀態單元測試
 │   ├── test_cart_integration.js # 購物車與預約結帳合約整合測試
 │   └── test_supabase_client.js# 前端 RPC 客戶端安全測試
-
-├── AGENTS.md                  # 五大 Agent 職責邊界與開發憲法
-├── doterra.csv                # 131 款現代精油核心資料庫（建議零售價、官方容量）
-├── indicator_cards.csv        # 12 款指示卡元資料
-├── line_bot.py                # 後端 Flask Webhook 主程式進入點
-└── router.py                  # LINE 訊息文字意圖解析與分發路由
+│
+├── AGENTS.md                  # 📁 根目錄全域: 五大 Agent 職責邊界與開發憲法
+├── doterra.csv                # 📦 Agent 4: 131 款現代精油核心資料庫（建議零售價、官方容量）
+├── indicator_cards.csv        # 📦 Agent 4: 12 款指示卡元資料
+├── line_bot.py                # ⚙️ Agent 2: 後端 Flask Webhook 主程式進入點
+├── router.py                  # ⚙️ Agent 2: LINE 文字路由與防回音轉發
+├── requirements.txt           # 📁 根目錄全域: Python 相依套件清單
+├── .gitignore                 # 📁 根目錄全域: Git 忽略設定
+└── LICENSE                    # 📁 根目錄全域: 專案授權條款
 ```
 
 ---
