@@ -57,11 +57,20 @@
 
 | 代理人角色 | 專屬目錄 | 職責與管轄範圍 |
 | :--- | :--- | :--- |
-| 🛡️ **Agent 1（品管與測試工程師）** | [`/tests/`](tests/) | 第一順位品質守護，全站 12 大深度測試矩陣（Testing Depth 2.0）、CI/CD 管線（`.github/workflows/`）、活體端點監控、全站「照妖鏡」資安審計與品質驗收清單（`QA_ACCEPTANCE_CRITERIA.md`） |
+| 🛡️ **Agent 1（品管與測試工程師）** | [`/tests/`](tests/)、[`/doc/test/`](doc/test/) | 第一順位品質守護，全站 12 大深度測試矩陣（Testing Depth 2.0）、CI/CD 管線（`.github/workflows/ci.yml` · Python 3.13 + Node 20）、對標林鼎淵（Dean Lin）《Vibe Coding Testing Practice》五步防呆 SOP，收錄完整教學規範、MSW Mock 伺服器與 DevPanel 測試面板資產（[`doc/test/reference-vibe-testing/`](doc/test/reference-vibe-testing/) 與 [`tests/reference/`](tests/reference/)） |
 | ⚙️ **Agent 2（後端工程師）** | [`/api/`](api/) | 核心業務邏輯與 API 路由藍圖（`/health`, `/api/oils`, `/api/draws`, `/api/payments/create`）、LINE Webhook 防回音路由、Supabase RPC 安全互動與金流訂單持久化 |
-| 🎨 **Agent 3（前端切版工程師）** | [`/components/`](components/) | 日式美學 UI 元件庫（側滑購物車 Drawer、首頁選品、圖鑑彈窗）、CSS 和色樣式表、發布目錄 [`/static/`](static/) 與全站 XSS `escapeHtml` 實體轉義 |
+| 🎨 **Agent 3（前端切版工程師）** | [`/components/`](components/)、[`/static/`](static/) | 日式美學 UI 元件庫（側滑購物車 Drawer、首頁選品、圖鑑彈窗）、CSS 和色樣式表、發布目錄 [`/static/`](static/)、全站 XSS `escapeHtml` 實體轉義，以及 React (Vite + React + TS) 元件現代化架構演進 |
 | 📦 **Agent 4（商品與文案主編）** | [`/catalog/`](catalog/) | 131 款精油資料庫母體（`doterra.csv`）、官方單一建議零售價審定、官方標準容量規範、合規自然醫學文案把關與商品圖鑑同步工具（`sync_catalog.py`） |
 | 💳 **Agent 5（維運與金流工程師）** | [`/infra/`](infra/) | 自訂獨立頂級網域 DNS 解析配置、Vercel 邊緣 CDN、Render 外部 Ingress 活躍保溫探測、綠界 ECPay / LINE Pay 第三方線上金流架構與 Supabase 憑證安全 |
+
+---
+
+### 🛡️ 3.1 雙層分支保護機制（Poka-Yoke 防呆鐵律）
+
+專案嚴格貫徹日本 5S 與林鼎淵工程防護規範：
+1. **👑 1. 主分支 (`main`)**：唯一的 Production Source of Truth，受 GitHub Branch Protection 保護，嚴禁未經測試直接推送。
+2. **🛡️ 2. 測試分支 (`test/agent1-vibe-testing`)**：所有 AI 協同開發、新功能測試與 Bug 修復的專屬工作分支。
+3. **🚦 品質驗收鐵律**：**「測試分支執行 `python tests/run_all_tests.py` 獲得 100% 綠燈驗收通過後，才准併入主分支 main」**。
 
 ---
 

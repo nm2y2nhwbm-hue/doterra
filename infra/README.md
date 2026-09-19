@@ -27,7 +27,8 @@
 * 💳 [`payment_gateway_blueprint.md`](payment_gateway_blueprint.md)：綠界科技（ECPay）與 LINE Pay 線上支付串接架構藍圖（含持久化防禦與日式款待過渡）。
 * 🗄️ [`payment_schema_spec.sql`](payment_schema_spec.sql)：線上支付訂單表（`orders`）與稽核日誌（`payment_logs`）之 Schema 與 Supabase RLS 安全策略規格。
 * 🔐 [`env_spec.md`](env_spec.md)：多雲環境變數配置清冊與金流金鑰安全規範。
-* 🛡️ [`SECURITY_RESPONSE.md`](SECURITY_RESPONSE.md)：Agent 5 針對 Agent 3 全站資安照妖鏡稽核通報之維運整改回覆書。
+* 🛡️ [`SECURITY_RESPONSE.md`](SECURITY_RESPONSE.md)：Agent 5 針對 Agent 1 全站資安照妖鏡稽核通報之維運整改回覆書。
+* ⚙️ **核心後端穩定性規範**：核心後端一律維持 Python 3.13 Flask (Render) + PostgreSQL (Supabase)，禁止以 Google Apps Script (GAS) 替代核心後端；GAS 僅作為外部非同步通知外掛。
 
 ---
 

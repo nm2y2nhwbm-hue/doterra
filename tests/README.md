@@ -47,10 +47,26 @@
 
 ### 4. L6 自動化調度與 CI/CD 管線
 * **`tests/run_all_tests.py`**：Agent 1 專屬一鍵執行全量測試調度器，自動偵測 Python 與 Node.js 環境，輸出結構化報表與耗時分析（12 大套件秒級全綠通過）。
-* **`.github/workflows/ci.yml`**：每次推送或 PR 時自動於 GitHub Actions 啟動 Python 3.12 與 Node.js 20 雙環境自動化測試管線。
-
+* **`.github/workflows/ci.yml`**：每次推送或 PR 時自動於 GitHub Actions 啟動 Python 3.13 與 Node.js 20 雙環境自動化測試管線。
 
 ---
+
+## 🛠️ 外部標準基準庫 (Reference Benchmark) —— 林鼎淵（Dean Lin）《Vibe Coding Testing Practice》
+
+本專案全面導入林鼎淵老師提倡之防呆測試工程學，確立 **「測試通過後才併入主分支 main」** 之 Poka-Yoke 鐵律：
+
+1. **官方線上倉庫**：[deancourse/vibe-coding-testing-practice README.md](https://github.com/deancourse/vibe-coding-testing-practice/blob/main/README.md)
+2. **專案內部完整規範手冊**：[`doc/test/reference-vibe-testing/README.md`](../doc/test/reference-vibe-testing/README.md)
+   - 收錄完整 Prompt 規格、10 大手動/自動測試情境清單、MSW Mock API 規格。
+3. **架構參考程式庫**：[`tests/reference/vibe-testing-practice/`](./reference/vibe-testing-practice/)
+   - `mocks/`：MSW (Mock Service Worker) 測試伺服器與 Handlers
+   - `components/`：DevPanel 測試浮窗、ProtectedRoute 路由守衛、RoleBasedRoute 權限守衛
+   - `test/`：Vitest + MSW 自動化測試 Setup 模組
+   - `context/`：AuthContext Token 生命週期與 401 自動過期處理
+4. **測試規格工作流**：
+   - [`.agent/workflows/gen-test-cases.md`](../.agent/workflows/gen-test-cases.md)（生成測試案例五步法）
+   - [`.agent/workflows/test/test-doc-template.md`](../.agent/workflows/test/test-doc-template.md)（測試規格模板）
+
 
 ## 🚀 測試執行指令
 
