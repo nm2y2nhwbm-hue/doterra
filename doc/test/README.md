@@ -34,6 +34,8 @@
 ---
 
 ## 🛠️ 外部標準基準庫 (Reference Benchmark)
-- **標準基準庫**：`gh repo clone deancourse/vibe-coding-testing-practice`
-- **本機沙盒兼容路徑**：`D:/00_Sandbox/vibe-coding-testing-practice`
-- **工作流定義**：`.agent/workflows/gen-test-cases.md`、`.agent/workflows/test/test-doc-template.md`
+- **官方線上倉庫**：[deancourse/vibe-coding-testing-practice README.md](https://github.com/deancourse/vibe-coding-testing-practice/blob/main/README.md)
+- **專案內部完整規範**：[`doc/test/reference-vibe-testing/README.md`](file:///D:/01_Project/GitHub/doterra/doc/test/reference-vibe-testing/README.md)（含 Prompt 規範、10 大測試情境、MSW Mock API 規格）
+- **架構參考程式庫**：[`tests/reference/vibe-testing-practice/`](file:///D:/01_Project/GitHub/doterra/tests/reference/vibe-testing-practice)（含 MSW Mock Server、DevPanel 測試浮窗、路由守衛與 Test Setup）
+- **工作流定義**：[`.agent/workflows/gen-test-cases.md`](file:///D:/01_Project/GitHub/doterra/.agent/workflows/gen-test-cases.md)、[`.agent/workflows/test/test-doc-template.md`](file:///D:/01_Project/GitHub/doterra/.agent/workflows/test/test-doc-template.md)
+- **克隆指令備忘**：`gh repo clone deancourse/vibe-coding-testing-practice`

@@ -11,9 +11,12 @@
 1. **Agent 1 → `/tests/`、`.github/`、`doc/test/`（品管與測試工程師，第一順位品質守護）**
    - **專屬負責目錄**：`/tests/`、CI/CD 管線 (`.github/workflows/`)、測試案例規格文檔 (`doc/test/`) 與測試工作流 (`.agent/workflows/`)。
    - **外部標準基準庫 (Reference Benchmark)**：
-     - **克隆／參考指令**：`gh repo clone deancourse/vibe-coding-testing-practice`
-       *(本機沙盒兼容指令：`git clone https://github.com/deancourse/vibe-coding-testing-practice.git D:/00_Sandbox/vibe-coding-testing-practice`)*
      - **對標體系**：林鼎淵（Dean Lin）《Vibe Coding Testing Practice》自動化測試防禦規範。
+     - **官方線上倉庫**：[deancourse/vibe-coding-testing-practice README.md](https://github.com/deancourse/vibe-coding-testing-practice/blob/main/README.md)
+     - **專案內部收錄規範**：[`doc/test/reference-vibe-testing/README.md`](file:///D:/01_Project/GitHub/doterra/doc/test/reference-vibe-testing/README.md)（含完整 Prompt 規範、10 大測試情境、MSW Mock 規格）。
+     - **架構參考程式庫**：[`tests/reference/vibe-testing-practice/`](file:///D:/01_Project/GitHub/doterra/tests/reference/vibe-testing-practice)（收錄 MSW Mock 伺服器、DevPanel 測試面板、路由守衛與 Test Setup 模組）。
+     - **克隆指令備忘**：`gh repo clone deancourse/vibe-coding-testing-practice`  
+       *(本機沙盒兼容指令：`git clone https://github.com/deancourse/vibe-coding-testing-practice.git D:/00_Sandbox/vibe-coding-testing-practice`)*
    - **核心職責與防呆五大工序 (Poka-Yoke Testing SOP)**：
      1. **STEP 1 先規格後程式（Test-First Spec）**：建立 `doc/test/`，撰寫 Markdown 格式測試案例（【測試類型】測試說明、範例輸入、期待輸出），經 Review 確認邊界後才允許撰寫測試程式。
      2. **STEP 2 測試結構嚴格對齊**：測試程式第二層 `describe()` 必須為「測試類型」，每個測試案例直接採用 Markdown 原文描述，不任意轉譯或改名。
