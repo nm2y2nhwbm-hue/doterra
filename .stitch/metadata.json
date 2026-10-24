@@ -1,0 +1,74 @@
+{
+  "projectId": "5923035553865007790",
+  "projectResourceName": "projects/5923035553865007790",
+  "title": "雫之洞悉 · 返魂堂 - Sync",
+  "visibility": "PRIVATE",
+  "projectType": "PROJECT_DESIGN",
+  "origin": "STITCH",
+  "designSystemAssetId": "feeabe85b2684a7cb8c11b36c86972e6",
+  "designSystemResource": "assets/feeabe85b2684a7cb8c11b36c86972e6",
+  "lastSyncTime": "2026-10-23T00:03:00Z",
+  "screens": {
+    "13380217003105765109": {
+      "id": "13380217003105765109",
+      "sourceScreen": "projects/5923035553865007790/screens/13380217003105765109",
+      "title": "DESIGN.md",
+      "screenType": "DOCUMENT",
+      "displayMode": "MARKDOWN",
+      "width": 390,
+      "height": 884,
+      "canvasPosition": { "x": 0, "y": 0 }
+    },
+    "14174230131050334678": {
+      "id": "14174230131050334678",
+      "sourceScreen": "projects/5923035553865007790/screens/14174230131050334678",
+      "title": "首頁 · 牌陣導覽與調息選品 (/index.html)",
+      "screenType": "DESIGN",
+      "displayMode": "HTML",
+      "width": 1280,
+      "height": 5623,
+      "canvasPosition": { "x": 490, "y": 0 }
+    },
+    "5369804410554536187": {
+      "id": "5369804410554536187",
+      "sourceScreen": "projects/5923035553865007790/screens/5369804410554536187",
+      "title": "線上抽牌儀式核心 (/cards.html)",
+      "screenType": "DESIGN",
+      "displayMode": "HTML",
+      "width": 1280,
+      "height": 800,
+      "canvasPosition": { "x": 1870, "y": 0 }
+    },
+    "14299190853929800853": {
+      "id": "14299190853929800853",
+      "sourceScreen": "projects/5923035553865007790/screens/14299190853929800853",
+      "title": "貴賓預約奉呈卡 (/booking.html)",
+      "screenType": "DESIGN",
+      "displayMode": "HTML",
+      "width": 1280,
+      "height": 4448,
+      "canvasPosition": { "x": 3250, "y": 0 }
+    },
+    "3098082822141504791": {
+      "id": "3098082822141504791",
+      "sourceScreen": "projects/5923035553865007790/screens/3098082822141504791",
+      "title": "131款精油圖鑑知識庫 (/oils.html)",
+      "screenType": "DESIGN",
+      "displayMode": "HTML",
+      "width": 1280,
+      "height": 800,
+      "canvasPosition": { "x": 4630, "y": 0 }
+    },
+    "11012076330594626401": {
+      "id": "11012076330594626401",
+      "sourceScreen": "projects/5923035553865007790/screens/11012076330594626401",
+      "title": "購物車專屬管理面板 (/cart.html)",
+      "screenType": "DESIGN",
+      "displayMode": "HTML",
+      "width": 1280,
+      "height": 960,
+      "canvasPosition": { "x": 6010, "y": 0 },
+      "screenshot": ".stitch/designs/cart.png"
+    }
+  }
+}

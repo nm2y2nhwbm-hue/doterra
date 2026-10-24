@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LH6J1MM1LK"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LH6J1MM1LK');
+</script>
+<meta charset="UTF-8">
+<script>
+  // LINE 入口偵測：由 LINE App 內建瀏覽器開啟時（例如 LINE OA 選單連結），
+  // 外層首頁只會瞬間閃過，立刻導向內層抽卡工具頁，不停留在行銷首頁。
+  // 放在 <head> 最前面、樣式表載入之前，盡量縮短這個瞬間。
+  (function(){
+    try {
+      if (/\bLine\//i.test(navigator.userAgent)) {
+        window.location.replace('cards.html' + window.location.search);
+      }
+    } catch (e) {}
+  })();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>現代精油心靈指引卡｜MODERN OIL ORACLE</title>
+<meta name="description" content="3 分鐘精油心靈指引卡，透過鏡子、河流與岔路三類牌陣，陪你整理此刻感受並預約專屬精油體驗。">
+<link rel="canonical" href="https://doterra-two.vercel.app/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:site_name" content="現代精油心靈指引卡">
+<meta property="og:title" content="現代精油心靈指引卡｜MODERN OIL ORACLE">
+<meta property="og:description" content="停下來，讓一張牌接住此刻的你。免費線上抽牌與貴賓精油體驗預約。">
+<meta property="og:url" content="https://doterra-two.vercel.app/">
+<meta property="og:image" content="https://doterra-two.vercel.app/images/og-modern-oil-oracle.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="現代精油心靈指引卡品牌分享圖">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#355343">
+<link rel="icon" href="favicon.png?v=3" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="style.css?v=21">
+<link rel="stylesheet" href="cart.css?v=1">
+<link rel="stylesheet" href="fonts.css?v=1" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="fonts.css?v=1"></noscript>
+</head>
+<body class="has-fixed-nav">
+
+<header class="site-nav">
+  <div class="site-nav-inner">
+    <a href="index.html" class="site-nav-logo"><img src="images/logo-emblem.png?v=3" alt="雫之洞悉 · 返魂堂" class="site-nav-logo-img" width="28" height="28"><span>雫之洞悉 · 返魂堂</span></a>
+    <nav class="site-nav-links">
+      <a href="cards.html">線上抽牌</a>
+      <a href="oils.html">精油圖鑑</a>
+      <a href="#shop">調息選品</a>
+      <a href="#gift" id="nav-gift-link">貴賓禮盒</a>
+      <a href="#about" id="home-guide-link" role="button" aria-label="卡牌說明">卡牌說明</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button class="nav-cart-link site-nav-cta" type="button" style="background:transparent;border:1px solid var(--gold-accent,#C5A059);color:var(--forest-deep,#253B2F);padding:7px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;" aria-label="查看調息購物清單">
+        🛒<span class="nav-cart-count" style="display:none;background:var(--gold-accent,#C5A059);color:#1A1A1A;border-radius:10px;padding:1px 6px;font-size:11px;font-weight:700;">0</span>
+      </button>
+      <button class="site-nav-cta" id="nav-book-btn" type="button" onclick="location.href='booking.html'">立即預約</button>
+    </div>
+  </div>
+</header>
+
+<main style="padding:0;">
+
+  <section class="home-hero">
+    <div class="home-hero-text">
+            <div class="hero-brand-header">
+        <img src="images/brand-logo-transparent.png?v=3" alt="雫之洞悉 · 返魂堂" class="hero-brand-logo" width="220" height="74" fetchpriority="high">
+      </div>
+<div class="home-kicker">雫之洞悉 · 返魂堂 · MODERN OIL ORACLE</div>
+      <h1>停下來，<br>讓一張牌接住此刻的你</h1>
+      <p class="home-sub">結合多特瑞精油與塔羅直覺，為忙碌的現代人打造的 3 分鐘身心校準儀式——不需要懂占卜，只需要深呼吸，讓直覺帶你抽出屬於此刻的訊息。</p>
+      <div class="home-cta-row">
+        <a class="home-cta primary" href="cards.html">🔮 免費線上抽卡</a>
+        <a class="home-cta secondary" href="booking.html">💎 預約貴賓體驗禮盒</a>
+      </div>
+    <!-- 日式「おもてなし（款待）」三步驟心理預期導引 -->
+    <div class="omotenashi-steps">
+      <div class="omotenashi-step">
+        <div class="step-num">一</div>
+        <div class="step-text">深呼吸 · 直覺抽卡</div>
+      </div>
+      <div class="omotenashi-step">
+        <div class="step-num">二</div>
+        <div class="step-text">照見當下 · 香氣解讀</div>
+      </div>
+      <div class="omotenashi-step">
+        <div class="step-num">三</div>
+        <div class="step-text">一對一專屬體驗調配</div>
+      </div>
+    </div>
+      <p class="home-disclaimer">此服務為身心靈探索工具，不做醫療、心理或投資專業建議</p>
+    </div>
+    <div class="home-hero-visual">
+      <div class="home-card-mock">
+        <div class="spark"><img src="images/logo-emblem.png?v=3" alt="雫" class="card-mock-emblem" width="24" height="24" loading="lazy" decoding="async"></div>
+        <div class="eyebrow">INSIGHT</div>
+        <div class="title">洞悉</div>
+        <div class="line">精油的氣息<br>照見此刻的訊息</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="home-section" id="quick-lead">
+    <form class="quick-lead-card" id="quick-lead-form">
+      <div class="ql-title">想讓芳療師為你調配這瓶專屬守護油、或進行一對一深度諮詢嗎？</div>
+      <div class="ql-sub">請留下你的聯絡方式：</div>
+      <div class="ql-fields">
+        <div class="form-field">
+          <label class="form-label" for="ql-name">姓名 <span class="req">必填</span></label>
+          <input class="form-input" id="ql-name" name="name" type="text" required maxlength="60" autocomplete="name">
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="ql-email">E-mail <span class="req">必填</span></label>
+          <input class="form-input" id="ql-email" name="email" type="email" required maxlength="120" autocomplete="email">
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="ql-line">LINE ID（選填）</label>
+          <input class="form-input" id="ql-line" name="lineId" type="text" maxlength="60" autocomplete="off">
+        </div>
+        <label class="form-label" for="ql-concern">主要困擾（選填）</label>
+        <select class="form-input" id="ql-concern" name="mainConcern">
+          <option value="">主要困擾（請選擇）</option>
+          <option>工作壓力</option>
+          <option>睡眠品質</option>
+          <option>情緒起伏</option>
+          <option>人際關係</option>
+          <option>其他</option>
+        </select>
+      </div>
+      <button type="submit" class="home-cta primary" id="ql-submit-btn" style="width:100%;justify-content:center;">送出，留下這份心意</button>
+            <!-- 日式款待安心標籤 -->
+      <div class="trust-badges">
+        <div class="trust-badge-item">
+          <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>所要時間約 2 分鐘</span>
+        </div>
+        <div class="trust-badge-item">
+          <svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span>個人資訊嚴密保護</span>
+        </div>
+        <div class="trust-badge-item">
+          <svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>絕無強行推銷負擔</span>
+        </div>
+      </div>
+<div id="ql-msg" class="admin-msg" role="status" aria-live="polite"></div>
+    </form>
+  </section>
+
+  <section class="home-section" id="about">
+    <div class="home-section-title">今天，想怎麼問自己？</div>
+    <div class="category-row" id="home-category-row"></div>
+  </section>
+
+  <section class="home-section" id="shop">
+    <div class="home-section-title">調息香氣選品 · 現代精油逸品</div>
+    <p style="text-align:center;font-size:0.9rem;color:var(--text-sub,#6B645C);margin-top:-14px;margin-bottom:28px;">依三大牌陣與生命位格精心調配，將抽牌時觸動身心的植物能量帶回日常</p>
+    <div class="shop-grid">
+      <!-- 商品 1 -->
+      <div class="shop-card">
+        <span class="shop-card-badge">🪞 鏡子對應</span>
+        <div class="shop-card-img-wrap">
+          <img src="images/logo-emblem.png?v=3" alt="鏡子 · 當下覺察調息禮盒" class="shop-card-img" style="object-fit:contain;padding:24px;">
+        </div>
+        <div class="shop-card-title">【鏡子】當下覺察調息禮盒</div>
+        <div class="shop-card-desc">精選多特瑞原裝【野橘 15ml】與【安定平衡複方 15ml】，附心靈肯定小語卡。柑橘清新與草本大地深層安定，專注照看當下、舒緩現代人緊繃思緒。</div>
+        <div class="shop-card-foot">
+          <div>
+            <div class="shop-card-price">NT$ 1,845 <span>/ 組 (15ml×2)</span></div>
+            <div style="font-size:11px;color:#8E867E;margin-top:2px;">多特瑞官方建議零售價</div>
+          </div>
+          <button type="button" class="shop-add-btn" data-add-cart data-cart-item='{"id":"SET-MIRROR-01","name":"【鏡子】當下覺察調息禮盒","price":1845,"capacity":"15ml×2","pillar":"中柱 · 平衡","image":"images/logo-emblem.png"}'>
+            <span>＋ 加入清單</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 商品 2 -->
+      <div class="shop-card">
+        <span class="shop-card-badge">🌊 河流對應</span>
+        <div class="shop-card-img-wrap">
+          <img src="images/logo-emblem.png?v=3" alt="河流 · 時間軌跡梳理禮盒" class="shop-card-img" style="object-fit:contain;padding:24px;">
+        </div>
+        <div class="shop-card-title">【河流】時間軌跡梳理禮盒</div>
+        <div class="shop-card-desc">精選多特瑞原裝【高山雪松 15ml】與【順暢清新複方 15ml】，陪伴梳理人生階段與時間流動，為關鍵轉折點帶來清晰明朗的洞察力。</div>
+        <div class="shop-card-foot">
+          <div>
+            <div class="shop-card-price">NT$ 1,965 <span>/ 組 (15ml×2)</span></div>
+            <div style="font-size:11px;color:#8E867E;margin-top:2px;">多特瑞官方建議零售價</div>
+          </div>
+          <button type="button" class="shop-add-btn" data-add-cart data-cart-item='{"id":"SET-RIVER-02","name":"【河流】時間軌跡梳理禮盒","price":1965,"capacity":"15ml×2","pillar":"右柱 · 慈悲","image":"images/logo-emblem.png"}'>
+            <span>＋ 加入清單</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 商品 3 -->
+      <div class="shop-card">
+        <span class="shop-card-badge">⛩️ 岔路對應</span>
+        <div class="shop-card-img-wrap">
+          <img src="images/logo-emblem.png?v=3" alt="岔路 · 重大抉擇守護禮盒" class="shop-card-img" style="object-fit:contain;padding:24px;">
+        </div>
+        <div class="shop-card-title">【岔路】重大抉擇守護禮盒</div>
+        <div class="shop-card-desc">精選多特瑞頂級原裝【神聖乳香 15ml】與【舒壓複方 10ml 隨身滾珠】。於人生十字路口賦予堅定決斷勇氣，規格與價值精準對等。</div>
+        <div class="shop-card-foot">
+          <div>
+            <div class="shop-card-price">NT$ 4,895 <span>/ 組 (15ml+10ml)</span></div>
+            <div style="font-size:11px;color:#8E867E;margin-top:2px;">多特瑞官方建議零售價</div>
+          </div>
+          <button type="button" class="shop-add-btn" data-add-cart data-cart-item='{"id":"SET-CROSS-03","name":"【岔路】重大抉擇守護禮盒","price":4895,"capacity":"15ml+10ml滾珠","pillar":"左柱 · 嚴厲","image":"images/logo-emblem.png"}'>
+            <span>＋ 加入清單</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 商品 4 -->
+      <div class="shop-card">
+        <span class="shop-card-badge">💎 芳療客製</span>
+        <div class="shop-card-img-wrap">
+          <img src="images/logo-emblem.png?v=3" alt="雫之洞悉 · 專屬位格滾珠精油" class="shop-card-img" style="object-fit:contain;padding:24px;">
+        </div>
+        <div class="shop-card-title">【客製】專屬位格滾珠精油 10ml</div>
+        <div class="shop-card-desc">以多特瑞分餾椰子油為基底，由專業芳療師依照您在線上抽牌的專屬位格與調息箋，親手調配標準 10ml 隨身守護滾珠油。</div>
+        <div class="shop-card-foot">
+          <div>
+            <div class="shop-card-price">NT$ 1,040 <span>/ 瓶 (10ml 滾珠)</span></div>
+            <div style="font-size:11px;color:#8E867E;margin-top:2px;">多特瑞官方建議零售價</div>
+          </div>
+          <button type="button" class="shop-add-btn" data-add-cart data-cart-item='{"id":"CUSTOM-ROLLER-10","name":"【客製】專屬位格滾珠精油","price":1040,"capacity":"10ml滾珠","pillar":"位格特調","image":"images/logo-emblem.png"}'>
+            <span>＋ 加入清單</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="home-section" id="gift">
+    <div class="home-section-title">貴賓體驗禮盒</div>
+    <div class="home-feature-grid">
+      <div class="home-feature-card"><b>一對一預約諮詢</b><span>依抽牌結果搭配專屬精油體驗，由專人為你解讀</span></div>
+      <div class="home-feature-card"><b>限量體驗禮盒</b><span>抽牌結果將對應推薦的精油組合，預約即可安排收到禮盒</span></div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="home-footer">
+  <a href="admin.html" class="footer-logo-link" title="雫之洞悉 · 返魂堂" aria-label="雫之洞悉 · 返魂堂">
+    <img src="images/brand-logo-transparent.png?v=3" alt="雫之洞悉 · 返魂堂" class="footer-logo" width="180" height="60" loading="lazy" decoding="async">
+  </a>
+  <p>雫之洞悉 · 返魂堂 · 現代精油心靈指引卡</p>
+  <p style="font-size:11px;opacity:0.75;margin:0;">MODERN OIL ORACLE</p>
+</footer>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script defer src="supabase-client.js?v=1"></script>
+<script defer src="mode-catalog.js?v=1"></script>
+<script defer src="home.js?v=2"></script>
+<script defer src="guide-modal.js?v=1"></script>
+<script defer src="site-fixes.js?v=3"></script>
+<script defer src="cart.js?v=1"></script>
+</body>
+</html>

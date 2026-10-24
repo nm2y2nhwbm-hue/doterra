@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LH6J1MM1LK"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-LH6J1MM1LK');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>購物車專屬管理面板｜現代精油心靈指引卡 · 雫之洞悉</title>
+<meta name="description" content="雫之洞悉 · 返魂堂 購物車專屬管理面板。檢視當前調息選品、精油禮盒配置與 LINE Pay 一鍵安全結帳。">
+<meta name="theme-color" content="#355343">
+<link rel="icon" href="favicon.png?v=3" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="style.css?v=21">
+<link rel="stylesheet" href="cart.css?v=1">
+<link rel="stylesheet" href="fonts.css?v=1" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="fonts.css?v=1"></noscript>
+<style>
+  /* 購物車專屬管理面板 專用日式和風樣式 */
+  .cart-admin-container {
+    max-width: 1160px;
+    margin: 40px auto 80px;
+    padding: 0 24px;
+  }
+  .cart-admin-header {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+  .cart-admin-badge {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    padding: 4px 14px;
+    background: rgba(197, 160, 89, 0.12);
+    border: 1px solid rgba(197, 160, 89, 0.35);
+    color: #8b6b23;
+    border-radius: 9999px;
+    margin-bottom: 12px;
+    font-family: var(--font-en, sans-serif);
+    text-transform: uppercase;
+  }
+  .cart-admin-title {
+    font-family: var(--font-serif, "Noto Serif TC", serif);
+    font-size: 28px;
+    color: #1e2022;
+    letter-spacing: 0.08em;
+    margin: 0 0 8px;
+    font-weight: 600;
+  }
+  .cart-admin-subtitle {
+    font-size: 13px;
+    color: #6b7f73;
+    letter-spacing: 0.06em;
+    margin: 0;
+  }
+
+  /* 統計總覽卡片列 */
+  .cart-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 36px;
+  }
+  @media (max-width: 768px) {
+    .cart-stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+  }
+  .cart-stat-card {
+    background: #ffffff;
+    border: 1px solid rgba(197, 160, 89, 0.22);
+    border-radius: 16px;
+    padding: 18px 20px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+    position: relative;
+    overflow: hidden;
+  }
+  .cart-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: #355343;
+    opacity: 0.6;
+  }
+  .cart-stat-label {
+    font-size: 12px;
+    color: #6b7f73;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }
+  .cart-stat-value {
+    font-family: var(--font-en, sans-serif);
+    font-size: 22px;
+    font-weight: 600;
+    color: #1e2022;
+    letter-spacing: 0.02em;
+  }
+  .cart-stat-desc {
+    font-size: 11px;
+    color: #a0a6a2;
+    margin-top: 4px;
+  }
+
+  /* 主內容佈局：左清單、右結帳摘要 */
+  .cart-layout-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 32px;
+    align-items: start;
+  }
+  @media (max-width: 992px) {
+    .cart-layout-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* 清單卡片容器 */
+  .cart-items-card {
+    background: #ffffff;
+    border: 1px solid rgba(197, 160, 89, 0.25);
+    border-radius: 20px;
+    padding: 24px 28px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+  }
+  .cart-table-head {
+    display: grid;
+    grid-template-columns: 80px 1fr 110px 110px 40px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #f0eee9;
+    font-size: 12px;
+    color: #8b9690;
+    letter-spacing: 0.05em;
+  }
+  @media (max-width: 600px) {
+    .cart-table-head {
+      display: none;
+    }
+  }
+
+  /* 單一品項列 */
+  .cart-page-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 110px 110px 40px;
+    align-items: center;
+    padding: 18px 0;
+    border-bottom: 1px solid #f6f4f0;
+    transition: background 0.2s ease;
+  }
+  @media (max-width: 600px) {
+    .cart-page-row {
+      grid-template-columns: 70px 1fr;
+      gap: 12px;
+      position: relative;
+    }
+  }
+  .cart-row-thumb {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    object-fit: cover;
+    background: #f7f6f2;
+    border: 1px solid rgba(197, 160, 89, 0.2);
+  }
+  .cart-row-info h4 {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-family: var(--font-serif, serif);
+    color: #1e2022;
+  }
+  .cart-row-meta {
+    font-size: 12px;
+    color: #7b8882;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .cart-row-pillar-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(53, 83, 67, 0.08);
+    color: #355343;
+    border: 1px solid rgba(53, 83, 67, 0.2);
+  }
+
+  /* 數量調整器 */
+  .cart-row-qty-box {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd7cc;
+    border-radius: 8px;
+    overflow: hidden;
+    width: 88px;
+    height: 32px;
+    background: #faf8f5;
+  }
+  .cart-qty-btn {
+    width: 28px;
+    height: 30px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 14px;
+    color: #444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+  .cart-qty-btn:hover {
+    background: rgba(197, 160, 89, 0.15);
+  }
+  .cart-qty-val {
+    flex: 1;
+    text-align: center;
+    font-size: 13px;
+    font-family: var(--font-en, sans-serif);
+    color: #222;
+    user-select: none;
+  }
+
+  .cart-row-subtotal {
+    font-family: var(--font-en, sans-serif);
+    font-size: 15px;
+    font-weight: 600;
+    color: #355343;
+    letter-spacing: 0.02em;
+  }
+  .cart-row-remove {
+    background: transparent;
+    border: none;
+    color: #9da6a1;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    transition: color 0.2s;
+  }
+  .cart-row-remove:hover {
+    color: #ba1a1a;
+  }
+
+  /* 底部按鈕列 */
+  .cart-actions-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid #f0eee9;
+  }
+  .btn-secondary-link {
+    font-size: 13px;
+    color: #55665e;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s;
+  }
+  .btn-secondary-link:hover {
+    color: #355343;
+  }
+  .btn-clear-cart {
+    font-size: 12px;
+    color: #a44;
+    background: transparent;
+    border: 1px dashed rgba(186, 26, 26, 0.35);
+    padding: 6px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-clear-cart:hover {
+    background: rgba(186, 26, 26, 0.08);
+    border-color: #ba1a1a;
+  }
+
+  /* 右側結帳卡片 */
+  .cart-checkout-summary {
+    background: #ffffff;
+    border: 1px solid rgba(197, 160, 89, 0.3);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 6px 28px rgba(0, 0, 0, 0.05);
+    position: sticky;
+    top: 90px;
+  }
+  .cart-summary-title {
+    font-family: var(--font-serif, serif);
+    font-size: 17px;
+    color: #1e2022;
+    margin: 0 0 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f0eee9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .summary-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: #6a7670;
+    margin-bottom: 10px;
+  }
+  .summary-line.total {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px dashed #e5dfd5;
+    font-size: 15px;
+    color: #1e2022;
+    font-weight: 600;
+  }
+  .summary-line.total .price-val {
+    font-size: 24px;
+    color: #355343;
+    font-family: var(--font-en, sans-serif);
+  }
+  .security-seal {
+    background: rgba(53, 83, 67, 0.05);
+    border: 1px solid rgba(53, 83, 67, 0.15);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 11px;
+    color: #355343;
+    line-height: 1.5;
+    margin: 16px 0;
+  }
+  .btn-linepay-checkout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    background: #06c755;
+    color: #ffffff;
+    border: none;
+    padding: 14px 20px;
+    border-radius: 9999px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(6, 199, 85, 0.28);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    text-decoration: none;
+  }
+  .btn-linepay-checkout:hover {
+    background: #05b34c;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(6, 199, 85, 0.35);
+  }
+
+  /* 空狀態 */
+  .cart-empty-panel {
+    text-align: center;
+    padding: 60px 20px;
+    background: #ffffff;
+    border: 1px dashed rgba(197, 160, 89, 0.35);
+    border-radius: 20px;
+  }
+  .cart-empty-drop {
+    font-size: 42px;
+    color: #c5a059;
+    margin-bottom: 12px;
+  }
+  .cart-empty-title {
+    font-family: var(--font-serif, serif);
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 8px;
+  }
+  .cart-empty-text {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 24px;
+  }
+</style>
+</head>
+<body class="has-fixed-nav">
+
+<!-- 頂部日式款待導覽列 -->
+<header class="site-nav">
+  <div class="site-nav-inner">
+    <a href="index.html" class="site-nav-logo">
+      <img src="images/logo-emblem.png?v=3" alt="雫之洞悉 · 返魂堂" class="site-nav-logo-img" width="28" height="28">
+      <span>雫之洞悉 · 返魂堂</span>
+    </a>
+    <nav class="site-nav-links">
+      <a href="cards.html">線上抽牌</a>
+      <a href="oils.html">精油圖鑑</a>
+      <a href="index.html#shop">調息選品</a>
+      <a href="index.html#gift">貴賓禮盒</a>
+      <a href="cart.html" class="active">購物車管理</a>
+    </nav>
+  </div>
+</header>
+
+<main class="cart-admin-container">
+  <!-- 頁面標題區 -->
+  <div class="cart-admin-header">
+    <span class="cart-admin-badge">Hospitality Curation & Cart Portal</span>
+    <h1 class="cart-admin-title">購物車專屬管理面板</h1>
+    <p class="cart-admin-subtitle">細心梳理每一抹香氣選品 · 嚴選天然植萃與日式款待儀式</p>
+  </div>
+
+  <!-- 4 大統計總覽卡片 -->
+  <div class="cart-stats-grid">
+    <div class="cart-stat-card">
+      <div class="cart-stat-label">當前選品件數</div>
+      <div class="cart-stat-value" id="stat-total-count">0</div>
+      <div class="cart-stat-desc">件香氣逸品</div>
+    </div>
+    <div class="cart-stat-card">
+      <div class="cart-stat-label">調息選品總額</div>
+      <div class="cart-stat-value">NT$ <span id="stat-total-amount">0</span></div>
+      <div class="cart-stat-desc">台幣官方建議零售價</div>
+    </div>
+    <div class="cart-stat-card">
+      <div class="cart-stat-label">金流安全中樞</div>
+      <div class="cart-stat-value" style="font-size: 17px; color: #06c755;">LINE Pay v3</div>
+      <div class="cart-stat-desc">[測試沙盒 Sandbox 模式]</div>
+    </div>
+    <div class="cart-stat-card">
+      <div class="cart-stat-label">防偽驗簽機制</div>
+      <div class="cart-stat-value" style="font-size: 17px; color: #355343;">doterra.csv</div>
+      <div class="cart-stat-desc">伺服器端強制防偽校驗</div>
+    </div>
+  </div>
+
+  <!-- 主佈局區 -->
+  <div class="cart-layout-grid">
+    <!-- 左側清單區 -->
+    <div id="cart-content-area">
+      <div class="cart-items-card" id="cart-table-wrapper">
+        <div class="cart-table-head">
+          <span>香氣</span>
+          <span>選品詳情</span>
+          <span style="text-align: center;">調息數量</span>
+          <span style="text-align: right;">小計金額</span>
+          <span></span>
+        </div>
+        <div id="cart-rows-container">
+          <!-- 動態渲染清單列 -->
+        </div>
+
+        <div class="cart-actions-bar">
+          <a href="index.html#shop" class="btn-secondary-link">
+            <span>←</span> 繼續選品探索
+          </a>
+          <button class="btn-clear-cart" id="btn-clear-all" type="button">
+            清空所有品項
+          </button>
+        </div>
+      </div>
+
+      <!-- 空購物車狀態 -->
+      <div class="cart-empty-panel" id="cart-empty-panel" style="display: none;">
+        <div class="cart-empty-drop">💧</div>
+        <h3 class="cart-empty-title">購物車目前靜寂如初</h3>
+        <p class="cart-empty-text">您尚未加入任何調息精油或心靈禮盒，停下腳步，讓香氣引領您。</p>
+        <a href="oils.html" class="button button-primary" style="display: inline-block;">
+          前往精油圖鑑選品
+        </a>
+      </div>
+    </div>
+
+    <!-- 右側結帳總結 -->
+    <aside class="cart-checkout-summary">
+      <h3 class="cart-summary-title">
+        <span>選品結帳總結</span>
+        <span style="font-size: 11px; color: #8b9690; font-family: var(--font-en, sans-serif);">SUMMARY</span>
+      </h3>
+      <div class="summary-line">
+        <span>商品合計</span>
+        <span style="font-family: var(--font-en, sans-serif);">NT$ <span id="summary-subtotal">0</span></span>
+      </div>
+      <div class="summary-line">
+        <span>貴賓款待運費</span>
+        <span style="color: #355343; font-weight: 500;">免運費</span>
+      </div>
+      <div class="summary-line total">
+        <span>應付總金額</span>
+        <span class="price-val">NT$ <span id="summary-final-total">0</span></span>
+      </div>
+
+      <div class="security-seal">
+        🔒 <strong>安全防偽保障</strong><br>
+        本站訂單金額由伺服器參照官方資料庫重新計算，杜絕惡意竄改，維護您的安心體驗。
+      </div>
+
+      <a href="booking.html" class="btn-linepay-checkout" id="cart-page-checkout-btn">
+        <span>🟢</span> LINE Pay 一鍵安全結帳
+      </a>
+      <div style="text-align: center; margin-top: 10px; font-size: 11px; color: #888;">
+        [LINE Pay Sandbox 測試沙盒環境]
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer" style="margin-top: 80px; text-align: center; padding: 40px 20px; border-top: 1px solid #e9e4d8; font-size: 12px; color: #8d9e94;">
+  <p>© 2026 雫之洞悉 · 返魂堂 · MODERN OIL ORACLE. All rights reserved.</p>
+</footer>
+
+<!-- 引入購物車核心模組 -->
+<script src="cart.js?v=1"></script>
+
+<!-- 專屬面板互動腳本 -->
+<script>
+(function() {
+  'use strict';
+
+  function escapeHtml(str) {
+    if (str == null) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function sanitizeUrl(url) {
+    if (!url) return 'images/logo-emblem.png';
+    const clean = String(url).trim();
+    if (/^(https?:\/\/|\/|images\/)/i.test(clean)) {
+      return clean.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    return 'images/logo-emblem.png';
+  }
+
+  function renderPageCart() {
+    if (!window.ModernOilCart) return;
+    const items = window.ModernOilCart.getItems();
+    const count = window.ModernOilCart.getCount();
+    const total = window.ModernOilCart.getTotal();
+
+    // 更新統計指標
+    const statCountEl = document.getElementById('stat-total-count');
+    const statAmountEl = document.getElementById('stat-total-amount');
+    const subtotalEl = document.getElementById('summary-subtotal');
+    const finalTotalEl = document.getElementById('summary-final-total');
+    const checkoutBtn = document.getElementById('cart-page-checkout-btn');
+    const tableWrapper = document.getElementById('cart-table-wrapper');
+    const emptyPanel = document.getElementById('cart-empty-panel');
+    const rowsContainer = document.getElementById('cart-rows-container');
+
+    if (statCountEl) statCountEl.textContent = count;
+    if (statAmountEl) statAmountEl.textContent = total.toLocaleString();
+    if (subtotalEl) subtotalEl.textContent = total.toLocaleString();
+    if (finalTotalEl) finalTotalEl.textContent = total.toLocaleString();
+
+    if (items.length === 0) {
+      if (tableWrapper) tableWrapper.style.display = 'none';
+      if (emptyPanel) emptyPanel.style.display = 'block';
+      if (checkoutBtn) {
+        checkoutBtn.style.opacity = '0.5';
+        checkoutBtn.style.pointerEvents = 'none';
+        checkoutBtn.href = '#';
+      }
+      return;
+    }
+
+    if (tableWrapper) tableWrapper.style.display = 'block';
+    if (emptyPanel) emptyPanel.style.display = 'none';
+    if (checkoutBtn) {
+      checkoutBtn.style.opacity = '1';
+      checkoutBtn.style.pointerEvents = 'auto';
+      // 序列化至 booking.html
+      const safeItems = JSON.stringify(items.map(i => ({
+        id: i.id,
+        name: i.name,
+        price: i.price,
+        qty: i.qty,
+        capacity: i.capacity || ''
+      })));
+      checkoutBtn.href = 'booking.html?cart_total=' + encodeURIComponent(total) + '&cart_items=' + encodeURIComponent(safeItems);
+    }
+
+    // 渲染各品項
+    if (rowsContainer) {
+      rowsContainer.innerHTML = items.map(function(item) {
+        const itemSubtotal = (Number(item.price) || 0) * (Number(item.qty) || 1);
+        const pillarHtml = item.pillar ? '<span class="cart-row-pillar-badge">' + escapeHtml(item.pillar) + '</span>' : '';
+        const capHtml = item.capacity ? '<span>' + escapeHtml(item.capacity) + '</span>' : '';
+
+        return '<div class="cart-page-row" data-id="' + escapeHtml(item.id) + '">' +
+          '<div><img src="' + sanitizeUrl(item.image) + '" alt="' + escapeHtml(item.name) + '" class="cart-row-thumb"></div>' +
+          '<div class="cart-row-info">' +
+            '<h4>' + escapeHtml(item.name) + '</h4>' +
+            '<div class="cart-row-meta">' +
+              pillarHtml + capHtml +
+              '<span>NT$ ' + (Number(item.price) || 0).toLocaleString() + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div style="display: flex; justify-content: center;">' +
+            '<div class="cart-row-qty-box">' +
+              '<button type="button" class="cart-qty-btn btn-qty-dec" data-id="' + escapeHtml(item.id) + '">−</button>' +
+              '<span class="cart-qty-val">' + (Number(item.qty) || 1) + '</span>' +
+              '<button type="button" class="cart-qty-btn btn-qty-inc" data-id="' + escapeHtml(item.id) + '">+</button>' +
+            '</div>' +
+          '</div>' +
+          '<div class="cart-row-subtotal" style="text-align: right;">' +
+            'NT$ ' + itemSubtotal.toLocaleString() +
+          '</div>' +
+          '<div style="text-align: right;">' +
+            '<button type="button" class="cart-row-remove btn-item-remove" data-id="' + escapeHtml(item.id) + '" title="刪除品項">×</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+
+      // 綁定事件代理
+      rowsContainer.querySelectorAll('.btn-qty-inc').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          const id = this.getAttribute('data-id');
+          if (window.ModernOilCart) window.ModernOilCart.updateQty(id, 1);
+        });
+      });
+      rowsContainer.querySelectorAll('.btn-qty-dec').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          const id = this.getAttribute('data-id');
+          if (window.ModernOilCart) window.ModernOilCart.updateQty(id, -1);
+        });
+      });
+      rowsContainer.querySelectorAll('.btn-item-remove').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          const id = this.getAttribute('data-id');
+          if (window.ModernOilCart) window.ModernOilCart.remove(id);
+        });
+      });
+    }
+  }
+
+  // 清空所有品項按鈕
+  document.addEventListener('DOMContentLoaded', function() {
+    const clearBtn = document.getElementById('btn-clear-all');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', function() {
+        if (confirm('確定要清空購物車內的所有調息選品嗎？')) {
+          if (window.ModernOilCart) window.ModernOilCart.clear();
+        }
+      });
+    }
+
+    renderPageCart();
+    window.addEventListener('cart:updated', renderPageCart);
+  });
+})();
+</script>
+</body>
+</html>

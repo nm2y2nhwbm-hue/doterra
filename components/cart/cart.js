@@ -197,7 +197,12 @@
           <span>💧</span>
           <span>調息選品清單</span>
         </div>
-        <button type="button" class="cart-close-btn" id="cart-close-btn" aria-label="關閉清單">✕</button>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <a href="cart.html" class="cart-fullscreen-link" title="展開全頁專屬管理面板" style="color: var(--forest-deep, #253B2F); text-decoration: none; font-size: 11px; padding: 3px 8px; border-radius: 4px; border: 1px solid var(--gold-border, rgba(184, 145, 46, 0.3)); background: var(--paper, #F8F4EC); display: inline-flex; align-items: center; gap: 3px; font-weight: 600;">
+            <span>⛶ 全頁管理</span>
+          </a>
+          <button type="button" class="cart-close-btn" id="cart-close-btn" aria-label="關閉清單">✕</button>
+        </div>
       </div>
       <div class="cart-drawer-body" id="cart-items-container"></div>
       <div class="cart-drawer-footer">
@@ -213,7 +218,12 @@
           <span>🟢 LINE Pay 一鍵安全結帳</span>
           <span>→</span>
         </a>
-        <button type="button" class="cart-clear-link" id="cart-clear-btn">清空所有選品</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+          <a href="cart.html" style="font-size: 12px; color: var(--forest, #355343); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; font-weight: 600;">
+            <span>⛶ 展開全頁專屬管理面板 ↗</span>
+          </a>
+          <button type="button" class="cart-clear-link" id="cart-clear-btn" style="width: auto; margin-top: 0;">清空所有選品</button>
+        </div>
       </div>
     `;
     document.body.appendChild(drawerEl);
