@@ -4,9 +4,9 @@
 
 本檔案適用於整個 `nm2y2nhwbm-hue/doterra` repository。開始工作前先閱讀本檔案；若未來子目錄另有 `AGENTS.md` 或 `AGENTS.override.md`，以較接近工作檔案的規則為優先。
 
-## 五大 Agent 職責與目錄邊界（五星專業分工架構 · TDD 品管優先編制）
+## 六大 Agent 職責與目錄邊界（六星專業分工架構 · 全端自動化編制）
 
-依據專案團隊升級規劃，專案劃分為五大獨立邊界目錄，落實「測試先行、後端接力、前端收斂」之專業分工，各 Agent 嚴禁越權跨目錄修改：
+依據專案團隊升級規劃，專案劃分為六大獨立邊界目錄，落實「測試先行、後端接力、前端收斂、自動化串接」之專業分工，各 Agent 嚴禁越權跨目錄修改：
 
 1. **Agent 1 → `/tests/`、`.github/`、`doc/test/`（品管與測試工程師，第一順位品質守護）**
    - **專屬負責目錄**：`/tests/`、CI/CD 管線 (`.github/workflows/`)、測試案例規格文檔 (`doc/test/`) 與測試工作流 (`.agent/workflows/`)。
@@ -49,7 +49,15 @@
    - **職責**：自訂獨立品牌頂級網域 DNS 解析配置、Vercel 邊緣 CDN 與 Render 伺服器規格、第三方線上金流閘道器（綠界 ECPay / LINE Pay）架構規格、Supabase RLS 與憑證安全管理、外部 Ingress 活躍保溫探測。
    - **嚴格守則**：不修改核心業務 API 與前端樣式，任何金流密鑰嚴禁硬編碼。
 
-6. **根目錄全域共用區（Shared Root Boundaries）**
+6. **Agent 6 → `/shortcuts/`（iOS 捷徑與自動化工程師 · Shortcut & Automation Agent）**
+   - **專屬負責目錄**：`/shortcuts/`。
+   - **職責**：
+     - 負責維護 `/shortcuts/oil_inventory_shortcut_v4.0.3.md` 的精油庫存管理 iOS 捷徑規格與自動化腳本。
+     - 當前端 (`doterra-two.vercel.app`) 或 GAS 後端（Google Apps Script）的 API 欄位與資料結構有變動時，負責比對並確保 iOS 捷徑參數與字典設定保持同步。
+     - 與現有 Agent 1~5 協同作業，確保全端自動化流程的一致性。
+   - **嚴格守則**：專注於 iOS 捷徑規格手冊、字典設定與自動化流程，嚴禁越權跨目錄修改核心業務 API、前端切版與測試程式碼。
+
+7. **根目錄全域共用區（Shared Root Boundaries）**
    - **保留於根目錄之專案核心檔**：`AGENTS.md`、`README.md`、`requirements.txt`、`.gitignore`、`LICENSE`。
    - **防呆鐵律**：資料母體 `doterra.csv`、`indicator_cards.csv` 與後端進入點 `line_bot.py` 維持現有根目錄路徑參照，嚴禁搬移破壞 Production 行為。
 
@@ -98,6 +106,7 @@
 - `router.py`、`adapters/line_adapter.py`：LINE 文字路由與 LIFF 導流訊息。
 - `core/`：卡片資料、資料庫讀取與抽牌記錄等核心模組。
 - `supabase/`：目前的 SQL 建置腳本；不是完整 migration history。
+- `shortcuts/`：iOS 捷徑規格、精油庫存自動化手冊（`oil_inventory_shortcut_v4.0.3.md`）與 GAS API 參數對應。
 
 ## 工作前檢查
 

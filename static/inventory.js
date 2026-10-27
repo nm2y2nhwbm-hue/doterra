@@ -262,8 +262,8 @@
     formWrap.style.display = 'flex';
   }
 
-  // TODO：換成你們真正的 Apple 捷徑名稱（在「捷徑」App 裡該捷徑的名字）
-  const APPLE_SHORTCUT_NAME = 'YOUR-SHORTCUT-NAME';
+  // Apple 捷徑名稱：精油庫存管理v4.0.3（在 iOS「捷徑」App 裡該捷徑的名稱）
+  const APPLE_SHORTCUT_NAME = '精油庫存管理v4.0.3';
 
   const scanBtn = document.getElementById('inv-scan-btn');
   scanBtn.addEventListener('click', () => {

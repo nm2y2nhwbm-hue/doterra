@@ -51,7 +51,7 @@
 
 ---
 
-## 🏛️ 3. 五大 Agent 專業分工體系 (Five-Agent Architecture · TDD 品管優先編制)
+## 🏛️ 3. 六大 Agent 專業分工體系 (Six-Agent Architecture · 全端自動化編制)
 
 專案全面落實「測試先行 (TDD)、後端接力、前端收斂」之五星專業分工與目錄級三權分立，嚴禁越權跨目錄修改：
 
@@ -62,6 +62,7 @@
 | 🎨 **Agent 3（前端切版工程師）** | [`/components/`](components/)、[`/static/`](static/) | 日式美學 UI 元件庫（側滑購物車 Drawer、首頁選品、圖鑑彈窗）、CSS 和色樣式表、發布目錄 [`/static/`](static/)、全站 XSS `escapeHtml` 實體轉義，以及 React (Vite + React + TS) 元件現代化架構演進 |
 | 📦 **Agent 4（商品與文案主編）** | [`/catalog/`](catalog/) | 131 款精油資料庫母體（`doterra.csv`）、官方單一建議零售價審定、官方標準容量規範、合規自然醫學文案把關與商品圖鑑同步工具（`sync_catalog.py`） |
 | 💳 **Agent 5（維運與金流工程師）** | [`/infra/`](infra/) | 自訂獨立頂級網域 DNS 解析配置、Vercel 邊緣 CDN、Render 外部 Ingress 活躍保溫探測、綠界 ECPay / LINE Pay 第三方線上金流架構與 Supabase 憑證安全 |
+| 📱 **Agent 6（iOS 捷徑與自動化工程師）** | [`/shortcuts/`](shortcuts/) | 負責維護 `/shortcuts/oil_inventory_shortcut_v4.0.3.md` 的精油庫存管理 iOS 捷徑規格與自動化腳本，當前端或 GAS 後端 API 結構變動時比對並確保參數與字典設定保持同步，確保全端自動化流程一致性 |
 
 ---
 
@@ -78,7 +79,7 @@
 
 在 Google Antigravity 2.0 桌面端或 IDE 中，可直接在對話框複製貼上下列標準指令：
 
-#### 🚀 指令 A：五星 Subagent 協同團隊裂變標準指令（全自動模式）
+#### 🚀 指令 A：六星 Subagent 協同團隊裂變標準指令（全自動模式）
 ```text
 /teamwork-preview 請讀取本專案根目錄之 AGENTS.md，嚴格依據最新「五星專業分工架構（TDD 品管優先編制）」組建協同團隊。
 
@@ -94,6 +95,8 @@
    - 專屬邊界 `/catalog/`：維護 131 款精油母體資料庫、官方定價審定、規格容量統一與自然醫學合規文案把關。
 5. Role: "Agent 5: 維運與金流工程師 (/infra/)"
    - 專屬邊界 `/infra/`：負責 Vercel 邊緣 CDN、自訂網域 DNS、Render 外部 Ingress 活躍保溫、金流閘道器架構與憑證安全。
+6. Role: "Agent 6: iOS 捷徑與自動化工程師 (/shortcuts/)"
+   - 專屬邊界 `/shortcuts/`：負責維護 `/shortcuts/oil_inventory_shortcut_v4.0.3.md` 的精油庫存管理 iOS 捷徑規格與自動化腳本，當前端或 GAS 後端 API 結構變動時比對並確保參數與字典設定保持同步，確保全端自動化流程一致性。
 
 請各 Subagent 先執行工作前 Git 狀態點檢，嚴格恪守目錄邊界，依序推進任務並向主控回報成果！
 ```
